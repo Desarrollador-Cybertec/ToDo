@@ -1,110 +1,70 @@
-import { useState } from 'react'
-import { Routes, Route } from 'react-router-dom'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { ProtectedRoute } from './components/guards/ProtectedRoute';
+import { GuestRoute } from './components/guards/GuestRoute';
+import { AppLayout } from './components/layout/AppLayout';
+import { LoginPage } from './pages/auth/LoginPage';
+import { DashboardPage } from './pages/dashboard/DashboardPage';
+import { TaskListPage } from './pages/tasks/TaskListPage';
+import { TaskCreatePage } from './pages/tasks/TaskCreatePage';
+import { TaskDetailPage } from './pages/tasks/TaskDetailPage';
+import { AreaListPage } from './pages/areas/AreaListPage';
+import { AreaCreatePage } from './pages/areas/AreaCreatePage';
+import { AreaDetailPage } from './pages/areas/AreaDetailPage';
+import { MeetingListPage } from './pages/meetings/MeetingListPage';
+import { MeetingCreatePage } from './pages/meetings/MeetingCreatePage';
+import { MeetingDetailPage } from './pages/meetings/MeetingDetailPage';
+import { UserListPage } from './pages/users/UserListPage';
+import { ConsolidatedPage } from './pages/consolidated/ConsolidatedPage';
+import { SettingsPage } from './pages/settings/SettingsPage';
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/about" element={<About />} />
+      {/* Guest routes */}
+      <Route element={<GuestRoute />}>
+        <Route path="/login" element={<LoginPage />} />
+      </Route>
+
+      {/* Authenticated routes */}
+      <Route element={<ProtectedRoute />}>
+        <Route element={<AppLayout />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+
+          {/* Tasks - all authenticated roles */}
+          <Route path="/tasks" element={<TaskListPage />} />
+          <Route path="/tasks/create" element={<TaskCreatePage />} />
+          <Route path="/tasks/:id" element={<TaskDetailPage />} />
+
+          {/* Meetings - all authenticated roles */}
+          <Route path="/meetings" element={<MeetingListPage />} />
+          <Route path="/meetings/create" element={<MeetingCreatePage />} />
+          <Route path="/meetings/:id" element={<MeetingDetailPage />} />
+        </Route>
+      </Route>
+
+      {/* SuperAdmin & Area Manager routes */}
+      <Route element={<ProtectedRoute allowedRoles={['superadmin', 'area_manager']} />}>
+        <Route element={<AppLayout />}>
+          <Route path="/areas" element={<AreaListPage />} />
+          <Route path="/areas/create" element={<AreaCreatePage />} />
+          <Route path="/areas/:id" element={<AreaDetailPage />} />
+        </Route>
+      </Route>
+
+      {/* SuperAdmin only routes */}
+      <Route element={<ProtectedRoute allowedRoles={['superadmin']} />}>
+        <Route element={<AppLayout />}>
+          <Route path="/users" element={<UserListPage />} />
+          <Route path="/consolidated" element={<ConsolidatedPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+        </Route>
+      </Route>
+
+      {/* Redirects */}
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
 }
 
-function Home() {
-  const [count, setCount] = useState(0);
-  return (
-    <section id="center">
-      <div className="hero">
-        <img src={heroImg} className="base" width="170" height="179" alt="" />
-        <img src={reactLogo} className="framework" alt="React logo" />
-        <img src={viteLogo} className="vite" alt="Vite logo" />
-      </div>
-      <div>
-        <h1>Get started</h1>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-        </p>
-      </div>
-      <button
-        className="counter"
-        onClick={() => setCount((count) => count + 1)}
-      >
-        Count is {count}
-      </button>
-    </section>
-  );
-}
-
-function About() {
-  return (
-    <section>
-      <h2>About Page</h2>
-      <p>Esta es la página About.</p>
-    </section>
-  );
-}
-
-       <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-
-
-export default App
+export default App;
