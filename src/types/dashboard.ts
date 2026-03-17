@@ -1,26 +1,33 @@
 export interface GeneralDashboard {
   tasks_by_status: Record<string, number>;
   tasks_by_area: AreaTaskCount[];
+  total_all: number;
   total_active: number;
   total_completed: number;
-  total_overdue: number;
-  total_due_soon: number;
+  overdue_tasks: number;
+  due_soon: number;
   completion_rate: number;
-  avg_days_to_close: number;
-  top_responsible: ResponsibleLoad[];
+  global_progress: number;
+  pending_by_user: PendingByUser[];
   completed_this_month: number;
+}
+
+export interface PendingByUser {
+  user_id: number;
+  user_name: string;
+  pending_tasks: number;
 }
 
 export interface AreaTaskCount {
   area_id: number;
   area_name: string;
-  count: number;
+  total: number;
 }
 
 export interface ResponsibleLoad {
   user_id: number;
   user_name: string;
-  task_count: number;
+  active_tasks: number;
 }
 
 export interface AreaDashboard {

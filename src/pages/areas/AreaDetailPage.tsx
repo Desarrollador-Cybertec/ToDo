@@ -273,7 +273,7 @@ export function AreaDetailPage() {
                       <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-50 text-xs font-medium text-blue-600">{r.user_name.charAt(0)}</span>
                       <span className="text-gray-700">{r.user_name}</span>
                     </div>
-                    <span className="rounded-lg bg-blue-50 px-2 py-0.5 font-semibold text-blue-700">{r.task_count}</span>
+                    <span className="rounded-lg bg-blue-50 px-2 py-0.5 font-semibold text-blue-700">{r.active_tasks}</span>
                   </div>
                 ))}
               </div>

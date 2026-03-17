@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../../context/useAuth';
 import { dashboardApi } from '../../api/dashboard';
 import { Role, TASK_STATUS_LABELS } from '../../types/enums';
-import type { GeneralDashboard, PersonalDashboard } from '../../types';
+import type { GeneralDashboard, PendingByUser, PersonalDashboard } from '../../types';
 import { HiOutlineClipboardList, HiOutlineClock, HiOutlineExclamation, HiOutlineCheckCircle, HiOutlineChevronRight } from 'react-icons/hi';
 import { PageTransition, FadeIn, StaggerList, StaggerItem } from '../../components/ui';
 import { SkeletonDashboard, Badge, STATUS_BADGE_VARIANT } from '../../components/ui';
@@ -61,7 +61,7 @@ function SuperAdminDashboard() {
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Tareas activas" value={data.total_active ?? 0} icon={<HiOutlineClipboardList className="h-6 w-6 text-blue-600" />} color="bg-blue-50" delay={0} />
         <StatCard label="Completadas" value={data.total_completed ?? 0} icon={<HiOutlineCheckCircle className="h-6 w-6 text-green-600" />} color="bg-green-50" delay={0.05} />
-        <StatCard label="Vencidas" value={data.total_overdue ?? 0} icon={<HiOutlineExclamation className="h-6 w-6 text-red-600" />} color="bg-red-50" delay={0.1} />
+        <StatCard label="Vencidas" value={data.overdue_tasks ?? 0} icon={<HiOutlineExclamation className="h-6 w-6 text-red-600" />} color="bg-red-50" delay={0.1} />
         <StatCard label="Tasa de cumplimiento" value={`${data.completion_rate ?? 0}%`} icon={<HiOutlineClock className="h-6 w-6 text-amber-600" />} color="bg-amber-50" delay={0.15} />
       </div>
 
@@ -79,9 +79,9 @@ function SuperAdminDashboard() {
           </StaggerList>
         </DashboardCard>
 
-        <DashboardCard title="Top responsables" delay={0.25}>
+        <DashboardCard title="Pendientes por usuario" delay={0.25}>
           <StaggerList className="space-y-3">
-            {(data.top_responsible ?? []).map((r) => (
+            {(data.pending_by_user ?? []).map((r: PendingByUser) => (
               <StaggerItem key={r.user_id}>
                 <div className="flex items-center justify-between rounded-lg px-1 py-0.5">
                   <div className="flex items-center gap-2.5">
@@ -90,7 +90,7 @@ function SuperAdminDashboard() {
                     </div>
                     <span className="text-sm text-gray-700">{r.user_name}</span>
                   </div>
-                  <span className="text-sm font-medium text-gray-900">{r.task_count}</span>
+                  <span className="text-sm font-medium text-gray-900">{r.pending_tasks}</span>
                 </div>
               </StaggerItem>
             ))}
@@ -103,7 +103,7 @@ function SuperAdminDashboard() {
               <StaggerItem key={a.area_id}>
                 <div className="flex items-center justify-between rounded-lg px-1 py-0.5">
                   <span className="text-sm text-gray-700">{a.area_name}</span>
-                  <span className="text-sm font-medium text-gray-900">{a.count}</span>
+                  <span className="text-sm font-medium text-gray-900">{a.total}</span>
                 </div>
               </StaggerItem>
             ))}
@@ -113,8 +113,12 @@ function SuperAdminDashboard() {
         <DashboardCard title="Métricas" delay={0.35}>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Promedio días para cerrar</span>
-              <span className="rounded-lg bg-blue-50 px-2.5 py-1 text-sm font-semibold text-blue-700">{data.avg_days_to_close ?? 0} días</span>
+              <span className="text-sm text-gray-600">Total de tareas</span>
+              <span className="rounded-lg bg-gray-100 px-2.5 py-1 text-sm font-semibold text-gray-700">{data.total_all ?? 0}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">Progreso global</span>
+              <span className="rounded-lg bg-blue-50 px-2.5 py-1 text-sm font-semibold text-blue-700">{data.global_progress ?? 0}%</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Completadas este mes</span>
@@ -122,7 +126,7 @@ function SuperAdminDashboard() {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Próximas a vencer</span>
-              <span className="rounded-lg bg-amber-50 px-2.5 py-1 text-sm font-semibold text-amber-700">{data.total_due_soon ?? 0}</span>
+              <span className="rounded-lg bg-amber-50 px-2.5 py-1 text-sm font-semibold text-amber-700">{data.due_soon ?? 0}</span>
             </div>
           </div>
         </DashboardCard>
