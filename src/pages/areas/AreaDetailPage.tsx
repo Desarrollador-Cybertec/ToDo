@@ -1,14 +1,16 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { areasApi } from '../../api/areas';
+import { tasksApi } from '../../api/tasks';
+import { usersApi } from '../../api/users';
 import { dashboardApi } from '../../api/dashboard';
 import { useAuth } from '../../context/useAuth';
-import { Role, TASK_STATUS_LABELS } from '../../types/enums';
+import { Role, TASK_STATUS_LABELS, TASK_PRIORITY_LABELS } from '../../types/enums';
 import { ApiError } from '../../api/client';
-import type { Area, AreaDashboard } from '../../types';
-import { HiOutlineArrowLeft, HiOutlineExclamationCircle, HiOutlineCheckCircle } from 'react-icons/hi';
-import { AnimatePresence } from 'framer-motion';
-import { PageTransition, FadeIn, SlideDown, Badge, STATUS_BADGE_VARIANT, SkeletonDetail } from '../../components/ui';
+import type { Area, AreaDashboard, AreaMember, Task, User } from '../../types';
+import { HiOutlineArrowLeft, HiOutlineExclamationCircle, HiOutlineCheckCircle, HiOutlineUserAdd, HiOutlineX } from 'react-icons/hi';
+import { AnimatePresence, motion } from 'framer-motion';
+import { PageTransition, FadeIn, SlideDown, Badge, STATUS_BADGE_VARIANT, PRIORITY_BADGE_VARIANT, SkeletonDetail, Spinner } from '../../components/ui';
 
 export function AreaDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -16,22 +18,41 @@ export function AreaDetailPage() {
   const { user } = useAuth();
   const [area, setArea] = useState<Area | null>(null);
   const [dashboard, setDashboard] = useState<AreaDashboard | null>(null);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [members, setMembers] = useState<AreaMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [claimError, setClaimError] = useState('');
   const [claimSuccess, setClaimSuccess] = useState('');
   const [claimUserId, setClaimUserId] = useState('');
+  const [assigningTaskId, setAssigningTaskId] = useState<number | null>(null);
+  const [assignToUserId, setAssignToUserId] = useState('');
+  const [assignSaving, setAssignSaving] = useState(false);
+  const [assignMsg, setAssignMsg] = useState('');
+  const [managerCandidates, setManagerCandidates] = useState<User[]>([]);
+  const [showManagerSelect, setShowManagerSelect] = useState(false);
+  const [selectedManagerId, setSelectedManagerId] = useState('');
+  const [managerSaving, setManagerSaving] = useState(false);
+  const [managerMsg, setManagerMsg] = useState('');
 
   const areaId = Number(id);
   const isManager = user?.role.slug === Role.AREA_MANAGER;
+  const isSuperadmin = user?.role.slug === Role.SUPERADMIN;
 
   const loadData = useCallback(async () => {
     try {
-      const [areaRes, dashRes] = await Promise.all([
+      const [areaRes, dashRes, tasksRes, membersRes, usersRes] = await Promise.all([
         areasApi.get(areaId),
         dashboardApi.area(areaId).catch(() => null),
+        tasksApi.list(`area_id=${areaId}`).catch(() => [] as Task[]),
+        areasApi.members(areaId).catch(() => [] as AreaMember[]),
+        usersApi.list().catch(() => [] as User[]),
       ]);
       setArea(areaRes);
       if (dashRes) setDashboard(dashRes);
+      setTasks(Array.isArray(tasksRes) ? tasksRes : []);
+      setMembers(Array.isArray(membersRes) ? membersRes : []);
+      const allUsers = Array.isArray(usersRes) ? usersRes : [];
+      setManagerCandidates(allUsers.filter((u) => u.role.slug === Role.AREA_MANAGER && u.active));
     } catch {
       navigate('/areas');
     } finally {
@@ -54,6 +75,40 @@ export function AreaDetailPage() {
       setTimeout(() => setClaimSuccess(''), 3000);
     } catch (error) {
       setClaimError(error instanceof ApiError ? error.data.message : 'Error al reclamar trabajador');
+    }
+  };
+
+  const handleAssign = async (taskId: number) => {
+    if (!assignToUserId) return;
+    setAssignSaving(true);
+    try {
+      await tasksApi.delegate(taskId, { to_user_id: Number(assignToUserId) });
+      setAssignMsg('Tarea asignada');
+      setAssigningTaskId(null);
+      setAssignToUserId('');
+      loadData();
+      setTimeout(() => setAssignMsg(''), 3000);
+    } catch (error) {
+      setAssignMsg(error instanceof ApiError ? error.data.message : 'Error al asignar');
+    } finally {
+      setAssignSaving(false);
+    }
+  };
+
+  const handleAssignManager = async () => {
+    if (!selectedManagerId) return;
+    setManagerSaving(true);
+    try {
+      await areasApi.assignManager(areaId, Number(selectedManagerId));
+      setManagerMsg('Encargado asignado');
+      setShowManagerSelect(false);
+      setSelectedManagerId('');
+      loadData();
+      setTimeout(() => setManagerMsg(''), 3000);
+    } catch (error) {
+      setManagerMsg(error instanceof ApiError ? error.data.message : 'Error al asignar encargado');
+    } finally {
+      setManagerSaving(false);
     }
   };
 
@@ -87,7 +142,54 @@ export function AreaDetailPage() {
                 ) : (
                   <p className="text-sm text-gray-400">Sin asignar</p>
                 )}
+                {isSuperadmin && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowManagerSelect(!showManagerSelect);
+                      setSelectedManagerId(area.manager_user_id ? String(area.manager_user_id) : '');
+                    }}
+                    className="rounded-lg border border-gray-200 px-2 py-0.5 text-xs text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                  >
+                    {showManagerSelect ? 'Cancelar' : area.manager ? 'Cambiar' : 'Asignar'}
+                  </button>
+                )}
               </div>
+              <AnimatePresence>
+                {showManagerSelect && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mt-2 overflow-hidden"
+                  >
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={selectedManagerId}
+                        onChange={(e) => setSelectedManagerId(e.target.value)}
+                        className="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                      >
+                        <option value="">— Seleccionar —</option>
+                        {managerCandidates.map((u) => (
+                          <option key={u.id} value={u.id}>{u.name}</option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={handleAssignManager}
+                        disabled={!selectedManagerId || managerSaving}
+                        className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm transition-all hover:bg-indigo-700 disabled:opacity-50"
+                      >
+                        {managerSaving ? <Spinner size="sm" /> : null}
+                        Asignar
+                      </button>
+                    </div>
+                    {managerMsg && (
+                      <p className="mt-1.5 text-xs font-medium text-green-600">{managerMsg}</p>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
             {area.process_identifier && (
               <div>
@@ -178,6 +280,116 @@ export function AreaDetailPage() {
             </FadeIn>
           </div>
         )}
+
+        {/* Tasks list */}
+        <FadeIn delay={0.25} className="mt-6 rounded-2xl border border-gray-100 bg-white shadow-sm">
+          <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+            <h3 className="font-semibold text-gray-900">Tareas del área</h3>
+            <span className="rounded-lg bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-600">{tasks.length}</span>
+          </div>
+
+          {/* assign feedback */}
+          <AnimatePresence>
+            {assignMsg && (
+              <SlideDown>
+                <div className="mx-6 mt-3 flex items-center gap-2 rounded-xl bg-green-50 px-3 py-2 text-sm text-green-700 ring-1 ring-inset ring-green-200">
+                  <HiOutlineCheckCircle className="h-4 w-4 shrink-0" /> {assignMsg}
+                </div>
+              </SlideDown>
+            )}
+          </AnimatePresence>
+
+          {tasks.length === 0 ? (
+            <p className="px-6 py-8 text-center text-sm text-gray-400">No hay tareas registradas para esta área.</p>
+          ) : (
+            <div className="divide-y divide-gray-50">
+              {tasks.map((task) => (
+                <div key={task.id} className="px-6 py-4">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    {/* Left: title + badges */}
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium text-gray-900">{task.title}</p>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                        <Badge variant={STATUS_BADGE_VARIANT[task.status] ?? 'gray'} size="sm">
+                          {TASK_STATUS_LABELS[task.status] ?? task.status}
+                        </Badge>
+                        <Badge variant={PRIORITY_BADGE_VARIANT[task.priority] ?? 'gray'} size="sm">
+                          {TASK_PRIORITY_LABELS[task.priority]}
+                        </Badge>
+                        {task.due_date && (
+                          <span className={`text-xs ${task.is_overdue ? 'font-semibold text-red-600' : 'text-gray-400'}`}>
+                            Vence: {new Date(task.due_date).toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' })}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Right: responsible + assign button */}
+                    <div className="flex shrink-0 items-center gap-3">
+                      {task.current_responsible ? (
+                        <div className="flex items-center gap-1.5 rounded-lg bg-indigo-50 px-2.5 py-1">
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-200 text-xs font-bold text-indigo-700">
+                            {task.current_responsible.name.charAt(0)}
+                          </span>
+                          <span className="text-xs font-medium text-indigo-700">{task.current_responsible.name}</span>
+                        </div>
+                      ) : (
+                        <span className="rounded-lg bg-gray-100 px-2.5 py-1 text-xs text-gray-400">Sin asignar</span>
+                      )}
+                      {isManager && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAssigningTaskId(assigningTaskId === task.id ? null : task.id);
+                            setAssignToUserId('');
+                          }}
+                          className={`rounded-lg p-1.5 transition-colors ${assigningTaskId === task.id ? 'bg-red-50 text-red-500 hover:bg-red-100' : 'border border-gray-200 text-gray-400 hover:bg-gray-100 hover:text-gray-600'}`}
+                          title={assigningTaskId === task.id ? 'Cancelar' : 'Asignar'}
+                        >
+                          {assigningTaskId === task.id ? <HiOutlineX className="h-4 w-4" /> : <HiOutlineUserAdd className="h-4 w-4" />}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Inline assign row */}
+                  <AnimatePresence>
+                    {assigningTaskId === task.id && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                        animate={{ opacity: 1, height: 'auto', marginTop: 12 }}
+                        exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="flex items-center gap-2 rounded-xl border border-indigo-100 bg-indigo-50/60 p-3">
+                          <select
+                            value={assignToUserId}
+                            onChange={(e) => setAssignToUserId(e.target.value)}
+                            className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                          >
+                            <option value="">— Seleccionar miembro —</option>
+                            {members.filter((m) => m.is_active).map((m) => (
+                              <option key={m.user_id} value={m.user_id}>{m.user.name}</option>
+                            ))}
+                          </select>
+                          <button
+                            type="button"
+                            onClick={() => handleAssign(task.id)}
+                            disabled={!assignToUserId || assignSaving}
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-blue-700 disabled:opacity-50"
+                          >
+                            {assignSaving ? <Spinner size="sm" /> : null}
+                            Asignar
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ))}
+            </div>
+          )}
+        </FadeIn>
       </div>
     </PageTransition>
   );

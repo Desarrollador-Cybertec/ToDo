@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { tasksApi } from '../../api/tasks';
 import { useAuth } from '../../context/useAuth';
 import { ApiError } from '../../api/client';
@@ -41,11 +41,12 @@ import {
   HiOutlineRefresh,
 } from 'react-icons/hi';
 import { PageTransition, FadeIn, SlideDown, StaggerList, StaggerItem } from '../../components/ui';
-import { SkeletonDetail, Badge, STATUS_BADGE_VARIANT, PRIORITY_BADGE_VARIANT } from '../../components/ui';
+import { SkeletonDetail, Badge, Spinner, STATUS_BADGE_VARIANT, PRIORITY_BADGE_VARIANT } from '../../components/ui';
 
 export function TaskDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const [task, setTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
@@ -58,6 +59,22 @@ export function TaskDetailPage() {
   const [showDelegateForm, setShowDelegateForm] = useState(false);
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [areaMembers, setAreaMembers] = useState<User[]>([]);
+  const [editing, setEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editPriority, setEditPriority] = useState('');
+  const [editDueDate, setEditDueDate] = useState('');
+  const [editStartDate, setEditStartDate] = useState('');
+  const [editRequiresAttachment, setEditRequiresAttachment] = useState(false);
+  const [editRequiresComment, setEditRequiresComment] = useState(false);
+  const [editRequiresApproval, setEditRequiresApproval] = useState(false);
+  const [editRequiresNotification, setEditRequiresNotification] = useState(false);
+  const [editRequiresDueDate, setEditRequiresDueDate] = useState(false);
+  const [editRequiresProgress, setEditRequiresProgress] = useState(false);
+  const [editNotifyDue, setEditNotifyDue] = useState(false);
+  const [editNotifyOverdue, setEditNotifyOverdue] = useState(false);
+  const [editNotifyCompletion, setEditNotifyCompletion] = useState(false);
+  const [editSaving, setEditSaving] = useState(false);
 
   const taskId = Number(id);
 
@@ -65,12 +82,29 @@ export function TaskDetailPage() {
     try {
       const res = await tasksApi.get(taskId);
       setTask(res);
+      if (searchParams.get('edit') === '1') {
+        setEditing(true);
+        setEditTitle(res.title);
+        setEditDescription(res.description ?? '');
+        setEditPriority(res.priority);
+        setEditDueDate(res.due_date?.slice(0, 10) ?? '');
+        setEditStartDate(res.start_date?.slice(0, 10) ?? '');
+        setEditRequiresAttachment(res.requires_attachment);
+        setEditRequiresComment(res.requires_completion_comment);
+        setEditRequiresApproval(res.requires_manager_approval);
+        setEditRequiresNotification(res.requires_completion_notification);
+        setEditRequiresDueDate(res.requires_due_date);
+        setEditRequiresProgress(res.requires_progress_report);
+        setEditNotifyDue(res.notify_on_due);
+        setEditNotifyOverdue(res.notify_on_overdue);
+        setEditNotifyCompletion(res.notify_on_completion);
+      }
     } catch {
       navigate('/tasks');
     } finally {
       setLoading(false);
     }
-  }, [taskId, navigate]);
+  }, [taskId, navigate, searchParams]);
 
   useEffect(() => {
     loadTask();
@@ -105,6 +139,62 @@ export function TaskDetailPage() {
   const canDelegate = (isSuperAdmin || isManager) && task?.status !== TaskStatus.COMPLETED && task?.status !== TaskStatus.CANCELLED;
   const canUpdate = isResponsible && task?.status === TaskStatus.IN_PROGRESS;
   const canUpload = isResponsible || isSuperAdmin || isManager;
+  const canEdit = (isSuperAdmin || isManager) && task?.status !== TaskStatus.COMPLETED && task?.status !== TaskStatus.CANCELLED;
+
+  const startEditing = () => {
+    if (!task) return;
+    setEditTitle(task.title);
+    setEditDescription(task.description ?? '');
+    setEditPriority(task.priority);
+    setEditDueDate(task.due_date?.slice(0, 10) ?? '');
+    setEditStartDate(task.start_date?.slice(0, 10) ?? '');
+    setEditRequiresAttachment(task.requires_attachment);
+    setEditRequiresComment(task.requires_completion_comment);
+    setEditRequiresApproval(task.requires_manager_approval);
+    setEditRequiresNotification(task.requires_completion_notification);
+    setEditRequiresDueDate(task.requires_due_date);
+    setEditRequiresProgress(task.requires_progress_report);
+    setEditNotifyDue(task.notify_on_due);
+    setEditNotifyOverdue(task.notify_on_overdue);
+    setEditNotifyCompletion(task.notify_on_completion);
+    setEditing(true);
+  };
+
+  const cancelEditing = () => {
+    setEditing(false);
+  };
+
+  const saveEdit = async () => {
+    if (!task) return;
+    setEditSaving(true);
+    try {
+      const updates: Record<string, string | boolean> = {};
+      if (editTitle !== task.title) updates.title = editTitle;
+      if ((editDescription || '') !== (task.description || '')) updates.description = editDescription;
+      if (editPriority !== task.priority) updates.priority = editPriority;
+      if ((editDueDate || '') !== (task.due_date?.slice(0, 10) || '')) updates.due_date = editDueDate;
+      if ((editStartDate || '') !== (task.start_date?.slice(0, 10) || '')) updates.start_date = editStartDate;
+      if (editRequiresAttachment !== task.requires_attachment) updates.requires_attachment = editRequiresAttachment;
+      if (editRequiresComment !== task.requires_completion_comment) updates.requires_completion_comment = editRequiresComment;
+      if (editRequiresApproval !== task.requires_manager_approval) updates.requires_manager_approval = editRequiresApproval;
+      if (editRequiresNotification !== task.requires_completion_notification) updates.requires_completion_notification = editRequiresNotification;
+      if (editRequiresDueDate !== task.requires_due_date) updates.requires_due_date = editRequiresDueDate;
+      if (editRequiresProgress !== task.requires_progress_report) updates.requires_progress_report = editRequiresProgress;
+      if (editNotifyDue !== task.notify_on_due) updates.notify_on_due = editNotifyDue;
+      if (editNotifyOverdue !== task.notify_on_overdue) updates.notify_on_overdue = editNotifyOverdue;
+      if (editNotifyCompletion !== task.notify_on_completion) updates.notify_on_completion = editNotifyCompletion;
+      if (Object.keys(updates).length > 0) {
+        await tasksApi.update(taskId, updates);
+        showMessage('Tarea actualizada');
+        loadTask();
+      }
+      setEditing(false);
+    } catch (error) {
+      setActionError(error instanceof ApiError ? error.data.message : 'Error al actualizar');
+    } finally {
+      setEditSaving(false);
+    }
+  };
 
   const commentForm = useForm<AddCommentFormData>({ resolver: zodResolver(addCommentSchema) });
   const onComment = async (data: AddCommentFormData) => {
@@ -196,6 +286,142 @@ export function TaskDetailPage() {
 
         {/* Task Header */}
         <FadeIn className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+          <AnimatePresence mode="wait">
+            {editing ? (
+              <motion.div
+                key="edit-mode"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-4"
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900">Editar tarea</h3>
+                  <button type="button" onClick={cancelEditing} className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
+                    <HiOutlineX className="h-5 w-5" />
+                  </button>
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-gray-700">Título</label>
+                  <input
+                    type="text"
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-gray-700">Descripción</label>
+                  <textarea
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    rows={3}
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  />
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-gray-700">Prioridad</label>
+                    <select
+                      value={editPriority}
+                      onChange={(e) => setEditPriority(e.target.value)}
+                      className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    >
+                      {Object.entries(TASK_PRIORITY_LABELS).map(([value, label]) => (
+                        <option key={value} value={value}>{label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-gray-700">Fecha límite</label>
+                    <input
+                      type="date"
+                      value={editDueDate}
+                      onChange={(e) => setEditDueDate(e.target.value)}
+                      className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-gray-700">Fecha de inicio</label>
+                    <input
+                      type="date"
+                      value={editStartDate}
+                      onChange={(e) => setEditStartDate(e.target.value)}
+                      className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    />
+                  </div>
+                </div>
+
+                {/* Requisitos */}
+                <div className="rounded-xl border border-gray-200 bg-gray-50/50 p-4">
+                  <p className="mb-3 text-sm font-semibold text-gray-700">Requisitos</p>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {[
+                      { label: 'Requiere adjunto', value: editRequiresAttachment, set: setEditRequiresAttachment },
+                      { label: 'Requiere comentario de cierre', value: editRequiresComment, set: setEditRequiresComment },
+                      { label: 'Requiere aprobación del encargado', value: editRequiresApproval, set: setEditRequiresApproval },
+                      { label: 'Requiere fecha límite', value: editRequiresDueDate, set: setEditRequiresDueDate },
+                      { label: 'Requiere reporte de avance', value: editRequiresProgress, set: setEditRequiresProgress },
+                    ].map((opt) => (
+                      <label key={opt.label} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-gray-700 transition-colors hover:bg-white">
+                        <input
+                          type="checkbox"
+                          checked={opt.value}
+                          onChange={(e) => opt.set(e.target.checked)}
+                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500/20"
+                        />
+                        {opt.label}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Notificaciones */}
+                <div className="rounded-xl border border-gray-200 bg-gray-50/50 p-4">
+                  <p className="mb-3 text-sm font-semibold text-gray-700">Notificaciones</p>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {[
+                      { label: 'Notificar al vencer', value: editNotifyDue, set: setEditNotifyDue },
+                      { label: 'Notificar si vencida', value: editNotifyOverdue, set: setEditNotifyOverdue },
+                      { label: 'Notificar al completarse', value: editNotifyCompletion, set: setEditNotifyCompletion },
+                      { label: 'Notificar al completar (usuario)', value: editRequiresNotification, set: setEditRequiresNotification },
+                    ].map((opt) => (
+                      <label key={opt.label} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-gray-700 transition-colors hover:bg-white">
+                        <input
+                          type="checkbox"
+                          checked={opt.value}
+                          onChange={(e) => opt.set(e.target.checked)}
+                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500/20"
+                        />
+                        {opt.label}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">
+                  <button
+                    type="button"
+                    onClick={cancelEditing}
+                    className="rounded-xl px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={saveEdit}
+                    disabled={editSaving || !editTitle.trim()}
+                    className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50"
+                  >
+                    {editSaving ? <><Spinner size="sm" /> Guardando...</> : 'Guardar cambios'}
+                  </button>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div key="view-mode" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">{task.title}</h2>
@@ -268,6 +494,11 @@ export function TaskDetailPage() {
 
           {/* Actions */}
           <div className="mt-6 flex flex-wrap gap-2 border-t border-gray-100 pt-4">
+            {canEdit && (
+              <button type="button" onClick={startEditing} className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-amber-600 active:scale-[0.98]">
+                <HiOutlinePencil className="h-4 w-4" /> Editar
+              </button>
+            )}
             {canStart && (
               <button type="button" onClick={() => handleAction(() => tasksApi.start(taskId), 'Tarea iniciada')} className="inline-flex items-center gap-1.5 rounded-xl bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-green-700 active:scale-[0.98]">
                 <HiOutlinePlay className="h-4 w-4" /> Iniciar
@@ -312,6 +543,9 @@ export function TaskDetailPage() {
               </button>
             )}
           </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </FadeIn>
 
         {/* Modal forms */}

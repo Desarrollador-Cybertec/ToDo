@@ -133,6 +133,15 @@ export interface UpdateTaskRequest {
   priority?: TaskPriorityType;
   due_date?: string;
   start_date?: string;
+  requires_attachment?: boolean;
+  requires_completion_comment?: boolean;
+  requires_manager_approval?: boolean;
+  requires_completion_notification?: boolean;
+  requires_due_date?: boolean;
+  requires_progress_report?: boolean;
+  notify_on_due?: boolean;
+  notify_on_overdue?: boolean;
+  notify_on_completion?: boolean;
 }
 
 export interface DelegateTaskRequest {

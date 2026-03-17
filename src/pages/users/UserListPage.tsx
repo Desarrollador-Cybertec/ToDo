@@ -1,13 +1,14 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { usersApi } from '../../api/users';
+import { areasApi } from '../../api/areas';
 import { createUserSchema, type CreateUserFormData } from '../../schemas';
-import { ROLE_LABELS } from '../../types/enums';
+import { ROLE_LABELS, Role } from '../../types/enums';
 import { ApiError } from '../../api/client';
-import type { User } from '../../types';
-import { HiOutlinePlus, HiOutlineExclamationCircle, HiOutlineCheckCircle } from 'react-icons/hi';
+import type { User, Area } from '../../types';
+import { HiOutlinePlus, HiOutlineExclamationCircle, HiOutlineCheckCircle, HiOutlinePencil, HiOutlineX } from 'react-icons/hi';
 import { PageTransition, FadeIn, SlideDown, SkeletonTable, Spinner, Badge } from '../../components/ui';
 
 const ROLE_BADGE: Record<string, 'purple' | 'blue' | 'gray'> = {
@@ -18,15 +19,29 @@ const ROLE_BADGE: Record<string, 'purple' | 'blue' | 'gray'> = {
 
 export function UserListPage() {
   const [users, setUsers] = useState<User[]>([]);
+  const [areas, setAreas] = useState<Area[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingUserId, setEditingUserId] = useState<number | null>(null);
+  const [editOriginalRoleSlug, setEditOriginalRoleSlug] = useState<string>('');
+  const [editName, setEditName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editRoleId, setEditRoleId] = useState<number>(0);
+  const [editAreaId, setEditAreaId] = useState<string>('');
+  const [editAreaLoading, setEditAreaLoading] = useState(false);
+  const [editActive, setEditActive] = useState(true);
+  const [editSaving, setEditSaving] = useState(false);
   const [serverError, setServerError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
   const loadUsers = useCallback(async () => {
     try {
-      const res = await usersApi.list();
-      setUsers(res);
+      const [usersRes, areasRes] = await Promise.all([
+        usersApi.list(),
+        areasApi.list().catch(() => []),
+      ]);
+      setUsers(Array.isArray(usersRes) ? usersRes : []);
+      setAreas(Array.isArray(areasRes) ? areasRes : []);
     } catch {
       setUsers([]);
     } finally {
@@ -67,6 +82,76 @@ export function UserListPage() {
       loadUsers();
     } catch (error) {
       setServerError(error instanceof ApiError ? error.data.message : 'Error al cambiar estado');
+    }
+  };
+
+  const startEditing = async (u: User) => {
+    // Set immediately from list data so modal opens right away
+    setEditingUserId(u.id);
+    setEditOriginalRoleSlug(u.role.slug);
+    setEditName(u.name);
+    setEditEmail(u.email);
+    setEditRoleId(u.role.id);   // use nested role.id — always present
+    setEditAreaId('');
+    setEditActive(u.active);
+    setServerError('');
+
+    // Fetch full detail to get area_id and confirm role_id
+    if (u.role.slug === 'worker') {
+      setEditAreaLoading(true);
+      try {
+        const full = await usersApi.get(u.id);
+        setEditRoleId(full.role.id);
+        setEditAreaId(full.area_id ? String(full.area_id) : '');
+      } catch {
+        // keep values from list
+      } finally {
+        setEditAreaLoading(false);
+      }
+    }
+  };
+
+  const cancelEditing = () => {
+    setEditingUserId(null);
+  };
+
+  const saveUserEdit = async (userId: number) => {
+    setEditSaving(true);
+    setServerError('');
+    try {
+      const currentUser = users.find((u) => u.id === userId);
+      if (!currentUser) return;
+
+      // Update user info if changed
+      const updates: Record<string, string | number> = {};
+      if (editName !== currentUser.name) updates.name = editName;
+      if (editEmail !== currentUser.email) updates.email = editEmail;
+      if (Object.keys(updates).length > 0) {
+        await usersApi.update(userId, updates);
+      }
+
+      // Change role if different
+      if (editRoleId !== currentUser.role_id) {
+        await usersApi.changeRole(userId, editRoleId);
+      }
+
+      // Toggle active if changed
+      if (editActive !== currentUser.active) {
+        await usersApi.toggleActive(userId);
+      }
+
+      // Assign to area if selected
+      if (editAreaId) {
+        await areasApi.claimWorker({ area_id: Number(editAreaId), user_id: userId });
+      }
+
+      showMessage('Usuario actualizado');
+      setEditingUserId(null);
+      loadUsers();
+    } catch (error) {
+      setServerError(error instanceof ApiError ? error.data.message : 'Error al actualizar usuario');
+    } finally {
+      setEditSaving(false);
     }
   };
 
@@ -168,7 +253,7 @@ export function UserListPage() {
             </thead>
             <tbody className="divide-y divide-gray-50">
               {users.map((u) => (
-                <tr key={u.id} className="transition-colors hover:bg-gray-50/50">
+                <tr key={u.id} className="group transition-colors hover:bg-gray-50/50">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <span className="flex h-8 w-8 items-center justify-center rounded-full bg-linear-to-br from-blue-100 to-indigo-100 text-sm font-medium text-blue-700">{u.name.charAt(0)}</span>
@@ -183,13 +268,23 @@ export function UserListPage() {
                     <Badge variant={u.active ? 'green' : 'red'} size="sm">{u.active ? 'Activo' : 'Inactivo'}</Badge>
                   </td>
                   <td className="px-6 py-4">
-                    <button
-                      type="button"
-                      onClick={() => handleToggleActive(u.id)}
-                      className={`rounded-xl px-3 py-1.5 text-xs font-medium transition-colors ${u.active ? 'border border-red-200 text-red-600 hover:bg-red-50' : 'border border-green-200 text-green-600 hover:bg-green-50'}`}
-                    >
-                      {u.active ? 'Desactivar' : 'Activar'}
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => startEditing(u)}
+                        className="rounded-lg border border-gray-200 p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                        title="Editar"
+                      >
+                        <HiOutlinePencil className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleToggleActive(u.id)}
+                        className={`rounded-xl px-3 py-1.5 text-xs font-medium transition-colors ${u.active ? 'border border-red-200 text-red-600 hover:bg-red-50' : 'border border-green-200 text-green-600 hover:bg-green-50'}`}
+                      >
+                        {u.active ? 'Desactivar' : 'Activar'}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -197,6 +292,137 @@ export function UserListPage() {
           </table>
         </FadeIn>
       )}
+
+      {/* Edit user panel */}
+      <AnimatePresence>
+          {editingUserId != null && (
+              <motion.div
+                key="edit-panel"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+                onClick={cancelEditing}
+              >
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl"
+                >
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-gray-900">Editar usuario</h3>
+                    <button type="button" onClick={cancelEditing} className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
+                      <HiOutlineX className="h-5 w-5" />
+                    </button>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <label className="mb-1.5 block text-sm font-medium text-gray-700">Nombre</label>
+                        <input
+                          type="text"
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1.5 block text-sm font-medium text-gray-700">Correo</label>
+                        <input
+                          type="email"
+                          value={editEmail}
+                          onChange={(e) => setEditEmail(e.target.value)}
+                          className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Role: hidden for superadmin, worker↔area_manager for others */}
+                    {editOriginalRoleSlug !== Role.SUPERADMIN && (
+                      <div>
+                        <label className="mb-1.5 block text-sm font-medium text-gray-700">Rol</label>
+                        <select
+                          value={editRoleId}
+                          onChange={(e) => setEditRoleId(Number(e.target.value))}
+                          className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                        >
+                          <option value={2}>{ROLE_LABELS[Role.AREA_MANAGER]}</option>
+                          <option value={3}>{ROLE_LABELS[Role.WORKER]}</option>
+                        </select>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
+                      <div>
+                        <p className="text-sm font-medium text-gray-700">Estado del usuario</p>
+                        <p className="text-xs text-gray-500">{editActive ? 'El usuario puede iniciar sesión' : 'El usuario está bloqueado'}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setEditActive((v) => !v)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                          editActive ? 'bg-green-500' : 'bg-gray-300'
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                            editActive ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    {/* Area: only visible for workers */}
+                    {editOriginalRoleSlug === Role.WORKER && (
+                    <div className="rounded-xl border border-indigo-100 bg-indigo-50/50 p-4">
+                      <label className="mb-1.5 block text-sm font-semibold text-indigo-700">Asignar a un área</label>
+                      <p className="mb-2 text-xs text-indigo-600/70">Selecciona un área para agregar a este usuario como miembro.</p>
+                      {editAreaLoading ? (
+                        <div className="flex items-center gap-2 py-2 text-sm text-indigo-500">
+                          <Spinner size="sm" /> Cargando área actual...
+                        </div>
+                      ) : (
+                        <select
+                          value={editAreaId}
+                          onChange={(e) => setEditAreaId(e.target.value)}
+                          className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                        >
+                          <option value="">— Sin área —</option>
+                          {areas.filter((a) => a.active).map((a) => (
+                            <option key={a.id} value={a.id}>
+                              {a.name}{a.manager ? ` (Encargado: ${a.manager.name})` : ''}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </div>
+                    )}
+
+                    <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">
+                      <button
+                        type="button"
+                        onClick={cancelEditing}
+                        className="rounded-xl px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => saveUserEdit(editingUserId)}
+                        disabled={editSaving}
+                        className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50"
+                      >
+                        {editSaving ? <><Spinner size="sm" /> Guardando...</> : 'Guardar cambios'}
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+          )}
+        </AnimatePresence>
     </PageTransition>
   );
 }

@@ -2,26 +2,39 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { tasksApi } from '../../api/tasks';
+import { areasApi } from '../../api/areas';
 import { useAuth } from '../../context/useAuth';
 import { Role, TASK_STATUS_LABELS, TASK_PRIORITY_LABELS } from '../../types/enums';
-import type { Task } from '../../types';
-import { HiOutlinePlus, HiOutlineFilter, HiOutlineEye, HiOutlineClipboardList } from 'react-icons/hi';
+import type { Task, Area } from '../../types';
+import { HiOutlinePlus, HiOutlineFilter, HiOutlineEye, HiOutlineClipboardList, HiOutlinePencil } from 'react-icons/hi';
 import { PageTransition, StaggerList, StaggerItem } from '../../components/ui';
 import { SkeletonList, EmptyState, Badge, STATUS_BADGE_VARIANT, PRIORITY_BADGE_VARIANT } from '../../components/ui';
 
 export function TaskListPage() {
   const { user } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [areas, setAreas] = useState<Area[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState<string>('');
+  const [filterAreaId, setFilterAreaId] = useState<string>('');
   const [sortBy, setSortBy] = useState<string>('');
 
   const canCreate = user?.role.slug === Role.SUPERADMIN || user?.role.slug === Role.AREA_MANAGER;
+  const isSuperadmin = user?.role.slug === Role.SUPERADMIN;
+
+  useEffect(() => {
+    if (isSuperadmin) {
+      areasApi.list()
+        .then((res) => setAreas(Array.isArray(res) ? res : []))
+        .catch(() => setAreas([]));
+    }
+  }, [isSuperadmin]);
 
   useEffect(() => {
     let cancelled = false;
     const params = new URLSearchParams();
     if (filterStatus) params.set('status', filterStatus);
+    if (filterAreaId) params.set('area_id', filterAreaId);
     if (sortBy) params.set('sort', sortBy);
     
     tasksApi.list(params.toString())
@@ -29,7 +42,7 @@ export function TaskListPage() {
       .catch(() => { if (!cancelled) setTasks([]); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [filterStatus, sortBy]);
+  }, [filterStatus, filterAreaId, sortBy]);
 
   return (
     <PageTransition>
@@ -58,6 +71,18 @@ export function TaskListPage() {
             <option key={value} value={value}>{label}</option>
           ))}
         </select>
+        {isSuperadmin && (
+          <select
+            value={filterAreaId}
+            onChange={(e) => setFilterAreaId(e.target.value)}
+            className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:bg-white focus:outline-none"
+          >
+            <option value="">Todas las áreas</option>
+            {areas.filter((a) => a.active).map((a) => (
+              <option key={a.id} value={a.id}>{a.name}</option>
+            ))}
+          </select>
+        )}
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
@@ -129,13 +154,24 @@ export function TaskListPage() {
                         )}
                       </div>
                     </div>
-                    <Link
-                      to={`/tasks/${task.id}`}
-                      className="flex items-center gap-1.5 rounded-xl border border-gray-200 px-3 py-1.5 text-sm text-gray-500 transition-all hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
-                    >
-                      <HiOutlineEye className="h-4 w-4" />
-                      Ver
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      {canCreate && (
+                        <Link
+                          to={`/tasks/${task.id}?edit=1`}
+                          className="flex items-center gap-1.5 rounded-xl border border-gray-200 px-3 py-1.5 text-sm text-gray-500 transition-all hover:border-amber-200 hover:bg-amber-50 hover:text-amber-600"
+                        >
+                          <HiOutlinePencil className="h-4 w-4" />
+                          Editar
+                        </Link>
+                      )}
+                      <Link
+                        to={`/tasks/${task.id}`}
+                        className="flex items-center gap-1.5 rounded-xl border border-gray-200 px-3 py-1.5 text-sm text-gray-500 transition-all hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
+                      >
+                        <HiOutlineEye className="h-4 w-4" />
+                        Ver
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </StaggerItem>

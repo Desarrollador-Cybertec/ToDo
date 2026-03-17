@@ -13,6 +13,7 @@ export interface User {
   active: boolean;
   role_id: number;
   role: UserRole;
+  area_id?: number | null;
   created_at: string;
   updated_at: string;
 }

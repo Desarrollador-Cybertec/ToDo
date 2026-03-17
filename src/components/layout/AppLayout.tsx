@@ -90,7 +90,7 @@ export function AppLayout() {
   const isActive = (path: string) => location.pathname.startsWith(path);
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex h-screen overflow-hidden bg-gray-50">
       {/* Mobile overlay */}
       <AnimatePresence>
         {sidebarOpen && (
@@ -107,7 +107,7 @@ export function AppLayout() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r border-gray-200/80 bg-white transition-transform duration-300 ease-out lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r border-gray-200/80 bg-white transition-transform duration-300 ease-out lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
         }`}
       >
@@ -182,7 +182,7 @@ export function AppLayout() {
       </aside>
 
       {/* Main content */}
-      <div className="flex flex-1 flex-col">
+      <div className="flex flex-1 flex-col lg:ml-64">
         <header className="sticky top-0 z-10 flex h-16 items-center border-b border-gray-200/80 bg-white/80 px-6 backdrop-blur-md lg:px-8">
           <button
             type="button"
@@ -201,7 +201,7 @@ export function AppLayout() {
           </div>
         </header>
 
-        <main className="flex-1 p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto p-6 lg:p-8">
           <Outlet />
         </main>
       </div>
