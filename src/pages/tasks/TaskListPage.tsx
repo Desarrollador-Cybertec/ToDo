@@ -1,29 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import { tasksApi } from '../../api/tasks';
 import { useAuth } from '../../context/useAuth';
 import { Role, TASK_STATUS_LABELS, TASK_PRIORITY_LABELS } from '../../types/enums';
 import type { Task } from '../../types';
-import { HiOutlinePlus, HiOutlineFilter, HiOutlineEye } from 'react-icons/hi';
-
-const PRIORITY_COLORS: Record<string, string> = {
-  low: 'bg-gray-100 text-gray-700',
-  medium: 'bg-blue-100 text-blue-700',
-  high: 'bg-orange-100 text-orange-700',
-  urgent: 'bg-red-100 text-red-700',
-};
-
-const STATUS_COLORS: Record<string, string> = {
-  draft: 'bg-gray-100 text-gray-700',
-  pending_assignment: 'bg-yellow-100 text-yellow-700',
-  pending: 'bg-blue-100 text-blue-700',
-  in_progress: 'bg-indigo-100 text-indigo-700',
-  in_review: 'bg-purple-100 text-purple-700',
-  completed: 'bg-green-100 text-green-700',
-  rejected: 'bg-red-100 text-red-700',
-  cancelled: 'bg-gray-100 text-gray-500',
-  overdue: 'bg-red-100 text-red-800',
-};
+import { HiOutlinePlus, HiOutlineFilter, HiOutlineEye, HiOutlineClipboardList } from 'react-icons/hi';
+import { PageTransition, StaggerList, StaggerItem } from '../../components/ui';
+import { SkeletonList, EmptyState, Badge, STATUS_BADGE_VARIANT, PRIORITY_BADGE_VARIANT } from '../../components/ui';
 
 export function TaskListPage() {
   const { user } = useAuth();
@@ -41,20 +25,20 @@ export function TaskListPage() {
     if (sortBy) params.set('sort', sortBy);
     
     tasksApi.list(params.toString())
-      .then((res) => { if (!cancelled) setTasks(res.data); })
+      .then((res) => { if (!cancelled) setTasks(res); })
       .catch(() => { if (!cancelled) setTasks([]); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [filterStatus, sortBy]);
 
   return (
-    <div>
+    <PageTransition>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <h2 className="text-2xl font-bold text-gray-900">Tareas</h2>
         {canCreate && (
           <Link
             to="/tasks/create"
-            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+            className="inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-md shadow-blue-500/25 transition-all hover:shadow-lg hover:shadow-blue-500/30 active:scale-[0.98]"
           >
             <HiOutlinePlus className="h-4 w-4" />
             Nueva tarea
@@ -62,12 +46,12 @@ export function TaskListPage() {
         )}
       </div>
 
-      <div className="mb-6 flex flex-wrap items-center gap-3">
+      <div className="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-gray-100 bg-white p-3 shadow-sm">
         <HiOutlineFilter className="h-5 w-5 text-gray-400" />
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+          className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:bg-white focus:outline-none"
         >
           <option value="">Todos los estados</option>
           {Object.entries(TASK_STATUS_LABELS).map(([value, label]) => (
@@ -77,7 +61,7 @@ export function TaskListPage() {
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+          className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:bg-white focus:outline-none"
         >
           <option value="">Más recientes</option>
           <option value="oldest">Más antiguas</option>
@@ -86,64 +70,79 @@ export function TaskListPage() {
         </select>
       </div>
 
-      {loading ? (
-        <div className="space-y-3">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="h-20 animate-pulse rounded-xl bg-gray-200" />
-          ))}
-        </div>
-      ) : tasks.length === 0 ? (
-        <div className="rounded-xl border bg-white p-12 text-center">
-          <p className="text-gray-500">No hay tareas para mostrar.</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {tasks.map((task) => (
-            <div key={task.id} className="rounded-xl border bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="flex-1">
-                  <Link to={`/tasks/${task.id}`} className="text-base font-medium text-gray-900 hover:text-blue-600">
-                    {task.title}
-                  </Link>
-                  {task.description && (
-                    <p className="mt-1 line-clamp-1 text-sm text-gray-500">{task.description}</p>
-                  )}
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[task.status] ?? 'bg-gray-100'}`}>
-                      {TASK_STATUS_LABELS[task.status]}
-                    </span>
-                    <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${PRIORITY_COLORS[task.priority] ?? 'bg-gray-100'}`}>
-                      {TASK_PRIORITY_LABELS[task.priority]}
-                    </span>
-                    {task.current_responsible && (
-                      <span className="text-xs text-gray-500">
-                        Responsable: {task.current_responsible.name}
-                      </span>
-                    )}
-                    {task.due_date && (
-                      <span className={`text-xs ${task.is_overdue ? 'font-medium text-red-600' : 'text-gray-500'}`}>
-                        Vence: {new Date(task.due_date).toLocaleDateString('es-PE')}
-                      </span>
-                    )}
-                    {task.progress_percent > 0 && (
-                      <span className="text-xs text-gray-500">
-                        Avance: {task.progress_percent}%
-                      </span>
-                    )}
+      <AnimatePresence mode="wait">
+        {loading ? (
+          <SkeletonList count={5} />
+        ) : tasks.length === 0 ? (
+          <EmptyState
+            icon={<HiOutlineClipboardList className="h-8 w-8" />}
+            title="No hay tareas"
+            description="No se encontraron tareas con los filtros actuales."
+            action={
+              canCreate ? (
+                <Link to="/tasks/create" className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700">
+                  <HiOutlinePlus className="h-4 w-4" /> Nueva tarea
+                </Link>
+              ) : undefined
+            }
+          />
+        ) : (
+          <StaggerList className="space-y-3">
+            {tasks.map((task) => (
+              <StaggerItem key={task.id}>
+                <div className="group rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-all hover:border-blue-100 hover:shadow-md">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="flex-1">
+                      <Link to={`/tasks/${task.id}`} className="text-base font-medium text-gray-900 transition-colors hover:text-blue-600">
+                        {task.title}
+                      </Link>
+                      {task.description && (
+                        <p className="mt-1 line-clamp-1 text-sm text-gray-500">{task.description}</p>
+                      )}
+                      <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                        <Badge variant={STATUS_BADGE_VARIANT[task.status]}>
+                          {TASK_STATUS_LABELS[task.status]}
+                        </Badge>
+                        <Badge variant={PRIORITY_BADGE_VARIANT[task.priority]}>
+                          {TASK_PRIORITY_LABELS[task.priority]}
+                        </Badge>
+                        {task.current_responsible && (
+                          <span className="flex items-center gap-1.5 text-xs text-gray-500">
+                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gray-100 text-[10px] font-medium text-gray-600">
+                              {task.current_responsible.name.charAt(0)}
+                            </span>
+                            {task.current_responsible.name}
+                          </span>
+                        )}
+                        {task.due_date && (
+                          <span className={`text-xs ${task.is_overdue ? 'font-medium text-red-600' : 'text-gray-500'}`}>
+                            Vence: {new Date(task.due_date).toLocaleDateString('es-PE')}
+                          </span>
+                        )}
+                        {task.progress_percent > 0 && (
+                          <span className="flex items-center gap-1.5 text-xs text-gray-500">
+                            <div className="h-1.5 w-12 rounded-full bg-gray-200">
+                              <div className="h-1.5 rounded-full bg-blue-500" style={{ width: `${task.progress_percent}%` }} />
+                            </div>
+                            {task.progress_percent}%
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <Link
+                      to={`/tasks/${task.id}`}
+                      className="flex items-center gap-1.5 rounded-xl border border-gray-200 px-3 py-1.5 text-sm text-gray-500 transition-all hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
+                    >
+                      <HiOutlineEye className="h-4 w-4" />
+                      Ver
+                    </Link>
                   </div>
                 </div>
-                <Link
-                  to={`/tasks/${task.id}`}
-                  className="flex items-center gap-1 rounded-lg border px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50"
-                >
-                  <HiOutlineEye className="h-4 w-4" />
-                  Ver
-                </Link>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+              </StaggerItem>
+            ))}
+          </StaggerList>
+        )}
+      </AnimatePresence>
+    </PageTransition>
   );
 }

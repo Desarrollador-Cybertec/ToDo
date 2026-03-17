@@ -36,7 +36,7 @@ export const updateTaskSchema = z.object({
 });
 
 export const delegateTaskSchema = z.object({
-  user_id: z.number({ message: 'Selecciona un trabajador' }).int().positive(),
+  to_user_id: z.number({ message: 'Selecciona un trabajador' }).int().positive(),
   note: z.string().max(1000).optional().or(z.literal('')),
 });
 

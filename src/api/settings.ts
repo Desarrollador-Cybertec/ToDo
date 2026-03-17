@@ -1,25 +1,23 @@
 import { apiClient } from './client';
 import type {
-  ApiResponse,
   ApiMessageResponse,
   SystemSetting,
-  UpdateSettingRequest,
   MessageTemplate,
   UpdateMessageTemplateRequest,
 } from '../types';
 
 export const settingsApi = {
-  listSettings: () =>
-    apiClient.get<ApiResponse<SystemSetting[]>>('/settings'),
+  listSettings: (group?: string) =>
+    apiClient.get<SystemSetting[]>(`/settings${group ? `?group=${group}` : ''}`),
 
-  updateSetting: (id: number, data: UpdateSettingRequest) =>
-    apiClient.put<ApiResponse<SystemSetting>>(`/settings/${id}`, data),
+  updateSettings: (settings: { key: string; value: string }[]) =>
+    apiClient.put<ApiMessageResponse>('/settings', { settings }),
 
   listTemplates: () =>
-    apiClient.get<ApiResponse<MessageTemplate[]>>('/message-templates'),
+    apiClient.get<MessageTemplate[]>('/message-templates'),
 
   updateTemplate: (id: number, data: UpdateMessageTemplateRequest) =>
-    apiClient.put<ApiResponse<MessageTemplate>>(`/message-templates/${id}`, data),
+    apiClient.put<MessageTemplate>(`/message-templates/${id}`, data),
 };
 
 export const automationApi = {
@@ -27,13 +25,13 @@ export const automationApi = {
     apiClient.post<ApiMessageResponse>('/automation/detect-overdue'),
 
   sendDailySummary: () =>
-    apiClient.post<ApiMessageResponse>('/automation/send-daily-summary'),
+    apiClient.post<ApiMessageResponse>('/automation/send-summary'),
 
   sendDueReminders: () =>
-    apiClient.post<ApiMessageResponse>('/automation/send-due-reminders'),
+    apiClient.post<ApiMessageResponse>('/automation/send-reminders'),
 
   detectInactive: () =>
-    apiClient.post<ApiMessageResponse>('/automation/detect-inactive'),
+    apiClient.post<ApiMessageResponse>('/automation/detect-inactivity'),
 };
 
 export const importApi = {

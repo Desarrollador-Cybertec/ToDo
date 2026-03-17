@@ -22,6 +22,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-context/
 package-lock.json
 *.env

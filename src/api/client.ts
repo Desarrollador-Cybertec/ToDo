@@ -64,7 +64,15 @@ async function request<T>(
     return undefined as T;
   }
 
-  return response.json();
+  const json = await response.json();
+
+  // Laravel API Resource responses wrap data in { data: ... }
+  // Unwrap automatically when the response has a single 'data' key
+  if (json && typeof json === 'object' && 'data' in json && !('token' in json)) {
+    return json.data as T;
+  }
+
+  return json as T;
 }
 
 export const apiClient = {

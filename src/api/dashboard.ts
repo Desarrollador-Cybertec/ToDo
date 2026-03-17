@@ -1,6 +1,5 @@
 import { apiClient } from './client';
 import type {
-  ApiResponse,
   GeneralDashboard,
   AreaDashboard,
   ConsolidatedDashboard,
@@ -9,14 +8,14 @@ import type {
 
 export const dashboardApi = {
   general: () =>
-    apiClient.get<ApiResponse<GeneralDashboard>>('/dashboard/general'),
+    apiClient.get<GeneralDashboard>('/dashboard/general'),
 
   area: (id: number) =>
-    apiClient.get<ApiResponse<AreaDashboard>>(`/dashboard/area/${id}`),
+    apiClient.get<AreaDashboard>(`/dashboard/area/${id}`),
 
   consolidated: () =>
-    apiClient.get<ApiResponse<ConsolidatedDashboard>>('/dashboard/consolidated'),
+    apiClient.get<ConsolidatedDashboard>('/dashboard/consolidated'),
 
   personal: () =>
-    apiClient.get<ApiResponse<PersonalDashboard>>('/dashboard/me'),
+    apiClient.get<PersonalDashboard>('/dashboard/me'),
 };

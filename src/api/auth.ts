@@ -1,5 +1,5 @@
 import { apiClient, setToken, removeToken } from './client';
-import type { LoginRequest, LoginResponse, ApiResponse, User } from '../types';
+import type { LoginRequest, LoginResponse, User } from '../types';
 
 export const authApi = {
   login: async (credentials: LoginRequest): Promise<LoginResponse> => {
@@ -13,5 +13,5 @@ export const authApi = {
     removeToken();
   },
 
-  me: () => apiClient.get<ApiResponse<User>>('/me'),
+  me: () => apiClient.get<{ user: User }>('/me'),
 };

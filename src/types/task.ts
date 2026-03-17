@@ -136,7 +136,7 @@ export interface UpdateTaskRequest {
 }
 
 export interface DelegateTaskRequest {
-  user_id: number;
+  to_user_id: number;
   note?: string;
 }
 
@@ -150,6 +150,7 @@ export interface RejectTaskRequest {
 
 export interface AddCommentRequest {
   comment: string;
+  type?: CommentTypeValue;
 }
 
 export interface AddUpdateRequest {

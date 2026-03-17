@@ -41,5 +41,4 @@ export interface UpdateAreaRequest {
 
 export interface ClaimWorkerRequest {
   user_id: number;
-  area_id: number;
 }

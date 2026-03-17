@@ -2,9 +2,12 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { motion, AnimatePresence } from 'framer-motion';
+import { HiOutlineMail, HiOutlineLockClosed, HiOutlineExclamationCircle } from 'react-icons/hi';
 import { useAuth } from '../../context/useAuth';
 import { loginSchema, type LoginFormData } from '../../schemas';
 import { ApiError } from '../../api/client';
+import { Spinner } from '../../components/ui';
 
 export function LoginPage() {
   const { login } = useAuth();
@@ -34,37 +37,63 @@ export function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md">
+    <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 px-4">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
+        className="w-full max-w-md"
+      >
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-blue-600">TAPE</h1>
-          <p className="mt-2 text-gray-600">Sistema de Gestión de Compromisos</p>
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.15, duration: 0.4, ease: 'easeOut' }}
+            className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/25"
+          >
+            <span className="text-2xl font-black text-white">T</span>
+          </motion.div>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">TAPE</h1>
+          <p className="mt-1.5 text-sm text-gray-500">Sistema de Gestión de Compromisos</p>
         </div>
 
-        <div className="rounded-xl bg-white p-8 shadow-lg">
+        <div className="rounded-2xl border border-gray-200/60 bg-white/80 p-8 shadow-xl shadow-gray-200/40 backdrop-blur-sm">
           <h2 className="mb-6 text-xl font-semibold text-gray-900">Iniciar sesión</h2>
 
-          {serverError && (
-            <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">
-              {serverError}
-            </div>
-          )}
+          <AnimatePresence mode="wait">
+            {serverError && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mb-4 overflow-hidden"
+              >
+                <div className="flex items-center gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-600 ring-1 ring-inset ring-red-200">
+                  <HiOutlineExclamationCircle className="h-4 w-4 shrink-0" />
+                  {serverError}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div>
               <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-gray-700">
                 Correo electrónico
               </label>
-              <input
-                id="email"
-                type="email"
-                autoComplete="email"
-                {...register('email')}
-                className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                placeholder="correo@ejemplo.com"
-              />
+              <div className="relative">
+                <HiOutlineMail className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  {...register('email')}
+                  className="w-full rounded-xl border border-gray-300 py-2.5 pl-10 pr-4 text-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  placeholder="correo@ejemplo.com"
+                />
+              </div>
               {errors.email && (
-                <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
+                <p className="mt-1.5 text-xs text-red-500">{errors.email.message}</p>
               )}
             </div>
 
@@ -72,29 +101,39 @@ export function LoginPage() {
               <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-gray-700">
                 Contraseña
               </label>
-              <input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                {...register('password')}
-                className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <HiOutlineLockClosed className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <input
+                  id="password"
+                  type="password"
+                  autoComplete="current-password"
+                  {...register('password')}
+                  className="w-full rounded-xl border border-gray-300 py-2.5 pl-10 pr-4 text-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  placeholder="••••••••"
+                />
+              </div>
               {errors.password && (
-                <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>
+                <p className="mt-1.5 text-xs text-red-500">{errors.password.message}</p>
               )}
             </div>
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-md shadow-blue-500/25 transition-all hover:shadow-lg hover:shadow-blue-500/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {isSubmitting ? 'Ingresando...' : 'Ingresar'}
+              {isSubmitting ? (
+                <>
+                  <Spinner size="sm" className="border-white border-t-transparent" />
+                  Ingresando...
+                </>
+              ) : (
+                'Ingresar'
+              )}
             </button>
           </form>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

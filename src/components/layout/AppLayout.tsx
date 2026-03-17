@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/useAuth';
 import { Role, ROLE_LABELS } from '../../types/enums';
 import {
@@ -85,61 +86,88 @@ export function AppLayout() {
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Mobile overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-20 bg-black/50 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-          onKeyDown={(e) => e.key === 'Escape' && setSidebarOpen(false)}
-        />
-      )}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-20 bg-black/40 backdrop-blur-sm lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-30 flex w-64 flex-col bg-white shadow-lg transition-transform lg:static lg:translate-x-0 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r border-gray-200/80 bg-white transition-transform duration-300 ease-out lg:static lg:translate-x-0 ${
+          sidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
         }`}
       >
-        <div className="flex h-16 items-center justify-between border-b px-6">
-          <h1 className="text-xl font-bold text-blue-600">TAPE</h1>
+        <div className="flex h-16 items-center justify-between border-b border-gray-100 px-6">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-blue-600 to-indigo-600 text-xs font-bold text-white shadow-sm">
+              T
+            </div>
+            <h1 className="text-lg font-bold tracking-tight text-gray-900">TAPE</h1>
+          </div>
           <button
             type="button"
-            className="lg:hidden"
+            className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 lg:hidden"
             onClick={() => setSidebarOpen(false)}
             aria-label="Cerrar menú"
           >
-            <HiOutlineX className="h-6 w-6" />
+            <HiOutlineX className="h-5 w-5" />
           </button>
         </div>
 
-        <nav className="flex-1 space-y-1 px-3 py-4">
-          {visibleItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              onClick={() => setSidebarOpen(false)}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                isActive(item.path)
-                  ? 'bg-blue-50 text-blue-700'
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              {item.icon}
-              {item.label}
-            </Link>
-          ))}
+        <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
+          {visibleItems.map((item) => {
+            const active = isActive(item.path);
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={() => setSidebarOpen(false)}
+                className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+                  active
+                    ? 'bg-blue-50 text-blue-700 shadow-sm'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                }`}
+              >
+                {active && (
+                  <motion.div
+                    layoutId="sidebar-indicator"
+                    className="absolute inset-y-1 left-0 w-0.75 rounded-full bg-blue-600"
+                    transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                  />
+                )}
+                <span className={`transition-colors ${active ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'}`}>
+                  {item.icon}
+                </span>
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
 
-        <div className="border-t p-4">
-          <div className="mb-3 px-3">
-            <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-            <p className="text-xs text-gray-500">
-              {user?.role && ROLE_LABELS[user.role.slug]}
-            </p>
+        <div className="border-t border-gray-100 p-4">
+          <div className="mb-3 flex items-center gap-3 rounded-xl bg-gray-50 px-3 py-2.5">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-indigo-500 text-sm font-medium text-white">
+              {user?.name?.charAt(0).toUpperCase()}
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-gray-900">{user?.name}</p>
+              <p className="truncate text-xs text-gray-500">
+                {user?.role && ROLE_LABELS[user.role.slug]}
+              </p>
+            </div>
           </div>
           <button
             type="button"
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600"
           >
             <HiOutlineLogout className="h-5 w-5" />
             Cerrar sesión
@@ -149,19 +177,22 @@ export function AppLayout() {
 
       {/* Main content */}
       <div className="flex flex-1 flex-col">
-        <header className="flex h-16 items-center border-b bg-white px-6 shadow-sm lg:px-8">
+        <header className="sticky top-0 z-10 flex h-16 items-center border-b border-gray-200/80 bg-white/80 px-6 backdrop-blur-md lg:px-8">
           <button
             type="button"
-            className="mr-4 lg:hidden"
+            className="mr-4 rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 lg:hidden"
             onClick={() => setSidebarOpen(true)}
             aria-label="Abrir menú"
           >
-            <HiOutlineMenu className="h-6 w-6" />
+            <HiOutlineMenu className="h-5 w-5" />
           </button>
           <div className="flex-1" />
-          <p className="text-sm text-gray-500">
-            {user?.email}
-          </p>
+          <div className="flex items-center gap-3">
+            <span className="hidden text-sm text-gray-500 sm:block">{user?.email}</span>
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-xs font-medium text-gray-600">
+              {user?.name?.charAt(0).toUpperCase()}
+            </div>
+          </div>
         </header>
 
         <main className="flex-1 p-6 lg:p-8">

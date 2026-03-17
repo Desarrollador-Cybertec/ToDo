@@ -1,6 +1,5 @@
 import { apiClient } from './client';
 import type {
-  ApiResponse,
   ApiMessageResponse,
   Area,
   CreateAreaRequest,
@@ -9,15 +8,15 @@ import type {
 } from '../types';
 
 export const areasApi = {
-  list: () => apiClient.get<ApiResponse<Area[]>>('/areas'),
+  list: () => apiClient.get<Area[]>('/areas'),
 
-  get: (id: number) => apiClient.get<ApiResponse<Area>>(`/areas/${id}`),
+  get: (id: number) => apiClient.get<Area>(`/areas/${id}`),
 
   create: (data: CreateAreaRequest) =>
-    apiClient.post<ApiResponse<Area>>('/areas', data),
+    apiClient.post<Area>('/areas', data),
 
   update: (id: number, data: UpdateAreaRequest) =>
-    apiClient.put<ApiResponse<Area>>(`/areas/${id}`, data),
+    apiClient.put<Area>(`/areas/${id}`, data),
 
   assignManager: (id: number, managerUserId: number) =>
     apiClient.patch<ApiMessageResponse>(`/areas/${id}/manager`, {

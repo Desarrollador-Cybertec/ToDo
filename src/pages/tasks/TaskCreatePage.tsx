@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { AnimatePresence } from 'framer-motion';
+import { HiOutlineArrowLeft, HiOutlineExclamationCircle } from 'react-icons/hi';
 import { createTaskSchema, type CreateTaskFormData } from '../../schemas';
 import { tasksApi } from '../../api/tasks';
 import { usersApi } from '../../api/users';
@@ -10,6 +12,8 @@ import { meetingsApi } from '../../api/meetings';
 import { TASK_PRIORITY_LABELS } from '../../types/enums';
 import { ApiError } from '../../api/client';
 import type { User, Area, Meeting } from '../../types';
+import { PageTransition, SlideDown, FadeIn } from '../../components/ui';
+import { Spinner } from '../../components/ui';
 
 export function TaskCreatePage() {
   const navigate = useNavigate();
@@ -44,13 +48,13 @@ export function TaskCreatePage() {
 
   useEffect(() => {
     Promise.all([
-      usersApi.list().catch(() => ({ data: [] })),
-      areasApi.list().catch(() => ({ data: [] })),
-      meetingsApi.list().catch(() => ({ data: [] })),
+      usersApi.list().catch(() => [] as User[]),
+      areasApi.list().catch(() => [] as Area[]),
+      meetingsApi.list().catch(() => [] as Meeting[]),
     ]).then(([usersRes, areasRes, meetingsRes]) => {
-      setUsers(usersRes.data);
-      setAreas(areasRes.data);
-      setMeetings(meetingsRes.data);
+      setUsers(usersRes);
+      setAreas(areasRes);
+      setMeetings(meetingsRes);
     });
   }, []);
 
@@ -78,142 +82,155 @@ export function TaskCreatePage() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <h2 className="mb-6 text-2xl font-bold text-gray-900">Nueva Tarea</h2>
+    <PageTransition>
+      <div className="mx-auto max-w-3xl">
+        <button type="button" onClick={() => navigate('/tasks')} className="mb-4 flex items-center gap-2 text-sm text-gray-500 transition-colors hover:text-gray-900">
+          <HiOutlineArrowLeft className="h-4 w-4" /> Volver a tareas
+        </button>
 
-      {serverError && (
-        <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">{serverError}</div>
-      )}
+        <h2 className="mb-6 text-2xl font-bold text-gray-900">Nueva Tarea</h2>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="rounded-xl border bg-white p-6 shadow-sm">
-          <h3 className="mb-4 text-lg font-semibold text-gray-900">Información básica</h3>
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="title" className="mb-1.5 block text-sm font-medium text-gray-700">Título *</label>
-              <input id="title" {...register('title')} className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-              {errors.title && <p className="mt-1 text-sm text-red-500">{errors.title.message}</p>}
+        <AnimatePresence>
+          {serverError && (
+            <SlideDown>
+              <div className="mb-4 flex items-center gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-600 ring-1 ring-inset ring-red-200">
+                <HiOutlineExclamationCircle className="h-4 w-4 shrink-0" />
+                {serverError}
+              </div>
+            </SlideDown>
+          )}
+        </AnimatePresence>
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <FadeIn delay={0.05} className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+            <h3 className="mb-4 text-lg font-semibold text-gray-900">Información básica</h3>
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="title" className="mb-1.5 block text-sm font-medium text-gray-700">Título *</label>
+                <input id="title" {...register('title')} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+                {errors.title && <p className="mt-1 text-sm text-red-500">{errors.title.message}</p>}
+              </div>
+              <div>
+                <label htmlFor="description" className="mb-1.5 block text-sm font-medium text-gray-700">Descripción</label>
+                <textarea id="description" rows={3} {...register('description')} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="priority" className="mb-1.5 block text-sm font-medium text-gray-700">Prioridad *</label>
+                  <select id="priority" {...register('priority')} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none">
+                    {Object.entries(TASK_PRIORITY_LABELS).map(([value, label]) => (
+                      <option key={value} value={value}>{label}</option>
+                    ))}
+                  </select>
+                  {errors.priority && <p className="mt-1 text-sm text-red-500">{errors.priority.message}</p>}
+                </div>
+                <div>
+                  <label htmlFor="meeting_id" className="mb-1.5 block text-sm font-medium text-gray-700">Reunión de origen</label>
+                  <select id="meeting_id" {...register('meeting_id', { setValueAs: (v: string) => v ? Number(v) : null })} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none">
+                    <option value="">Sin reunión</option>
+                    {meetings.map((m) => (
+                      <option key={m.id} value={m.id}>{m.title}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="start_date" className="mb-1.5 block text-sm font-medium text-gray-700">Fecha inicio</label>
+                  <input id="start_date" type="date" {...register('start_date')} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none" />
+                </div>
+                <div>
+                  <label htmlFor="due_date" className="mb-1.5 block text-sm font-medium text-gray-700">Fecha límite</label>
+                  <input id="due_date" type="date" {...register('due_date')} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none" />
+                </div>
+              </div>
             </div>
-            <div>
-              <label htmlFor="description" className="mb-1.5 block text-sm font-medium text-gray-700">Descripción</label>
-              <textarea id="description" rows={3} {...register('description')} className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-            </div>
+          </FadeIn>
+
+          <FadeIn delay={0.1} className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+            <h3 className="mb-4 text-lg font-semibold text-gray-900">Asignación</h3>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label htmlFor="priority" className="mb-1.5 block text-sm font-medium text-gray-700">Prioridad *</label>
-                <select id="priority" {...register('priority')} className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none">
-                  {Object.entries(TASK_PRIORITY_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
-                  ))}
-                </select>
-                {errors.priority && <p className="mt-1 text-sm text-red-500">{errors.priority.message}</p>}
-              </div>
-              <div>
-                <label htmlFor="meeting_id" className="mb-1.5 block text-sm font-medium text-gray-700">Reunión de origen</label>
-                <select id="meeting_id" {...register('meeting_id', { setValueAs: (v: string) => v ? Number(v) : null })} className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none">
-                  <option value="">Sin reunión</option>
-                  {meetings.map((m) => (
-                    <option key={m.id} value={m.id}>{m.title}</option>
+                <label htmlFor="assigned_to_user_id" className="mb-1.5 block text-sm font-medium text-gray-700">Asignar a usuario</label>
+                <select
+                  id="assigned_to_user_id"
+                  {...register('assigned_to_user_id', { setValueAs: (v: string) => v ? Number(v) : null })}
+                  disabled={!!assignToArea}
+                  className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none disabled:bg-gray-50 disabled:text-gray-400"
+                >
+                  <option value="">Sin asignar</option>
+                  {users.map((u) => (
+                    <option key={u.id} value={u.id}>{u.name}</option>
                   ))}
                 </select>
               </div>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label htmlFor="start_date" className="mb-1.5 block text-sm font-medium text-gray-700">Fecha inicio</label>
-                <input id="start_date" type="date" {...register('start_date')} className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none" />
+                <label htmlFor="assigned_to_area_id" className="mb-1.5 block text-sm font-medium text-gray-700">Asignar a área</label>
+                <select
+                  id="assigned_to_area_id"
+                  {...register('assigned_to_area_id', { setValueAs: (v: string) => v ? Number(v) : null })}
+                  disabled={!!assignToUser}
+                  className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none disabled:bg-gray-50 disabled:text-gray-400"
+                >
+                  <option value="">Sin asignar</option>
+                  {areas.map((a) => (
+                    <option key={a.id} value={a.id}>{a.name}</option>
+                  ))}
+                </select>
               </div>
-              <div>
-                <label htmlFor="due_date" className="mb-1.5 block text-sm font-medium text-gray-700">Fecha límite</label>
-                <input id="due_date" type="date" {...register('due_date')} className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none" />
-              </div>
             </div>
-          </div>
-        </div>
+          </FadeIn>
 
-        <div className="rounded-xl border bg-white p-6 shadow-sm">
-          <h3 className="mb-4 text-lg font-semibold text-gray-900">Asignación</h3>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label htmlFor="assigned_to_user_id" className="mb-1.5 block text-sm font-medium text-gray-700">Asignar a usuario</label>
-              <select
-                id="assigned_to_user_id"
-                {...register('assigned_to_user_id', { setValueAs: (v: string) => v ? Number(v) : null })}
-                disabled={!!assignToArea}
-                className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none disabled:bg-gray-100"
-              >
-                <option value="">Sin asignar</option>
-                {users.map((u) => (
-                  <option key={u.id} value={u.id}>{u.name}</option>
-                ))}
-              </select>
+          <FadeIn delay={0.15} className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+            <h3 className="mb-4 text-lg font-semibold text-gray-900">Requisitos</h3>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="flex cursor-pointer items-center gap-3 rounded-xl p-2 transition-colors hover:bg-gray-50">
+                <input type="checkbox" {...register('requires_attachment')} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                <span className="text-sm text-gray-700">Requiere adjunto</span>
+              </label>
+              <label className="flex cursor-pointer items-center gap-3 rounded-xl p-2 transition-colors hover:bg-gray-50">
+                <input type="checkbox" {...register('requires_completion_comment')} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                <span className="text-sm text-gray-700">Requiere comentario de cierre</span>
+              </label>
+              <label className="flex cursor-pointer items-center gap-3 rounded-xl p-2 transition-colors hover:bg-gray-50">
+                <input type="checkbox" {...register('requires_manager_approval')} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                <span className="text-sm text-gray-700">Requiere aprobación del jefe</span>
+              </label>
+              <label className="flex cursor-pointer items-center gap-3 rounded-xl p-2 transition-colors hover:bg-gray-50">
+                <input type="checkbox" {...register('requires_progress_report')} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                <span className="text-sm text-gray-700">Requiere reportes de avance</span>
+              </label>
             </div>
-            <div>
-              <label htmlFor="assigned_to_area_id" className="mb-1.5 block text-sm font-medium text-gray-700">Asignar a área</label>
-              <select
-                id="assigned_to_area_id"
-                {...register('assigned_to_area_id', { setValueAs: (v: string) => v ? Number(v) : null })}
-                disabled={!!assignToUser}
-                className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none disabled:bg-gray-100"
-              >
-                <option value="">Sin asignar</option>
-                {areas.map((a) => (
-                  <option key={a.id} value={a.id}>{a.name}</option>
-                ))}
-              </select>
+          </FadeIn>
+
+          <FadeIn delay={0.2} className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+            <h3 className="mb-4 text-lg font-semibold text-gray-900">Notificaciones</h3>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="flex cursor-pointer items-center gap-3 rounded-xl p-2 transition-colors hover:bg-gray-50">
+                <input type="checkbox" {...register('notify_on_due')} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                <span className="text-sm text-gray-700">Notificar al vencer</span>
+              </label>
+              <label className="flex cursor-pointer items-center gap-3 rounded-xl p-2 transition-colors hover:bg-gray-50">
+                <input type="checkbox" {...register('notify_on_overdue')} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                <span className="text-sm text-gray-700">Notificar si vencida</span>
+              </label>
+              <label className="flex cursor-pointer items-center gap-3 rounded-xl p-2 transition-colors hover:bg-gray-50">
+                <input type="checkbox" {...register('notify_on_completion')} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                <span className="text-sm text-gray-700">Notificar al completar</span>
+              </label>
             </div>
-          </div>
-        </div>
+          </FadeIn>
 
-        <div className="rounded-xl border bg-white p-6 shadow-sm">
-          <h3 className="mb-4 text-lg font-semibold text-gray-900">Requisitos</h3>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label className="flex items-center gap-3">
-              <input type="checkbox" {...register('requires_attachment')} className="h-4 w-4 rounded border-gray-300 text-blue-600" />
-              <span className="text-sm text-gray-700">Requiere adjunto</span>
-            </label>
-            <label className="flex items-center gap-3">
-              <input type="checkbox" {...register('requires_completion_comment')} className="h-4 w-4 rounded border-gray-300 text-blue-600" />
-              <span className="text-sm text-gray-700">Requiere comentario de cierre</span>
-            </label>
-            <label className="flex items-center gap-3">
-              <input type="checkbox" {...register('requires_manager_approval')} className="h-4 w-4 rounded border-gray-300 text-blue-600" />
-              <span className="text-sm text-gray-700">Requiere aprobación del jefe</span>
-            </label>
-            <label className="flex items-center gap-3">
-              <input type="checkbox" {...register('requires_progress_report')} className="h-4 w-4 rounded border-gray-300 text-blue-600" />
-              <span className="text-sm text-gray-700">Requiere reportes de avance</span>
-            </label>
+          <div className="flex justify-end gap-3">
+            <button type="button" onClick={() => navigate('/tasks')} className="rounded-xl border border-gray-200 px-6 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">
+              Cancelar
+            </button>
+            <button type="submit" disabled={isSubmitting} className="flex items-center gap-2 rounded-xl bg-linear-to-r from-blue-600 to-indigo-600 px-6 py-2.5 text-sm font-medium text-white shadow-md shadow-blue-500/25 transition-all hover:shadow-lg active:scale-[0.98] disabled:opacity-50">
+              {isSubmitting ? <><Spinner size="sm" className="border-white border-t-transparent" /> Creando...</> : 'Crear tarea'}
+            </button>
           </div>
-        </div>
-
-        <div className="rounded-xl border bg-white p-6 shadow-sm">
-          <h3 className="mb-4 text-lg font-semibold text-gray-900">Notificaciones</h3>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label className="flex items-center gap-3">
-              <input type="checkbox" {...register('notify_on_due')} className="h-4 w-4 rounded border-gray-300 text-blue-600" />
-              <span className="text-sm text-gray-700">Notificar al vencer</span>
-            </label>
-            <label className="flex items-center gap-3">
-              <input type="checkbox" {...register('notify_on_overdue')} className="h-4 w-4 rounded border-gray-300 text-blue-600" />
-              <span className="text-sm text-gray-700">Notificar si vencida</span>
-            </label>
-            <label className="flex items-center gap-3">
-              <input type="checkbox" {...register('notify_on_completion')} className="h-4 w-4 rounded border-gray-300 text-blue-600" />
-              <span className="text-sm text-gray-700">Notificar al completar</span>
-            </label>
-          </div>
-        </div>
-
-        <div className="flex justify-end gap-3">
-          <button type="button" onClick={() => navigate('/tasks')} className="rounded-lg border px-6 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">
-            Cancelar
-          </button>
-          <button type="submit" disabled={isSubmitting} className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50">
-            {isSubmitting ? 'Creando...' : 'Crear tarea'}
-          </button>
-        </div>
-      </form>
-    </div>
+        </form>
+      </div>
+    </PageTransition>
   );
 }

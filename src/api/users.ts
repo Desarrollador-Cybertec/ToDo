@@ -1,6 +1,5 @@
 import { apiClient } from './client';
 import type {
-  ApiResponse,
   ApiMessageResponse,
   User,
   CreateUserRequest,
@@ -8,15 +7,15 @@ import type {
 } from '../types';
 
 export const usersApi = {
-  list: () => apiClient.get<ApiResponse<User[]>>('/users'),
+  list: () => apiClient.get<User[]>('/users'),
 
-  get: (id: number) => apiClient.get<ApiResponse<User>>(`/users/${id}`),
+  get: (id: number) => apiClient.get<User>(`/users/${id}`),
 
   create: (data: CreateUserRequest) =>
-    apiClient.post<ApiResponse<User>>('/users', data),
+    apiClient.post<User>('/users', data),
 
   update: (id: number, data: UpdateUserRequest) =>
-    apiClient.put<ApiResponse<User>>(`/users/${id}`, data),
+    apiClient.put<User>(`/users/${id}`, data),
 
   changeRole: (id: number, roleId: number) =>
     apiClient.patch<ApiMessageResponse>(`/users/${id}/role`, { role_id: roleId }),
