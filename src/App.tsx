@@ -10,6 +10,7 @@ import { TaskDetailPage } from './pages/tasks/TaskDetailPage';
 import { AreaListPage } from './pages/areas/AreaListPage';
 import { AreaCreatePage } from './pages/areas/AreaCreatePage';
 import { AreaDetailPage } from './pages/areas/AreaDetailPage';
+import { ClaimWorkersPage } from './pages/areas/ClaimWorkersPage';
 import { MeetingListPage } from './pages/meetings/MeetingListPage';
 import { MeetingCreatePage } from './pages/meetings/MeetingCreatePage';
 import { MeetingDetailPage } from './pages/meetings/MeetingDetailPage';
@@ -42,8 +43,15 @@ function App() {
         </Route>
       </Route>
 
-      {/* SuperAdmin & Area Manager routes */}
-      <Route element={<ProtectedRoute allowedRoles={['superadmin', 'area_manager']} />}>
+      {/* Area Manager routes */}
+      <Route element={<ProtectedRoute allowedRoles={['area_manager']} />}>
+        <Route element={<AppLayout />}>
+          <Route path="/claim-workers" element={<ClaimWorkersPage />} />
+        </Route>
+      </Route>
+
+      {/* SuperAdmin only - Areas management */}
+      <Route element={<ProtectedRoute allowedRoles={['superadmin']} />}>
         <Route element={<AppLayout />}>
           <Route path="/areas" element={<AreaListPage />} />
           <Route path="/areas/create" element={<AreaCreatePage />} />

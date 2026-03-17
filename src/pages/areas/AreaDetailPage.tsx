@@ -47,7 +47,7 @@ export function AreaDetailPage() {
     if (!claimUserId) return;
     setClaimError('');
     try {
-      await areasApi.claimWorker({ user_id: Number(claimUserId) });
+      await areasApi.claimWorker({ area_id: areaId, user_id: Number(claimUserId) });
       setClaimSuccess('Trabajador agregado al área');
       setClaimUserId('');
       loadData();
@@ -137,7 +137,7 @@ export function AreaDetailPage() {
             <FadeIn delay={0.1} className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
               <h3 className="mb-4 font-semibold text-gray-900">Tareas por estado</h3>
               <div className="space-y-2.5">
-                {Object.entries(dashboard.tasks_by_status).map(([status, count]) => (
+                {Object.entries(dashboard.tasks_by_status ?? {}).map(([status, count]) => (
                   <div key={status} className="flex items-center justify-between text-sm">
                     <Badge variant={STATUS_BADGE_VARIANT[status] ?? 'gray'} size="sm">{TASK_STATUS_LABELS[status as keyof typeof TASK_STATUS_LABELS] ?? status}</Badge>
                     <span className="font-semibold text-gray-900">{count}</span>
@@ -150,22 +150,22 @@ export function AreaDetailPage() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600">Tasa de cumplimiento</span>
-                  <span className="rounded-lg bg-green-50 px-2 py-0.5 font-semibold text-green-700">{dashboard.completion_rate}%</span>
+                  <span className="rounded-lg bg-green-50 px-2 py-0.5 font-semibold text-green-700">{dashboard.completion_rate ?? 0}%</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600">Vencidas</span>
-                  <span className="rounded-lg bg-red-50 px-2 py-0.5 font-semibold text-red-600">{dashboard.overdue_tasks}</span>
+                  <span className="rounded-lg bg-red-50 px-2 py-0.5 font-semibold text-red-600">{dashboard.overdue_tasks ?? 0}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600">Sin avance</span>
-                  <span className="rounded-lg bg-amber-50 px-2 py-0.5 font-semibold text-amber-600">{dashboard.tasks_without_progress}</span>
+                  <span className="rounded-lg bg-amber-50 px-2 py-0.5 font-semibold text-amber-600">{dashboard.tasks_without_progress ?? 0}</span>
                 </div>
               </div>
             </FadeIn>
             <FadeIn delay={0.2} className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm lg:col-span-2">
               <h3 className="mb-4 font-semibold text-gray-900">Distribución por responsable</h3>
               <div className="space-y-2.5">
-                {dashboard.tasks_by_responsible.map((r) => (
+                {(dashboard.tasks_by_responsible ?? []).map((r) => (
                   <div key={r.user_id} className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
                       <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-50 text-xs font-medium text-blue-600">{r.user_name.charAt(0)}</span>

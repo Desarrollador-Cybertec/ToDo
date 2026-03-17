@@ -2,6 +2,7 @@ import { apiClient } from './client';
 import type {
   ApiMessageResponse,
   Area,
+  AreaMember,
   CreateAreaRequest,
   UpdateAreaRequest,
   ClaimWorkerRequest,
@@ -22,6 +23,9 @@ export const areasApi = {
     apiClient.patch<ApiMessageResponse>(`/areas/${id}/manager`, {
       manager_user_id: managerUserId,
     }),
+
+  members: (id: number) =>
+    apiClient.get<AreaMember[]>(`/areas/${id}/members`),
 
   claimWorker: (data: ClaimWorkerRequest) =>
     apiClient.post<ApiMessageResponse>('/areas/claim-worker', data),

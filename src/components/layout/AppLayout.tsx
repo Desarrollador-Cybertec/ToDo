@@ -38,7 +38,13 @@ const NAV_ITEMS: NavItem[] = [
     label: 'Áreas',
     path: '/areas',
     icon: <HiOutlineUserGroup className="h-5 w-5" />,
-    roles: [Role.SUPERADMIN, Role.AREA_MANAGER],
+    roles: [Role.SUPERADMIN],
+  },
+  {
+    label: 'Mi equipo',
+    path: '/claim-workers',
+    icon: <HiOutlineUserGroup className="h-5 w-5" />,
+    roles: [Role.AREA_MANAGER],
   },
   {
     label: 'Reuniones',

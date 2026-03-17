@@ -28,12 +28,14 @@ export function ConsolidatedPage() {
 
   if (!data) return <p className="text-gray-500">No se pudo cargar el consolidado.</p>;
 
+  const summary = data.summary ?? { total: 0, completed: 0, active: 0, overdue: 0, completion_rate: 0 };
+
   const statCards = [
-    { label: 'Total', value: data.summary.total, color: 'from-gray-500 to-gray-600', bg: 'bg-gray-50' },
-    { label: 'Completadas', value: data.summary.completed, color: 'from-green-500 to-emerald-600', bg: 'bg-green-50' },
-    { label: 'Activas', value: data.summary.active, color: 'from-blue-500 to-indigo-600', bg: 'bg-blue-50' },
-    { label: 'Vencidas', value: data.summary.overdue, color: 'from-red-500 to-rose-600', bg: 'bg-red-50' },
-    { label: 'Cumplimiento', value: `${data.summary.completion_rate}%`, color: 'from-amber-500 to-orange-600', bg: 'bg-amber-50' },
+    { label: 'Total', value: summary.total, color: 'from-gray-500 to-gray-600', bg: 'bg-gray-50' },
+    { label: 'Completadas', value: summary.completed, color: 'from-green-500 to-emerald-600', bg: 'bg-green-50' },
+    { label: 'Activas', value: summary.active, color: 'from-blue-500 to-indigo-600', bg: 'bg-blue-50' },
+    { label: 'Vencidas', value: summary.overdue, color: 'from-red-500 to-rose-600', bg: 'bg-red-50' },
+    { label: 'Cumplimiento', value: `${summary.completion_rate}%`, color: 'from-amber-500 to-orange-600', bg: 'bg-amber-50' },
   ];
 
   return (
@@ -73,7 +75,7 @@ export function ConsolidatedPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
-            {data.areas.map((area) => (
+            {(data.areas ?? []).map((area) => (
               <tr key={area.area_id} className="transition-colors hover:bg-gray-50/50">
                 <td className="whitespace-nowrap px-4 py-3.5">
                   <p className="font-medium text-gray-900">{area.area_name}</p>

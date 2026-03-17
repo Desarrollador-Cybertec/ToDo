@@ -8,6 +8,7 @@ export interface Area {
   manager_user_id: number | null;
   active: boolean;
   manager: User | null;
+  members?: AreaMember[];
   members_count?: number;
   created_at: string;
   updated_at: string;
@@ -40,5 +41,6 @@ export interface UpdateAreaRequest {
 }
 
 export interface ClaimWorkerRequest {
+  area_id: number;
   user_id: number;
 }
