@@ -32,12 +32,15 @@ export interface Task {
   assigned_to_area_id: number | null;
   current_responsible_user_id: number | null;
   area_id: number | null;
+  external_email: string | null;
+  external_name: string | null;
   created_by: number;
   closed_by: number | null;
   cancelled_by: number | null;
   creator: User;
   assigned_user: User | null;
   assigned_area: Area | null;
+  delegator: User | null;
   current_responsible: User | null;
   area: Area | null;
   meeting: Meeting | null;
@@ -115,6 +118,8 @@ export interface CreateTaskRequest {
   start_date?: string;
   assigned_to_user_id?: number;
   assigned_to_area_id?: number;
+  external_email?: string;
+  external_name?: string;
   meeting_id?: number;
   requires_attachment?: boolean;
   requires_completion_comment?: boolean;
@@ -149,17 +154,17 @@ export interface DelegateTaskRequest {
   note?: string;
 }
 
-export interface SubmitReviewRequest {
-  completion_comment?: string;
+export interface ApproveTaskRequest {
+  note?: string;
 }
 
 export interface RejectTaskRequest {
-  rejection_note: string;
+  note: string;
 }
 
 export interface AddCommentRequest {
   comment: string;
-  type?: CommentTypeValue;
+  type?: 'comment' | 'progress' | 'completion_note';
 }
 
 export interface AddUpdateRequest {

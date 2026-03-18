@@ -183,22 +183,15 @@ export function AppLayout() {
 
       {/* Main content */}
       <div className="flex flex-1 flex-col lg:ml-64">
-        <header className="sticky top-0 z-10 flex h-16 items-center border-b border-gray-200/80 bg-white/80 px-6 backdrop-blur-md lg:px-8">
+        <header className="sticky top-0 z-10 flex h-12 items-center border-b border-gray-200/80 bg-white/80 px-6 backdrop-blur-md lg:hidden lg:px-8">
           <button
             type="button"
-            className="mr-4 rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 lg:hidden"
+            className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
             onClick={() => setSidebarOpen(true)}
             aria-label="Abrir menú"
           >
             <HiOutlineMenu className="h-5 w-5" />
           </button>
-          <div className="flex-1" />
-          <div className="flex items-center gap-3">
-            <span className="hidden text-sm text-gray-500 sm:block">{user?.email}</span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-xs font-medium text-gray-600">
-              {user?.name?.charAt(0).toUpperCase()}
-            </div>
-          </div>
         </header>
 
         <main className="flex-1 overflow-y-auto p-6 lg:p-8">

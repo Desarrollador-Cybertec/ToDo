@@ -16,22 +16,20 @@ import {
   addCommentSchema,
   addUpdateSchema,
   rejectTaskSchema,
-  submitReviewSchema,
+  approveTaskSchema,
   delegateTaskSchema,
   type AddCommentFormData,
   type AddUpdateFormData,
   type RejectTaskFormData,
-  type SubmitReviewFormData,
+  type ApproveTaskFormData,
   type DelegateTaskFormData,
 } from '../../schemas';
 import type { Task, User } from '../../types';
-import { usersApi } from '../../api/users';
+import { areasApi } from '../../api/areas';
 import {
   HiOutlineArrowLeft,
   HiOutlinePaperClip,
   HiOutlineChatAlt,
-  HiOutlinePlay,
-  HiOutlineCheck,
   HiOutlineX,
   HiOutlinePencil,
   HiOutlineUpload,
@@ -43,6 +41,7 @@ import {
 } from 'react-icons/hi';
 import { PageTransition, FadeIn, SlideDown, StaggerList, StaggerItem } from '../../components/ui';
 import { SkeletonDetail, Badge, Spinner, STATUS_BADGE_VARIANT, PRIORITY_BADGE_VARIANT } from '../../components/ui';
+import { TaskStatusSelect } from '../../components/tasks/TaskStatusSelect';
 
 export function TaskDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -56,7 +55,7 @@ export function TaskDetailPage() {
   const [showCommentForm, setShowCommentForm] = useState(false);
   const [showUpdateForm, setShowUpdateForm] = useState(false);
   const [showRejectForm, setShowRejectForm] = useState(false);
-  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [showApproveForm, setShowApproveForm] = useState(false);
   const [showDelegateForm, setShowDelegateForm] = useState(false);
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [areaMembers, setAreaMembers] = useState<User[]>([]);
@@ -134,11 +133,6 @@ export function TaskDetailPage() {
   const isManager = user?.role.slug === Role.AREA_MANAGER;
   const isResponsible = task?.current_responsible_user_id === user?.id;
 
-  const canStart = isResponsible && task?.status === TaskStatus.PENDING;
-  const canSubmitReview = isResponsible && task?.status === TaskStatus.IN_PROGRESS;
-  const canApprove = (isSuperAdmin || isManager) && task?.status === TaskStatus.IN_REVIEW;
-  const canReject = (isSuperAdmin || isManager) && task?.status === TaskStatus.IN_REVIEW;
-  const canCancel = isSuperAdmin && task?.status !== TaskStatus.COMPLETED && task?.status !== TaskStatus.CANCELLED;
   const canDelete = isSuperAdmin;
   const canDelegate = (isSuperAdmin || isManager) && task?.status !== TaskStatus.COMPLETED && task?.status !== TaskStatus.CANCELLED;
   const canUpdate = isResponsible && task?.status === TaskStatus.IN_PROGRESS;
@@ -221,11 +215,11 @@ export function TaskDetailPage() {
     setShowRejectForm(false);
   };
 
-  const reviewForm = useForm<SubmitReviewFormData>({ resolver: zodResolver(submitReviewSchema) });
-  const onSubmitReview = async (data: SubmitReviewFormData) => {
-    await handleAction(() => tasksApi.submitReview(taskId, data), 'Tarea enviada a revisión');
-    reviewForm.reset();
-    setShowReviewForm(false);
+  const approveForm = useForm<ApproveTaskFormData>({ resolver: zodResolver(approveTaskSchema) });
+  const onApprove = async (data: ApproveTaskFormData) => {
+    await handleAction(() => tasksApi.approve(taskId, data.note ? { note: data.note } : undefined), 'Tarea aprobada');
+    approveForm.reset();
+    setShowApproveForm(false);
   };
 
   const delegateForm = useForm<DelegateTaskFormData>({ resolver: zodResolver(delegateTaskSchema) });
@@ -264,8 +258,8 @@ export function TaskDetailPage() {
     setShowDelegateForm(true);
     if (task?.area_id) {
       try {
-        const res = await usersApi.listAll();
-        setAreaMembers(res);
+        const members = await areasApi.membersAll(task.area_id);
+        setAreaMembers(members);
       } catch {
         setAreaMembers([]);
       }
@@ -511,29 +505,18 @@ export function TaskDetailPage() {
 
           {/* Actions */}
           <div className="mt-6 flex flex-wrap gap-2 border-t border-gray-100 pt-4">
+            <TaskStatusSelect
+              task={task}
+              userId={user?.id}
+              userRole={user?.role.slug}
+              onUpdated={(updated) => {
+                setTask(updated);
+                showMessage('Estado actualizado correctamente');
+              }}
+            />
             {canEdit && (
               <button type="button" onClick={startEditing} className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-amber-600 active:scale-[0.98]">
                 <HiOutlinePencil className="h-4 w-4" /> Editar
-              </button>
-            )}
-            {canStart && (
-              <button type="button" onClick={() => handleAction(() => tasksApi.start(taskId), 'Tarea iniciada')} className="inline-flex items-center gap-1.5 rounded-xl bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-green-700 active:scale-[0.98]">
-                <HiOutlinePlay className="h-4 w-4" /> Iniciar
-              </button>
-            )}
-            {canSubmitReview && (
-              <button type="button" onClick={() => setShowReviewForm(true)} className="inline-flex items-center gap-1.5 rounded-xl bg-purple-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-purple-700 active:scale-[0.98]">
-                <HiOutlinePencil className="h-4 w-4" /> Enviar a revisión
-              </button>
-            )}
-            {canApprove && (
-              <button type="button" onClick={() => handleAction(() => tasksApi.approve(taskId), 'Tarea aprobada')} className="inline-flex items-center gap-1.5 rounded-xl bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-green-700 active:scale-[0.98]">
-                <HiOutlineCheck className="h-4 w-4" /> Aprobar
-              </button>
-            )}
-            {canReject && (
-              <button type="button" onClick={() => setShowRejectForm(true)} className="inline-flex items-center gap-1.5 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-red-700 active:scale-[0.98]">
-                <HiOutlineX className="h-4 w-4" /> Rechazar
               </button>
             )}
             {canDelegate && (
@@ -554,11 +537,6 @@ export function TaskDetailPage() {
             <button type="button" onClick={() => setShowCommentForm(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">
               <HiOutlineChatAlt className="h-4 w-4" /> Comentar
             </button>
-            {canCancel && (
-              <button type="button" onClick={() => handleAction(() => tasksApi.cancel(taskId), 'Tarea cancelada')} className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50">
-                Cancelar tarea
-              </button>
-            )}
             {canDelete && (
               confirmDelete ? (
                 <div className="flex items-center gap-2 rounded-xl border border-red-300 bg-red-50 px-4 py-2">
@@ -624,15 +602,15 @@ export function TaskDetailPage() {
             </SlideDown>
           )}
 
-          {showReviewForm && (
+          {showApproveForm && (
             <SlideDown className="mt-4">
               <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                <h3 className="mb-3 font-semibold text-gray-900">Enviar a revisión</h3>
-                <form onSubmit={reviewForm.handleSubmit(onSubmitReview)} className="space-y-3">
-                  <textarea {...reviewForm.register('completion_comment')} rows={3} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none" placeholder="Comentario de cierre (opcional)..." />
+                <h3 className="mb-3 font-semibold text-gray-900">Aprobar tarea</h3>
+                <form onSubmit={approveForm.handleSubmit(onApprove)} className="space-y-3">
+                  <textarea {...approveForm.register('note')} rows={3} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="Nota de aprobación (opcional)..." />
                   <div className="flex gap-2">
-                    <button type="submit" disabled={reviewForm.formState.isSubmitting} className="rounded-xl bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50">Enviar</button>
-                    <button type="button" onClick={() => setShowReviewForm(false)} className="rounded-xl border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Cancelar</button>
+                    <button type="submit" disabled={approveForm.formState.isSubmitting} className="rounded-xl bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50">Aprobar</button>
+                    <button type="button" onClick={() => setShowApproveForm(false)} className="rounded-xl border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Cancelar</button>
                   </div>
                 </form>
               </div>
@@ -644,8 +622,8 @@ export function TaskDetailPage() {
               <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                 <h3 className="mb-3 font-semibold text-gray-900">Rechazar tarea</h3>
                 <form onSubmit={rejectForm.handleSubmit(onReject)} className="space-y-3">
-                  <textarea {...rejectForm.register('rejection_note')} rows={3} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none" placeholder="Motivo del rechazo..." />
-                  {rejectForm.formState.errors.rejection_note && <p className="text-sm text-red-500">{rejectForm.formState.errors.rejection_note.message}</p>}
+                  <textarea {...rejectForm.register('note')} rows={3} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none" placeholder="Motivo del rechazo..." />
+                  {rejectForm.formState.errors.note && <p className="text-sm text-red-500">{rejectForm.formState.errors.note.message}</p>}
                   <div className="flex gap-2">
                     <button type="submit" disabled={rejectForm.formState.isSubmitting} className="rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50">Rechazar</button>
                     <button type="button" onClick={() => setShowRejectForm(false)} className="rounded-xl border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Cancelar</button>

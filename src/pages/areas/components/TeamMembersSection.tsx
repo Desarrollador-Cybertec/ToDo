@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { areasApi } from '../../../api/areas';
-import type { AreaMember } from '../../../types';
-import { StaggerList, StaggerItem, SkeletonCard, Badge } from '../../../components/ui';
+import type { User } from '../../../types';
+import { SkeletonCard } from '../../../components/ui';
 import { FadeIn } from '../../../components/ui';
 import { HiOutlineUsers } from 'react-icons/hi';
 
@@ -11,7 +11,7 @@ interface TeamMembersSectionProps {
 }
 
 export function TeamMembersSection({ areaId, refreshKey }: TeamMembersSectionProps) {
-  const [members, setMembers] = useState<AreaMember[]>([]);
+  const [members, setMembers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -19,15 +19,8 @@ export function TeamMembersSection({ areaId, refreshKey }: TeamMembersSectionPro
     setLoading(true);
     setError(false);
     try {
-      const areaDetail = await areasApi.get(areaId);
-      const rawMembers = areaDetail.members;
-      if (Array.isArray(rawMembers)) {
-        setMembers(rawMembers);
-      } else if (rawMembers && typeof rawMembers === 'object' && 'data' in rawMembers) {
-        setMembers((rawMembers as unknown as { data: AreaMember[] }).data ?? []);
-      } else {
-        setMembers([]);
-      }
+      const users = await areasApi.membersAll(areaId);
+      setMembers(users);
     } catch {
       setError(true);
       setMembers([]);
@@ -58,40 +51,32 @@ export function TeamMembersSection({ areaId, refreshKey }: TeamMembersSectionPro
   }
 
   return (
-    <FadeIn className="mb-8">
-      <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900">
-        <HiOutlineUsers className="h-5 w-5 text-indigo-500" />
-        Trabajadores del área
-        <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-600">
+    <FadeIn delay={0.1} className="mt-6 rounded-2xl border border-gray-100 bg-white shadow-sm">
+      <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+        <h3 className="flex items-center gap-2 font-semibold text-gray-900">
+          <HiOutlineUsers className="h-5 w-5 text-indigo-500" />
+          Trabajadores del área
+        </h3>
+        <span className="rounded-lg bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold text-indigo-600">
           {members.length}
         </span>
-      </h3>
+      </div>
       {members.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 p-8 text-center">
-          <p className="text-sm text-gray-500">No hay trabajadores en tu área aún</p>
-        </div>
+        <p className="px-6 py-8 text-center text-sm text-gray-400">No hay trabajadores en esta área aún.</p>
       ) : (
-        <StaggerList className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 p-6 sm:grid-cols-2 lg:grid-cols-3">
           {members.map((member) => (
-            <StaggerItem key={member.id}>
-              <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-indigo-500 to-purple-500 text-sm font-medium text-white">
-                    {member.user?.name?.charAt(0).toUpperCase() ?? '?'}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="truncate font-semibold text-gray-900">{member.user?.name ?? 'Desconocido'}</p>
-                    <p className="truncate text-xs text-gray-500">{member.user?.email ?? ''}</p>
-                  </div>
-                </div>
-                <div className="mt-2 flex items-center gap-2 text-xs text-gray-400">
-                  <Badge variant="green" size="sm">En el equipo</Badge>
-                  <span>desde {new Date(member.joined_at).toLocaleDateString('es-PE')}</span>
-                </div>
+            <div key={member.id} className="flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50/50 p-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-indigo-500 to-purple-500 text-sm font-medium text-white">
+                {member.name.charAt(0).toUpperCase()}
               </div>
-            </StaggerItem>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-gray-900">{member.name}</p>
+                <p className="truncate text-xs text-gray-500">{member.email}</p>
+              </div>
+            </div>
           ))}
-        </StaggerList>
+        </div>
       )}
     </FadeIn>
   );

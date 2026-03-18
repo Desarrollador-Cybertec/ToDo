@@ -1,22 +1,23 @@
 import { apiClient } from './client';
 import type {
-  ApiMessageResponse,
   Task,
+  PaginatedResponse,
   CreateTaskRequest,
   UpdateTaskRequest,
   DelegateTaskRequest,
-  SubmitReviewRequest,
+  ApproveTaskRequest,
   RejectTaskRequest,
   AddCommentRequest,
   AddUpdateRequest,
   TaskComment,
   TaskAttachment,
   TaskUpdate,
+  ApiMessageResponse,
 } from '../types';
 
 export const tasksApi = {
   list: (params?: string) =>
-    apiClient.get<Task[]>(`/tasks${params ? `?${params}` : ''}`),
+    apiClient.getPage<PaginatedResponse<Task>>(`/tasks${params ? `?${params}` : ''}`),
 
   get: (id: number) => apiClient.get<Task>(`/tasks/${id}`),
 
@@ -27,22 +28,22 @@ export const tasksApi = {
     apiClient.put<Task>(`/tasks/${id}`, data),
 
   delegate: (id: number, data: DelegateTaskRequest) =>
-    apiClient.post<ApiMessageResponse>(`/tasks/${id}/delegate`, data),
+    apiClient.post<Task>(`/tasks/${id}/delegate`, data),
 
   start: (id: number) =>
-    apiClient.post<ApiMessageResponse>(`/tasks/${id}/start`),
+    apiClient.post<Task>(`/tasks/${id}/start`),
 
-  submitReview: (id: number, data?: SubmitReviewRequest) =>
-    apiClient.post<ApiMessageResponse>(`/tasks/${id}/submit-review`, data),
+  submitReview: (id: number) =>
+    apiClient.post<Task>(`/tasks/${id}/submit-review`),
 
-  approve: (id: number) =>
-    apiClient.post<ApiMessageResponse>(`/tasks/${id}/approve`),
+  approve: (id: number, data?: ApproveTaskRequest) =>
+    apiClient.post<Task>(`/tasks/${id}/approve`, data),
 
   reject: (id: number, data: RejectTaskRequest) =>
-    apiClient.post<ApiMessageResponse>(`/tasks/${id}/reject`, data),
+    apiClient.post<Task>(`/tasks/${id}/reject`, data),
 
   cancel: (id: number) =>
-    apiClient.post<ApiMessageResponse>(`/tasks/${id}/cancel`),
+    apiClient.post<Task>(`/tasks/${id}/cancel`),
 
   addComment: (id: number, data: AddCommentRequest) =>
     apiClient.post<TaskComment>(`/tasks/${id}/comment`, data),

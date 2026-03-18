@@ -12,6 +12,8 @@ export const createTaskSchema = z.object({
   start_date: z.string().optional().or(z.literal('')),
   assigned_to_user_id: z.number().int().positive().optional().nullable(),
   assigned_to_area_id: z.number().int().positive().optional().nullable(),
+  external_email: z.string().email('Correo inválido').max(255).optional().or(z.literal('')),
+  external_name: z.string().max(255).optional().or(z.literal('')),
   meeting_id: z.number().int().positive().optional().nullable(),
   requires_attachment: z.boolean().default(false),
   requires_completion_comment: z.boolean().default(false),
@@ -37,15 +39,15 @@ export const updateTaskSchema = z.object({
 
 export const delegateTaskSchema = z.object({
   to_user_id: z.number({ message: 'Selecciona un trabajador' }).int().positive(),
-  note: z.string().max(1000).optional().or(z.literal('')),
+  note: z.string().max(2000).optional().or(z.literal('')),
 });
 
-export const submitReviewSchema = z.object({
-  completion_comment: z.string().max(2000).optional().or(z.literal('')),
+export const approveTaskSchema = z.object({
+  note: z.string().max(2000).optional().or(z.literal('')),
 });
 
 export const rejectTaskSchema = z.object({
-  rejection_note: z.string().min(1, 'El motivo de rechazo es obligatorio').max(2000),
+  note: z.string().min(1, 'El motivo de rechazo es obligatorio').max(2000),
 });
 
 export const addCommentSchema = z.object({
@@ -63,7 +65,7 @@ export const addUpdateSchema = z.object({
 export type CreateTaskFormData = z.infer<typeof createTaskSchema>;
 export type UpdateTaskFormData = z.infer<typeof updateTaskSchema>;
 export type DelegateTaskFormData = z.infer<typeof delegateTaskSchema>;
-export type SubmitReviewFormData = z.infer<typeof submitReviewSchema>;
+export type ApproveTaskFormData = z.infer<typeof approveTaskSchema>;
 export type RejectTaskFormData = z.infer<typeof rejectTaskSchema>;
 export type AddCommentFormData = z.infer<typeof addCommentSchema>;
 export type AddUpdateFormData = z.infer<typeof addUpdateSchema>;
