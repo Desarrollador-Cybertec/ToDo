@@ -52,4 +52,7 @@ export const tasksApi = {
 
   addUpdate: (id: number, data: AddUpdateRequest) =>
     apiClient.post<TaskUpdate>(`/tasks/${id}/updates`, data),
+
+  delete: (id: number) =>
+    apiClient.delete<ApiMessageResponse>(`/tasks/${id}`),
 };

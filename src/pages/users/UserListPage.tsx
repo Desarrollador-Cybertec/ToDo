@@ -8,7 +8,7 @@ import { createUserSchema, type CreateUserFormData } from '../../schemas';
 import { ROLE_LABELS, Role } from '../../types/enums';
 import { ApiError } from '../../api/client';
 import type { User, Area } from '../../types';
-import { HiOutlinePlus, HiOutlineExclamationCircle, HiOutlineCheckCircle, HiOutlinePencil, HiOutlineX } from 'react-icons/hi';
+import { HiOutlinePlus, HiOutlineExclamationCircle, HiOutlineCheckCircle, HiOutlinePencil, HiOutlineX, HiOutlineChevronLeft, HiOutlineChevronRight } from 'react-icons/hi';
 import { PageTransition, FadeIn, SlideDown, SkeletonTable, Spinner, Badge } from '../../components/ui';
 
 const ROLE_BADGE: Record<string, 'purple' | 'blue' | 'gray'> = {
@@ -21,6 +21,9 @@ export function UserListPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
+  const [total, setTotal] = useState(0);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingUserId, setEditingUserId] = useState<number | null>(null);
   const [editOriginalRoleSlug, setEditOriginalRoleSlug] = useState<string>('');
@@ -34,13 +37,16 @@ export function UserListPage() {
   const [serverError, setServerError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  const loadUsers = useCallback(async () => {
+  const loadUsers = useCallback(async (p: number) => {
+    setLoading(true);
     try {
       const [usersRes, areasRes] = await Promise.all([
-        usersApi.list(),
+        usersApi.list(p),
         areasApi.list().catch(() => []),
       ]);
-      setUsers(Array.isArray(usersRes) ? usersRes : []);
+      setUsers(usersRes.data);
+      setLastPage(usersRes.meta.last_page);
+      setTotal(usersRes.meta.total);
       setAreas(Array.isArray(areasRes) ? areasRes : []);
     } catch {
       setUsers([]);
@@ -50,8 +56,8 @@ export function UserListPage() {
   }, []);
 
   useEffect(() => {
-    loadUsers();
-  }, [loadUsers]);
+    loadUsers(page);
+  }, [loadUsers, page]);
 
   const showMessage = (msg: string) => {
     setSuccessMsg(msg);
@@ -69,7 +75,7 @@ export function UserListPage() {
       showMessage('Usuario creado exitosamente');
       reset();
       setShowCreateForm(false);
-      loadUsers();
+      loadUsers(page);
     } catch (error) {
       setServerError(error instanceof ApiError ? error.data.message : 'Error al crear usuario');
     }
@@ -79,7 +85,7 @@ export function UserListPage() {
     try {
       await usersApi.toggleActive(userId);
       showMessage('Estado del usuario actualizado');
-      loadUsers();
+      loadUsers(page);
     } catch (error) {
       setServerError(error instanceof ApiError ? error.data.message : 'Error al cambiar estado');
     }
@@ -147,7 +153,7 @@ export function UserListPage() {
 
       showMessage('Usuario actualizado');
       setEditingUserId(null);
-      loadUsers();
+      loadUsers(page);
     } catch (error) {
       setServerError(error instanceof ApiError ? error.data.message : 'Error al actualizar usuario');
     } finally {
@@ -291,6 +297,36 @@ export function UserListPage() {
             </tbody>
           </table>
         </FadeIn>
+      )}
+
+      {/* Pagination */}
+      {!loading && lastPage > 1 && (
+        <div className="mt-4 flex items-center justify-between">
+          <p className="text-sm text-gray-500">
+            {total} usuario{total !== 1 ? 's' : ''} en total
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <HiOutlineChevronLeft className="h-4 w-4" /> Anterior
+            </button>
+            <span className="text-sm text-gray-600">
+              Página {page} de {lastPage}
+            </span>
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.min(lastPage, p + 1))}
+              disabled={page === lastPage}
+              className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Siguiente <HiOutlineChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Edit user panel */}

@@ -6,6 +6,7 @@ import type {
   CreateAreaRequest,
   UpdateAreaRequest,
   ClaimWorkerRequest,
+  User,
 } from '../types';
 
 export const areasApi = {
@@ -26,6 +27,9 @@ export const areasApi = {
 
   members: (id: number) =>
     apiClient.get<AreaMember[]>(`/areas/${id}/members`),
+
+  availableWorkers: (id: number) =>
+    apiClient.get<User[]>(`/areas/${id}/available-workers`),
 
   claimWorker: (data: ClaimWorkerRequest) =>
     apiClient.post<ApiMessageResponse>('/areas/claim-worker', data),

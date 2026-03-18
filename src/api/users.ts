@@ -1,13 +1,26 @@
 import { apiClient } from './client';
 import type {
   ApiMessageResponse,
+  PaginatedResponse,
   User,
   CreateUserRequest,
   UpdateUserRequest,
 } from '../types';
 
 export const usersApi = {
-  list: () => apiClient.get<User[]>('/users'),
+  list: (page = 1) => apiClient.getPage<PaginatedResponse<User>>(`/users?page=${page}`),
+
+  // All users across all pages – for select dropdowns
+  listAll: async (): Promise<User[]> => {
+    const first = await apiClient.getPage<PaginatedResponse<User>>('/users?page=1');
+    if (first.meta.last_page <= 1) return first.data;
+    const rest = await Promise.all(
+      Array.from({ length: first.meta.last_page - 1 }, (_, i) =>
+        apiClient.getPage<PaginatedResponse<User>>(`/users?page=${i + 2}`).then((r) => r.data),
+      ),
+    );
+    return [...first.data, ...rest.flat()];
+  },
 
   get: (id: number) => apiClient.get<User>(`/users/${id}`),
 

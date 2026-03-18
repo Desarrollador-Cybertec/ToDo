@@ -39,6 +39,7 @@ import {
   HiOutlineCheckCircle,
   HiOutlineClock,
   HiOutlineRefresh,
+  HiOutlineTrash,
 } from 'react-icons/hi';
 import { PageTransition, FadeIn, SlideDown, StaggerList, StaggerItem } from '../../components/ui';
 import { SkeletonDetail, Badge, Spinner, STATUS_BADGE_VARIANT, PRIORITY_BADGE_VARIANT } from '../../components/ui';
@@ -75,6 +76,8 @@ export function TaskDetailPage() {
   const [editNotifyOverdue, setEditNotifyOverdue] = useState(false);
   const [editNotifyCompletion, setEditNotifyCompletion] = useState(false);
   const [editSaving, setEditSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const taskId = Number(id);
 
@@ -136,6 +139,7 @@ export function TaskDetailPage() {
   const canApprove = (isSuperAdmin || isManager) && task?.status === TaskStatus.IN_REVIEW;
   const canReject = (isSuperAdmin || isManager) && task?.status === TaskStatus.IN_REVIEW;
   const canCancel = isSuperAdmin && task?.status !== TaskStatus.COMPLETED && task?.status !== TaskStatus.CANCELLED;
+  const canDelete = isSuperAdmin;
   const canDelegate = (isSuperAdmin || isManager) && task?.status !== TaskStatus.COMPLETED && task?.status !== TaskStatus.CANCELLED;
   const canUpdate = isResponsible && task?.status === TaskStatus.IN_PROGRESS;
   const canUpload = isResponsible || isSuperAdmin || isManager;
@@ -243,11 +247,24 @@ export function TaskDetailPage() {
     setShowUploadForm(false);
   };
 
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await tasksApi.delete(taskId);
+      navigate('/tasks');
+    } catch (error) {
+      setActionError(error instanceof ApiError ? error.data.message : 'Error al eliminar la tarea');
+      setConfirmDelete(false);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const handleDelegateOpen = async () => {
     setShowDelegateForm(true);
     if (task?.area_id) {
       try {
-        const res = await usersApi.list();
+        const res = await usersApi.listAll();
         setAreaMembers(res);
       } catch {
         setAreaMembers([]);
@@ -541,6 +558,24 @@ export function TaskDetailPage() {
               <button type="button" onClick={() => handleAction(() => tasksApi.cancel(taskId), 'Tarea cancelada')} className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50">
                 Cancelar tarea
               </button>
+            )}
+            {canDelete && (
+              confirmDelete ? (
+                <div className="flex items-center gap-2 rounded-xl border border-red-300 bg-red-50 px-4 py-2">
+                  <span className="text-sm text-red-700">¿Eliminar?</span>
+                  <button type="button" onClick={handleDelete} disabled={deleting} className="inline-flex items-center gap-1 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition-all hover:bg-red-700 disabled:opacity-50">
+                    {deleting ? <Spinner size="sm" /> : null}
+                    Sí, eliminar
+                  </button>
+                  <button type="button" onClick={() => setConfirmDelete(false)} className="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-red-100">
+                    No
+                  </button>
+                </div>
+              ) : (
+                <button type="button" onClick={() => setConfirmDelete(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50">
+                  <HiOutlineTrash className="h-4 w-4" /> Eliminar
+                </button>
+              )
             )}
           </div>
               </motion.div>

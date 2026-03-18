@@ -75,8 +75,33 @@ async function request<T>(
   return json as T;
 }
 
+// Like request<T> but returns the full JSON without auto-unwrapping (used for paginated endpoints)
+async function requestRaw<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  const token = getToken();
+  const headers: HeadersInit = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+  if (token) {
+    (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+  }
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, { ...options, headers });
+  if (response.status === 401) {
+    removeToken();
+    window.location.href = '/login';
+    throw new ApiError(401, { message: 'No autenticado' });
+  }
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ message: 'Error desconocido' }));
+    throw new ApiError(response.status, errorData);
+  }
+  return response.json() as Promise<T>;
+}
+
 export const apiClient = {
   get: <T>(endpoint: string) => request<T>(endpoint),
+  getPage: <T>(endpoint: string) => requestRaw<T>(endpoint),
 
   post: <T>(endpoint: string, data?: unknown) =>
     request<T>(endpoint, {

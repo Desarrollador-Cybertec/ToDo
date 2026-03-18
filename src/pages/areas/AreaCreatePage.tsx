@@ -17,7 +17,7 @@ export function AreaCreatePage() {
   const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
-    usersApi.list().then((res) => setUsers(res)).catch(() => {});
+    usersApi.listAll().then((res) => setUsers(res)).catch(() => {});
   }, []);
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<CreateAreaFormData>({
