@@ -8,7 +8,11 @@ import type {
 } from '../types';
 
 export const usersApi = {
-  list: (page = 1) => apiClient.getPage<PaginatedResponse<User>>(`/users?page=${page}`),
+  list: (page = 1, role?: string) => {
+    const params = new URLSearchParams({ page: String(page), per_page: '10' });
+    if (role) params.append('role', role);
+    return apiClient.getPage<PaginatedResponse<User>>(`/users?${params}`);
+  },
 
   // All users across all pages – for select dropdowns
   listAll: async (): Promise<User[]> => {

@@ -18,7 +18,7 @@ export function MeetingCreatePage() {
   const [areas, setAreas] = useState<Area[]>([]);
 
   useEffect(() => {
-    areasApi.list().then((res) => setAreas(res)).catch(() => {});
+    areasApi.listAll().then((res) => setAreas(res)).catch(() => {});
   }, []);
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<CreateMeetingFormData>({

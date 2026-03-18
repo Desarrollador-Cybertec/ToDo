@@ -15,7 +15,7 @@ export function ClaimWorkersPage() {
 
   const loadArea = useCallback(async () => {
     try {
-      const areas = await areasApi.list();
+      const areas = await areasApi.listAll();
       const areaList = areas ?? [];
       const managerArea =
         areaList.find((a) => a.manager_user_id === user?.id) ?? areaList[0] ?? null;

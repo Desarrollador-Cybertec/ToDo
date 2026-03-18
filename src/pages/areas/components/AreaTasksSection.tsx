@@ -3,7 +3,7 @@ import { tasksApi } from '../../../api/tasks';
 import { areasApi } from '../../../api/areas';
 import { ApiError } from '../../../api/client';
 import { TASK_STATUS_LABELS, TASK_PRIORITY_LABELS } from '../../../types/enums';
-import type { Task, AreaMember } from '../../../types';
+import type { Task } from '../../../types';
 import { HiOutlineUserAdd, HiOutlineCheckCircle, HiOutlineX } from 'react-icons/hi';
 import { AnimatePresence, motion } from 'framer-motion';
 import { FadeIn, SlideDown, Badge, STATUS_BADGE_VARIANT, PRIORITY_BADGE_VARIANT, SkeletonCard, Spinner } from '../../../components/ui';
@@ -16,7 +16,7 @@ interface AreaTasksSectionProps {
 
 export function AreaTasksSection({ areaId, isManager, refreshKey }: AreaTasksSectionProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [members, setMembers] = useState<AreaMember[]>([]);
+  const [members, setMembers] = useState<import('../../../types').User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [assigningTaskId, setAssigningTaskId] = useState<number | null>(null);
@@ -30,7 +30,7 @@ export function AreaTasksSection({ areaId, isManager, refreshKey }: AreaTasksSec
     try {
       const [tasksRes, membersRes] = await Promise.all([
         tasksApi.list(`area_id=${areaId}`).catch(() => [] as Task[]),
-        areasApi.members(areaId).catch(() => [] as AreaMember[]),
+        areasApi.membersAll(areaId).catch(() => []),
       ]);
       setTasks(Array.isArray(tasksRes) ? tasksRes : []);
       setMembers(Array.isArray(membersRes) ? membersRes : []);
@@ -162,8 +162,8 @@ export function AreaTasksSection({ areaId, isManager, refreshKey }: AreaTasksSec
                         className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                       >
                         <option value="">— Seleccionar miembro —</option>
-                        {members.filter((m) => m.is_active).map((m) => (
-                          <option key={m.user_id} value={m.user_id}>{m.user.name}</option>
+                        {members.map((m) => (
+                          <option key={m.id} value={m.id}>{m.name}</option>
                         ))}
                       </select>
                       <button

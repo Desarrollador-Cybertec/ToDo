@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -17,13 +17,22 @@ const ROLE_BADGE: Record<string, 'purple' | 'blue' | 'gray'> = {
   worker: 'gray',
 };
 
+const PAGE_SIZE = 10;
+
 export function UserListPage() {
-  const [users, setUsers] = useState<User[]>([]);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [lastPage, setLastPage] = useState(1);
-  const [total, setTotal] = useState(0);
+  const [roleFilter, setRoleFilter] = useState('');
+
+  const filteredUsers = useMemo(
+    () => roleFilter ? allUsers.filter((u) => u.role.slug === roleFilter) : allUsers,
+    [allUsers, roleFilter],
+  );
+  const total = filteredUsers.length;
+  const lastPage = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const users = filteredUsers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingUserId, setEditingUserId] = useState<number | null>(null);
   const [editOriginalRoleSlug, setEditOriginalRoleSlug] = useState<string>('');
@@ -37,27 +46,29 @@ export function UserListPage() {
   const [serverError, setServerError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  const loadUsers = useCallback(async (p: number) => {
+  const loadUsers = useCallback(async () => {
     setLoading(true);
     try {
       const [usersRes, areasRes] = await Promise.all([
-        usersApi.list(p),
-        areasApi.list().catch(() => []),
+        usersApi.listAll(),
+        areasApi.listAll().catch(() => []),
       ]);
-      setUsers(usersRes.data);
-      setLastPage(usersRes.meta.last_page);
-      setTotal(usersRes.meta.total);
+      setAllUsers(usersRes);
       setAreas(Array.isArray(areasRes) ? areasRes : []);
     } catch {
-      setUsers([]);
+      setAllUsers([]);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadUsers(page);
-  }, [loadUsers, page]);
+    loadUsers();
+  }, [loadUsers]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [roleFilter]);
 
   const showMessage = (msg: string) => {
     setSuccessMsg(msg);
@@ -75,7 +86,7 @@ export function UserListPage() {
       showMessage('Usuario creado exitosamente');
       reset();
       setShowCreateForm(false);
-      loadUsers(page);
+      loadUsers();
     } catch (error) {
       setServerError(error instanceof ApiError ? error.data.message : 'Error al crear usuario');
     }
@@ -85,7 +96,7 @@ export function UserListPage() {
     try {
       await usersApi.toggleActive(userId);
       showMessage('Estado del usuario actualizado');
-      loadUsers(page);
+      loadUsers();
     } catch (error) {
       setServerError(error instanceof ApiError ? error.data.message : 'Error al cambiar estado');
     }
@@ -153,7 +164,7 @@ export function UserListPage() {
 
       showMessage('Usuario actualizado');
       setEditingUserId(null);
-      loadUsers(page);
+      loadUsers();
     } catch (error) {
       setServerError(error instanceof ApiError ? error.data.message : 'Error al actualizar usuario');
     } finally {
@@ -163,15 +174,27 @@ export function UserListPage() {
 
   return (
     <PageTransition>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-2xl font-bold text-gray-900">Usuarios</h2>
-        <button
+        <div className="flex items-center gap-3">
+          <select
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value)}
+            className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          >
+            <option value="">Todos los roles</option>
+            <option value="superadmin">{ROLE_LABELS[Role.SUPERADMIN]}</option>
+            <option value="area_manager">{ROLE_LABELS[Role.AREA_MANAGER]}</option>
+            <option value="worker">{ROLE_LABELS[Role.WORKER]}</option>
+          </select>
+          <button
           type="button"
           onClick={() => setShowCreateForm(!showCreateForm)}
           className="inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98]"
         >
           <HiOutlinePlus className="h-4 w-4" /> Nuevo usuario
         </button>
+        </div>
       </div>
 
       <AnimatePresence>
@@ -300,7 +323,7 @@ export function UserListPage() {
       )}
 
       {/* Pagination */}
-      {!loading && lastPage > 1 && (
+      {!loading && (
         <div className="mt-4 flex items-center justify-between">
           <p className="text-sm text-gray-500">
             {total} usuario{total !== 1 ? 's' : ''} en total

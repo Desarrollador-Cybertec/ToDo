@@ -24,7 +24,7 @@ export function TaskListPage() {
 
   useEffect(() => {
     if (isSuperadmin) {
-      areasApi.list()
+      areasApi.listAll()
         .then((res) => setAreas(Array.isArray(res) ? res : []))
         .catch(() => setAreas([]));
     }

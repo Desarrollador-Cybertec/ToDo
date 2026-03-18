@@ -26,6 +26,11 @@ export interface AreaMember {
   user: User;
 }
 
+export interface ClaimWorkerResponse {
+  message: string;
+  member: AreaMember;
+}
+
 export interface CreateAreaRequest {
   name: string;
   description?: string;

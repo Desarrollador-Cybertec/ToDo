@@ -15,7 +15,7 @@ export function AreaListPage() {
   const isSuperAdmin = user?.role.slug === Role.SUPERADMIN;
 
   useEffect(() => {
-    areasApi.list()
+    areasApi.listAll()
       .then((res) => setAreas(res))
       .catch(() => setAreas([]))
       .finally(() => setLoading(false));

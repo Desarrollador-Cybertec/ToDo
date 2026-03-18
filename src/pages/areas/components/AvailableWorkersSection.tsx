@@ -29,7 +29,7 @@ export function AvailableWorkersSection({ areaId, refreshKey, onClaimed }: Avail
     setError('');
     try {
       const res = await areasApi.availableWorkers(areaId);
-      setWorkers(Array.isArray(res) ? res : []);
+      setWorkers(Array.isArray(res.data) ? res.data : []);
     } catch {
       setError('Error al cargar trabajadores disponibles');
       setWorkers([]);

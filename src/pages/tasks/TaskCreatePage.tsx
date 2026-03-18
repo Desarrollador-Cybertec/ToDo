@@ -49,7 +49,7 @@ export function TaskCreatePage() {
   useEffect(() => {
     Promise.all([
       usersApi.listAll().catch(() => [] as User[]),
-      areasApi.list().catch(() => [] as Area[]),
+      areasApi.listAll().catch(() => [] as Area[]),
       meetingsApi.list().catch(() => [] as Meeting[]),
     ]).then(([usersRes, areasRes, meetingsRes]) => {
       setUsers(usersRes);
