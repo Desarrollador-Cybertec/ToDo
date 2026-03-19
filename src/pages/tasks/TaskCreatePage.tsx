@@ -72,8 +72,12 @@ export function TaskCreatePage() {
   const [users, setUsers] = useState<User[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
+  const [areaMembers, setAreaMembers] = useState<User[]>([]);
+  const [workerDest, setWorkerDest] = useState<'self' | 'external'>('self');
 
   const isWorker = user?.role.slug === Role.WORKER;
+  const isManager = user?.role.slug === Role.AREA_MANAGER;
+  const isSuperadmin = user?.role.slug === Role.SUPERADMIN;
 
   const {
     register,
@@ -125,12 +129,50 @@ export function TaskCreatePage() {
       usersApi.listAll().catch(() => [] as User[]),
       areasApi.listAll().catch(() => [] as Area[]),
       meetingsApi.list().catch(() => [] as Meeting[]),
-    ]).then(([u, a, m]) => {
+    ]).then(async ([u, a, m]) => {
       setUsers(u);
       setAreas(a);
       setMeetings(m);
+
+      // For managers: load actual members of their managed areas
+      if (isManager && user?.id) {
+        const uid = Number(user.id);
+        // 1. Prefer area_id from /me; 2. scan areas list; 3. fallback to first area
+        let areaIdsToFetch: number[] = [];
+        if (user.area_id) {
+          areaIdsToFetch = [Number(user.area_id)];
+        } else {
+          const matched = a.filter(
+            (area) =>
+              Number(area.manager_user_id) === uid ||
+              (area.manager?.id != null && Number(area.manager.id) === uid),
+          );
+          areaIdsToFetch = matched.length ? matched.map((area) => area.id) : a.length ? [a[0].id] : [];
+        }
+
+        if (areaIdsToFetch.length) {
+          const memberLists = await Promise.all(
+            areaIdsToFetch.map((id) => areasApi.membersAll(id).catch(() => [] as User[])),
+          );
+          const memberMap = new Map<number, User>();
+          memberLists.flat().forEach((member) => memberMap.set(member.id, member));
+          setAreaMembers([...memberMap.values()]);
+        }
+      }
     });
-  }, []);
+  }, [isManager, user?.id, user?.area_id]);
+
+  /* Filter users based on role */
+  const availableUsers = (() => {
+    if (isSuperadmin) return users;
+    if (isManager) {
+      // Real area members + the manager themselves (for personal tasks)
+      const memberMap = new Map<number, User>(areaMembers.map((m) => [m.id, m]));
+      if (user) memberMap.set(user.id, user as User);
+      return [...memberMap.values()];
+    }
+    return [];
+  })();
 
   const onSubmit = async (data: CreateTaskFormData) => {
     setServerError('');
@@ -158,7 +200,8 @@ export function TaskCreatePage() {
   };
 
   const assigneeName = (() => {
-    if (isWorker) return user?.name ?? '';
+    if (isWorker && workerDest === 'self') return user?.name ?? '';
+    if (isWorker && workerDest === 'external') return watchExternalEmail || 'Sin correo';
     if (hasUser) return users.find((u) => String(u.id) === String(watchAssignedUser))?.name ?? '';
     if (hasArea) return areas.find((a) => String(a.id) === String(watchAssignedArea))?.name ?? '';
     if (hasExternalEmail) return watchExternalEmail ?? '';
@@ -214,12 +257,58 @@ export function TaskCreatePage() {
                     {/* responsible */}
                     {isWorker ? (
                       <div>
-                        <label className="mb-1.5 block text-sm font-medium text-gray-700">Responsable</label>
-                        <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-700">
-                          <HiOutlineUser className="h-4 w-4 text-gray-400" />
-                          {user?.name} (tú)
+                        <label className="mb-1.5 block text-sm font-medium text-gray-700">Destino</label>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => { setWorkerDest('self'); setValue('assigned_to_user_id', user?.id ?? null); setValue('external_email', ''); setValue('external_name', ''); }}
+                            className={`flex-1 rounded-xl border px-3 py-2.5 text-sm font-medium transition-all ${
+                              workerDest === 'self'
+                                ? 'border-blue-300 bg-blue-50 text-blue-700 ring-1 ring-blue-200'
+                                : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                            }`}
+                          >
+                            <HiOutlineUser className="mr-1 inline h-4 w-4" />
+                            Para mí
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { setWorkerDest('external'); setValue('assigned_to_user_id', null); }}
+                            className={`flex-1 rounded-xl border px-3 py-2.5 text-sm font-medium transition-all ${
+                              workerDest === 'external'
+                                ? 'border-blue-300 bg-blue-50 text-blue-700 ring-1 ring-blue-200'
+                                : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                            }`}
+                          >
+                            ✉️ Correo externo
+                          </button>
                         </div>
-                        <input type="hidden" {...register('assigned_to_user_id', { value: user?.id })} />
+                        {workerDest === 'self' && (
+                          <>
+                            <div className="mt-2 flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-700">
+                              <HiOutlineUser className="h-4 w-4 text-gray-400" />
+                              {user?.name} (tú)
+                            </div>
+                            <input type="hidden" {...register('assigned_to_user_id', { value: user?.id })} />
+                          </>
+                        )}
+                        {workerDest === 'external' && (
+                          <div className="mt-2 space-y-2">
+                            <input
+                              type="email"
+                              {...register('external_email')}
+                              placeholder="correo@ejemplo.com"
+                              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none"
+                            />
+                            {errors.external_email && <p className="mt-1 text-sm text-red-500">{errors.external_email.message}</p>}
+                            <input
+                              type="text"
+                              {...register('external_name')}
+                              placeholder="Nombre del destinatario"
+                              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none"
+                            />
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <div>
@@ -231,8 +320,8 @@ export function TaskCreatePage() {
                           className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none disabled:bg-gray-50 disabled:text-gray-400"
                         >
                           <option value="">Seleccionar usuario</option>
-                          {users.map((u) => (
-                            <option key={u.id} value={u.id}>{u.name}</option>
+                          {availableUsers.map((u) => (
+                            <option key={u.id} value={u.id}>{u.name}{u.id === user?.id ? ' (tú)' : ''}</option>
                           ))}
                         </select>
                       </div>
@@ -315,17 +404,15 @@ export function TaskCreatePage() {
                             <label htmlFor="start_date" className="mb-1.5 block text-sm font-medium text-gray-700">Fecha inicio</label>
                             <input id="start_date" type="date" {...register('start_date')} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none" />
                           </div>
-                          {!isWorker && (
-                            <div>
-                              <label htmlFor="meeting_id" className="mb-1.5 block text-sm font-medium text-gray-700">Reunión de origen</label>
-                              <select id="meeting_id" {...register('meeting_id', { setValueAs: (v: string) => v ? Number(v) : null })} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none">
-                                <option value="">Sin reunión</option>
-                                {meetings.map((m) => (
-                                  <option key={m.id} value={m.id}>{m.title}</option>
-                                ))}
-                              </select>
-                            </div>
-                          )}
+                          <div>
+                            <label htmlFor="meeting_id" className="mb-1.5 block text-sm font-medium text-gray-700">Reunión de origen</label>
+                            <select id="meeting_id" {...register('meeting_id', { setValueAs: (v: string) => v ? Number(v) : null })} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none">
+                              <option value="">Sin reunión</option>
+                              {meetings.map((m) => (
+                                <option key={m.id} value={m.id}>{m.title}</option>
+                              ))}
+                            </select>
+                          </div>
                         </div>
                       </div>
                     </FadeIn>
@@ -380,7 +467,7 @@ export function TaskCreatePage() {
                     )}
 
                     {/* requirements */}
-                    {!isWorker && <FadeIn delay={0.15} className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                    <FadeIn delay={0.15} className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                       <h3 className="mb-1 flex items-center gap-2 text-base font-semibold text-gray-900">
                         <HiOutlineShieldCheck className="h-5 w-5 text-blue-500" /> Requisitos
                       </h3>
@@ -391,10 +478,10 @@ export function TaskCreatePage() {
                         <ToggleField label="Aprobación del jefe" description="Necesita validación antes de cerrarse." checked={!!reqApproval} onChange={(v) => setValue('requires_manager_approval', v)} />
                         <ToggleField label="Reportes de avance" description="El responsable enviará actualizaciones periódicas." checked={!!reqProgress} onChange={(v) => setValue('requires_progress_report', v)} />
                       </div>
-                    </FadeIn>}
+                    </FadeIn>
 
                     {/* notifications */}
-                    {!isWorker && <FadeIn delay={0.2} className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                    <FadeIn delay={0.2} className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                       <h3 className="mb-1 flex items-center gap-2 text-base font-semibold text-gray-900">
                         <HiOutlineBell className="h-5 w-5 text-yellow-500" /> Notificaciones
                       </h3>
@@ -404,7 +491,7 @@ export function TaskCreatePage() {
                         <ToggleField label="Si vencida" checked={!!notOverdue} onChange={(v) => setValue('notify_on_overdue', v)} />
                         <ToggleField label="Al completar" checked={!!notCompletion} onChange={(v) => setValue('notify_on_completion', v)} />
                       </div>
-                    </FadeIn>}
+                    </FadeIn>
 
                     {/* bottom actions */}
                     <div className="flex justify-end gap-3 pb-2">

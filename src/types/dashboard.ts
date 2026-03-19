@@ -38,19 +38,32 @@ export interface AreaTaskCount {
 }
 
 export interface ResponsibleLoad {
-  user_id: number;
+  user_id: number | null;
   user_name: string;
   active_tasks: number;
 }
 
+export interface AwaitingClaimTask {
+  id: number;
+  title: string;
+  priority: string;
+  due_date: string | null;
+  created_at: string;
+}
+
 export interface AreaDashboard {
-  total?: number;
-  completed?: number;
-  tasks_by_status: Record<string, number>;
+  total_tasks: number;
+  active_tasks: number;
+  completed_tasks: number;
   overdue_tasks: number;
+  due_soon: number;
+  without_progress: number;
+  pending_assignment_tasks: number;
   completion_rate: number;
-  tasks_by_responsible: ResponsibleLoad[];
-  tasks_without_progress: number;
+  tasks_by_status: Record<string, number>;
+  by_responsible: ResponsibleLoad[];
+  awaiting_claim: AwaitingClaimTask[];
+  area: { id: number; name: string; manager_user_id: number | null };
 }
 
 export interface ConsolidatedDashboard {

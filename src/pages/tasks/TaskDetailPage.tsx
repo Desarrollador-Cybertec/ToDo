@@ -26,6 +26,7 @@ import {
 } from '../../schemas';
 import type { Task, User } from '../../types';
 import { areasApi } from '../../api/areas';
+import { usersApi } from '../../api/users';
 import {
   HiOutlineArrowLeft,
   HiOutlinePaperClip,
@@ -66,6 +67,7 @@ export function TaskDetailPage() {
   const [showDelegateForm, setShowDelegateForm] = useState(false);
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [areaMembers, setAreaMembers] = useState<User[]>([]);
+  const [membersLoading, setMembersLoading] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
@@ -90,6 +92,10 @@ export function TaskDetailPage() {
   const loadTask = useCallback(async () => {
     try {
       const res = await tasksApi.get(taskId);
+      // If the backend omits the creator relation for this role, fetch it by ID
+      if (!res.creator && res.created_by) {
+        res.creator = await usersApi.get(res.created_by).catch(() => null) as typeof res.creator;
+      }
       setTask(res);
       if (searchParams.get('edit') === '1') {
         setEditing(true);
@@ -147,9 +153,16 @@ export function TaskDetailPage() {
   const terminal = [TaskStatus.COMPLETED as string, TaskStatus.CANCELLED as string];
 
   const canDelete = isSuperAdmin;
-  const canDelegate = (isSuperAdmin || isManager) && task?.status !== TaskStatus.COMPLETED && task?.status !== TaskStatus.CANCELLED;
-  const canUpdate = (isResponsible || isSuperAdmin || isManager) && !terminal.includes(task?.status as string);
-  const canUpload = isResponsible || isCreator || isSuperAdmin || isManager;
+  // Manager can only delegate tasks in their own area — not tasks sent to a different area (pending_assignment there)
+  const managerOwnsTask = isManager && (
+    !task?.assigned_to_area_id ||
+    Number(task.assigned_to_area_id) === Number(user?.area_id) ||
+    Number(task?.area_id) === Number(user?.area_id)
+  );
+  const canDelegate = !terminal.includes(task?.status as string) && (isSuperAdmin || managerOwnsTask);
+  const canUpdate = (isResponsible || isSuperAdmin || isManager) && !terminal.includes(task?.status as string) && !!task?.requires_progress_report;
+  const canUpload = (isResponsible || isCreator || isSuperAdmin || isManager) && !!task?.requires_attachment;
+  const canComment = !!task?.requires_completion_comment;
   const canEdit = (isSuperAdmin || isManager) && task?.status !== TaskStatus.COMPLETED && task?.status !== TaskStatus.CANCELLED;
 
   const startEditing = () => {
@@ -269,12 +282,16 @@ export function TaskDetailPage() {
 
   const handleDelegateOpen = async () => {
     setShowDelegateForm(true);
-    if (task?.area_id) {
+    const areaId = task?.area_id ?? task?.assigned_to_area_id ?? task?.area?.id ?? task?.assigned_area?.id ?? user?.area_id ?? null;
+    if (areaId) {
+      setMembersLoading(true);
       try {
-        const members = await areasApi.membersAll(task.area_id);
-        setAreaMembers(members);
+        const members = await areasApi.membersAll(areaId);
+        setAreaMembers(Array.isArray(members) ? members : []);
       } catch {
         setAreaMembers([]);
+      } finally {
+        setMembersLoading(false);
       }
     }
   };
@@ -559,9 +576,11 @@ export function TaskDetailPage() {
                 <HiOutlineUpload className="h-4 w-4" /> Adjuntar
               </button>
             )}
-            <button type="button" onClick={() => setShowCommentForm(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">
-              <HiOutlineChatAlt className="h-4 w-4" /> Comentar
-            </button>
+            {canComment && (
+              <button type="button" onClick={() => setShowCommentForm(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">
+                <HiOutlineChatAlt className="h-4 w-4" /> Comentar
+              </button>
+            )}
             {canDelete && (
               confirmDelete ? (
                 <div className="flex items-center gap-2 rounded-xl border border-red-300 bg-red-50 px-4 py-2">
@@ -663,9 +682,15 @@ export function TaskDetailPage() {
               <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                 <h3 className="mb-3 font-semibold text-gray-900">Delegar tarea</h3>
                 <form onSubmit={delegateForm.handleSubmit(onDelegate)} className="space-y-3">
-                  <select {...delegateForm.register('to_user_id', { valueAsNumber: true })} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none">
-                    <option value="">Seleccionar trabajador</option>
-                    {areaMembers.filter(m => m.role.slug === 'worker').map((m) => (
+                  <select
+                    {...delegateForm.register('to_user_id', { valueAsNumber: true })}
+                    disabled={membersLoading}
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none disabled:bg-gray-50 disabled:text-gray-400"
+                  >
+                    <option value="">
+                      {membersLoading ? 'Cargando trabajadores...' : 'Seleccionar trabajador'}
+                    </option>
+                    {!membersLoading && areaMembers.filter(m => m.role?.slug === Role.WORKER).map((m) => (
                       <option key={m.id} value={m.id}>{m.name}</option>
                     ))}
                   </select>
@@ -758,28 +783,40 @@ export function TaskDetailPage() {
       {(task.status_history ?? []).length > 0 && (
         <FadeIn delay={0.2} className="mt-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
           <h3 className="mb-4 font-semibold text-gray-900">Historial de estados</h3>
-          <div className="relative ml-3 border-l-2 border-gray-200 pl-6">
-            {(task.status_history ?? []).map((h, index) => (
-              <div key={h.id} className={`relative pb-4 ${index === (task.status_history ?? []).length - 1 ? 'pb-0' : ''}`}>
-                <div className="absolute -left-7.75 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 ring-4 ring-white">
-                  <div className="h-1.5 w-1.5 rounded-full bg-white" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-900">
-                    {h.from_status ? (
-                      <>
-                        <Badge variant={STATUS_BADGE_VARIANT[h.from_status]} size="sm">{TASK_STATUS_LABELS[h.from_status]}</Badge>
-                        <span className="mx-1.5 text-gray-400">→</span>
-                      </>
-                    ) : null}
-                    <Badge variant={STATUS_BADGE_VARIANT[h.to_status]} size="sm">{TASK_STATUS_LABELS[h.to_status]}</Badge>
-                  </p>
-                  <p className="mt-1 text-xs text-gray-500">{h.user?.name ?? 'Sistema'} · {new Date(h.created_at).toLocaleString('es-PE')}</p>
-                  {h.note && <p className="mt-1 text-xs text-gray-600">{h.note}</p>}
-                </div>
+          {(() => {
+            const history = task.status_history ?? [];
+            // Workers only see entries where they were the responsible user at that moment
+            const visible = (isSuperAdmin || isManager)
+              ? history
+              : history.filter((h) => h.user_id === user?.id);
+            return (
+              <div className="relative ml-3 border-l-2 border-gray-200 pl-6">
+                {visible.length === 0 && (
+                  <p className="text-sm text-gray-400">No tienes interacciones registradas en esta tarea.</p>
+                )}
+                {visible.map((h, index) => (
+                  <div key={h.id} className={`relative pb-4 ${index === visible.length - 1 ? 'pb-0' : ''}`}>
+                    <div className="absolute -left-7.75 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 ring-4 ring-white">
+                      <div className="h-1.5 w-1.5 rounded-full bg-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">
+                        {h.from_status ? (
+                          <>
+                            <Badge variant={STATUS_BADGE_VARIANT[h.from_status]} size="sm">{TASK_STATUS_LABELS[h.from_status]}</Badge>
+                            <span className="mx-1.5 text-gray-400">→</span>
+                          </>
+                        ) : null}
+                        <Badge variant={STATUS_BADGE_VARIANT[h.to_status]} size="sm">{TASK_STATUS_LABELS[h.to_status]}</Badge>
+                      </p>
+                      <p className="mt-1 text-xs text-gray-500">{h.user?.name ?? 'Sistema'} · {new Date(h.created_at).toLocaleString('es-PE')}</p>
+                      {h.note && <p className="mt-1 text-xs text-gray-600">{h.note}</p>}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            );
+          })()}
         </FadeIn>
       )}
 

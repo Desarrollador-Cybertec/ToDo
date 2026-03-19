@@ -83,10 +83,12 @@ export interface TaskStatusHistory {
   id: number;
   task_id: number;
   changed_by: number;
+  user_id: number | null;
   from_status: TaskStatusType | null;
   to_status: TaskStatusType;
   note: string | null;
-  user: User;
+  user: User;                    // quien ejecutó el cambio (changed_by)
+  responsible_user: User | null; // responsable en ese momento (user_id)
   created_at: string;
 }
 
