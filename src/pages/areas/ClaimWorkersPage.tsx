@@ -17,15 +17,25 @@ export function ClaimWorkersPage() {
     try {
       const areas = await areasApi.listAll();
       const areaList = areas ?? [];
+      const uid = Number(user?.id);
+
+      // 1. Match by area_id from /me (most reliable)
+      // 2. Match by manager_user_id or manager.id (Number coercion to handle string IDs)
       const managerArea =
-        areaList.find((a) => a.manager_user_id === user?.id) ?? areaList[0] ?? null;
+        (user?.area_id ? areaList.find((a) => Number(a.id) === Number(user.area_id)) : null) ??
+        areaList.find(
+          (a) =>
+            Number(a.manager_user_id) === uid ||
+            (a.manager?.id != null && Number(a.manager.id) === uid),
+        ) ??
+        null;
       setMyArea(managerArea);
     } catch {
       setMyArea(null);
     } finally {
       setLoading(false);
     }
-  }, [user?.id]);
+  }, [user?.id, user?.area_id]);
 
   useEffect(() => {
     loadArea();

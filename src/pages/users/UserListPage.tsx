@@ -1,15 +1,17 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { usersApi } from '../../api/users';
 import { areasApi } from '../../api/areas';
 import { createUserSchema, type CreateUserFormData } from '../../schemas';
 import { ROLE_LABELS, Role } from '../../types/enums';
 import { ApiError } from '../../api/client';
 import type { User, Area } from '../../types';
-import { HiOutlinePlus, HiOutlineExclamationCircle, HiOutlineCheckCircle, HiOutlinePencil, HiOutlineX, HiOutlineChevronLeft, HiOutlineChevronRight } from 'react-icons/hi';
-import { PageTransition, FadeIn, SlideDown, SkeletonTable, Spinner, Badge } from '../../components/ui';
+import { HiOutlinePlus, HiOutlineExclamationCircle, HiOutlineCheckCircle, HiOutlinePencil, HiOutlineChevronLeft, HiOutlineChevronRight } from 'react-icons/hi';
+import { PageTransition, FadeIn, SlideDown, SkeletonTable, Badge } from '../../components/ui';
+import { UserEditModal } from './components/UserEditModal';
+import { UserCreateForm } from './components/UserCreateForm';
 
 const ROLE_BADGE: Record<string, 'purple' | 'blue' | 'gray'> = {
   superadmin: 'purple',
@@ -75,7 +77,7 @@ export function UserListPage() {
     setTimeout(() => setSuccessMsg(''), 3000);
   };
 
-  const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<CreateUserFormData>({
+  const createForm = useForm<CreateUserFormData>({
     resolver: zodResolver(createUserSchema),
   });
 
@@ -84,7 +86,7 @@ export function UserListPage() {
     try {
       await usersApi.create(data);
       showMessage('Usuario creado exitosamente');
-      reset();
+      createForm.reset();
       setShowCreateForm(false);
       loadUsers();
     } catch (error) {
@@ -216,53 +218,11 @@ export function UserListPage() {
 
       <AnimatePresence>
         {showCreateForm && (
-          <SlideDown className="mb-6">
-            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-              <h3 className="mb-4 font-semibold text-gray-900">Crear usuario</h3>
-              <form onSubmit={handleSubmit(onCreateUser)} className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-gray-700">Nombre *</label>
-                    <input id="name" {...register('name')} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-                    {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>}
-                  </div>
-                  <div>
-                    <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-gray-700">Correo *</label>
-                    <input id="email" type="email" {...register('email')} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-                    {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>}
-                  </div>
-                  <div>
-                    <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-gray-700">Contraseña *</label>
-                    <input id="password" type="password" autoComplete="new-password" {...register('password')} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-                    {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>}
-                  </div>
-                  <div>
-                    <label htmlFor="password_confirmation" className="mb-1.5 block text-sm font-medium text-gray-700">Confirmar contraseña *</label>
-                    <input id="password_confirmation" type="password" autoComplete="new-password" {...register('password_confirmation')} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-                    {errors.password_confirmation && <p className="mt-1 text-sm text-red-500">{errors.password_confirmation.message}</p>}
-                  </div>
-                  <div>
-                    <label htmlFor="role_id" className="mb-1.5 block text-sm font-medium text-gray-700">Rol *</label>
-                    <select id="role_id" {...register('role_id', { valueAsNumber: true })} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
-                      <option value="">Seleccionar rol</option>
-                      <option value={1}>Super Administrador</option>
-                      <option value={2}>Encargado de Área</option>
-                      <option value={3}>Trabajador</option>
-                    </select>
-                    {errors.role_id && <p className="mt-1 text-sm text-red-500">{errors.role_id.message}</p>}
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <button type="submit" disabled={isSubmitting} className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
-                    {isSubmitting ? <><Spinner size="sm" /> Creando...</> : 'Crear'}
-                  </button>
-                  <button type="button" onClick={() => { setShowCreateForm(false); reset(); }} className="rounded-xl border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                    Cancelar
-                  </button>
-                </div>
-              </form>
-            </div>
-          </SlideDown>
+          <UserCreateForm
+            form={createForm}
+            onSubmit={onCreateUser}
+            onCancel={() => { setShowCreateForm(false); createForm.reset(); }}
+          />
         )}
       </AnimatePresence>
 
@@ -353,135 +313,25 @@ export function UserListPage() {
       )}
 
       {/* Edit user panel */}
-      <AnimatePresence>
-          {editingUserId != null && (
-              <motion.div
-                key="edit-panel"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-                onClick={cancelEditing}
-              >
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                  onClick={(e) => e.stopPropagation()}
-                  className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl"
-                >
-                  <div className="mb-4 flex items-center justify-between">
-                    <h3 className="text-lg font-semibold text-gray-900">Editar usuario</h3>
-                    <button type="button" onClick={cancelEditing} className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
-                      <HiOutlineX className="h-5 w-5" />
-                    </button>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div>
-                        <label className="mb-1.5 block text-sm font-medium text-gray-700">Nombre</label>
-                        <input
-                          type="text"
-                          value={editName}
-                          onChange={(e) => setEditName(e.target.value)}
-                          className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-1.5 block text-sm font-medium text-gray-700">Correo</label>
-                        <input
-                          type="email"
-                          value={editEmail}
-                          onChange={(e) => setEditEmail(e.target.value)}
-                          className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Role: hidden for superadmin, worker↔area_manager for others */}
-                    {editOriginalRoleSlug !== Role.SUPERADMIN && (
-                      <div>
-                        <label className="mb-1.5 block text-sm font-medium text-gray-700">Rol</label>
-                        <select
-                          value={editRoleId}
-                          onChange={(e) => setEditRoleId(Number(e.target.value))}
-                          className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                        >
-                          <option value={2}>{ROLE_LABELS[Role.AREA_MANAGER]}</option>
-                          <option value={3}>{ROLE_LABELS[Role.WORKER]}</option>
-                        </select>
-                      </div>
-                    )}
-
-                    <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
-                      <div>
-                        <p className="text-sm font-medium text-gray-700">Estado del usuario</p>
-                        <p className="text-xs text-gray-500">{editActive ? 'El usuario puede iniciar sesión' : 'El usuario está bloqueado'}</p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setEditActive((v) => !v)}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-                          editActive ? 'bg-green-500' : 'bg-gray-300'
-                        }`}
-                      >
-                        <span
-                          className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-                            editActive ? 'translate-x-6' : 'translate-x-1'
-                          }`}
-                        />
-                      </button>
-                    </div>
-
-                    {/* Area: only visible for workers */}
-                    {editOriginalRoleSlug === Role.WORKER && (
-                    <div className="rounded-xl border border-indigo-100 bg-indigo-50/50 p-4">
-                      <label className="mb-1.5 block text-sm font-semibold text-indigo-700">Asignar a un área</label>
-                      <p className="mb-2 text-xs text-indigo-600/70">Selecciona un área para agregar a este usuario como miembro.</p>
-                      {editAreaLoading ? (
-                        <div className="flex items-center gap-2 py-2 text-sm text-indigo-500">
-                          <Spinner size="sm" /> Cargando área actual...
-                        </div>
-                      ) : (
-                        <select
-                          value={editAreaId}
-                          onChange={(e) => setEditAreaId(e.target.value)}
-                          className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                        >
-                          <option value="">— Sin área —</option>
-                          {areas.filter((a) => a.active).map((a) => (
-                            <option key={a.id} value={a.id}>
-                              {a.name}{a.manager ? ` (Encargado: ${a.manager.name})` : ''}
-                            </option>
-                          ))}
-                        </select>
-                      )}
-                    </div>
-                    )}
-
-                    <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">
-                      <button
-                        type="button"
-                        onClick={cancelEditing}
-                        className="rounded-xl px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100"
-                      >
-                        Cancelar
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => saveUserEdit(editingUserId)}
-                        disabled={editSaving}
-                        className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50"
-                      >
-                        {editSaving ? <><Spinner size="sm" /> Guardando...</> : 'Guardar cambios'}
-                      </button>
-                    </div>
-                  </div>
-                </motion.div>
-              </motion.div>
-          )}
-        </AnimatePresence>
+      <UserEditModal
+        editingUserId={editingUserId}
+        editOriginalRoleSlug={editOriginalRoleSlug}
+        editName={editName}
+        setEditName={setEditName}
+        editEmail={editEmail}
+        setEditEmail={setEditEmail}
+        editRoleId={editRoleId}
+        setEditRoleId={setEditRoleId}
+        editAreaId={editAreaId}
+        setEditAreaId={setEditAreaId}
+        editAreaLoading={editAreaLoading}
+        editActive={editActive}
+        setEditActive={(v) => setEditActive(v)}
+        editSaving={editSaving}
+        areas={areas}
+        onCancel={cancelEditing}
+        onSave={saveUserEdit}
+      />
     </PageTransition>
   );
 }

@@ -3,38 +3,10 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { settingsApi, automationApi, importApi } from '../../api/settings';
 import { ApiError } from '../../api/client';
 import type { SystemSetting, MessageTemplate } from '../../types';
-import { HiOutlineCog, HiOutlineMail, HiOutlineLightningBolt, HiOutlineUpload, HiOutlineExclamationCircle, HiOutlineCheckCircle, HiOutlineInformationCircle } from 'react-icons/hi';
-import { PageTransition, FadeIn, SlideDown, SkeletonCard, Badge } from '../../components/ui';
-
-const SETTING_LABELS: Record<string, string> = {
-  daily_summary_time: 'Hora del resumen diario',
-  detect_overdue_time: 'Hora de detección de vencidas',
-  inactivity_alert_time: 'Hora de alerta de inactividad',
-  send_reminders_time: 'Hora de envío de recordatorios',
-  alert_days_before_due: 'Días de anticipación para alertas',
-  daily_summary_enabled: 'Resumen diario activado',
-  detect_overdue_enabled: 'Detección de vencidas activada',
-  emails_enabled: 'Envío de correos activado',
-  inactivity_alert_days: 'Días para alerta de inactividad',
-  inactivity_alert_enabled: 'Alerta de inactividad activada',
-};
-
-const GROUP_LABELS: Record<string, string> = {
-  automation: 'Automatización',
-  notifications: 'Notificaciones',
-  general: 'General',
-};
-
-const TEMPLATE_VARIABLES = [
-  { variable: '{{user_name}}', desc: 'Nombre del usuario' },
-  { variable: '{{task_title}}', desc: 'Título de la tarea' },
-  { variable: '{{task_status}}', desc: 'Estado de la tarea' },
-  { variable: '{{task_priority}}', desc: 'Prioridad de la tarea' },
-  { variable: '{{due_date}}', desc: 'Fecha límite' },
-  { variable: '{{area_name}}', desc: 'Nombre del área' },
-  { variable: '{{app_name}}', desc: 'Nombre de la aplicación' },
-  { variable: '{{app_url}}', desc: 'URL de la aplicación' },
-];
+import { HiOutlineCog, HiOutlineMail, HiOutlineLightningBolt, HiOutlineUpload, HiOutlineExclamationCircle, HiOutlineCheckCircle } from 'react-icons/hi';
+import { PageTransition, FadeIn, SlideDown, SkeletonCard } from '../../components/ui';
+import { SettingsTab } from './components/SettingsTab';
+import { TemplatesTab } from './components/TemplatesTab';
 
 export function SettingsPage() {
   const [settings, setSettings] = useState<SystemSetting[]>([]);
@@ -250,13 +222,6 @@ export function SettingsPage() {
     { key: 'import' as const, label: 'Importar', icon: <HiOutlineUpload className="h-4 w-4" /> },
   ];
 
-  const settingsByGroup = settings.reduce<Record<string, SystemSetting[]>>((acc, s) => {
-    const group = s.group || 'General';
-    if (!acc[group]) acc[group] = [];
-    acc[group].push(s);
-    return acc;
-  }, {});
-
   return (
     <PageTransition>
       <h2 className="mb-6 text-2xl font-bold text-gray-900">Configuración del Sistema</h2>
@@ -355,197 +320,34 @@ export function SettingsPage() {
             transition={{ duration: 0.2 }}
           >
             {activeTab === 'settings' && (
-              <div className="space-y-4">
-                {Object.entries(settingsByGroup).map(([group, groupSettings]) => (
-                  <FadeIn key={group} className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-                    <h3 className="mb-2 text-sm font-semibold uppercase tracking-wider text-gray-500">{GROUP_LABELS[group.toLowerCase()] ?? group}</h3>
-                    <div className="divide-y divide-gray-100">
-                      {groupSettings.map((setting) => {
-                        const currentValue = drafts[setting.key] ?? setting.value;
-                        const isModified = setting.key in drafts;
-                        return (
-                          <div key={setting.id} className="flex items-center justify-between gap-3 py-2">
-                            <div className="min-w-0 flex-1">
-                              <p className={`text-sm ${isModified ? 'font-semibold text-blue-700' : 'font-medium text-gray-900'}`}>{SETTING_LABELS[setting.key] ?? setting.key}</p>
-                              {setting.description && <p className="text-xs text-gray-400">{setting.description}</p>}
-                            </div>
-                            {setting.type === 'boolean' ? (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const newVal = currentValue === 'true' ? 'false' : 'true';
-                                  updateDraft(setting.key, newVal);
-                                }}
-                                className={`rounded-lg px-3 py-1 text-xs font-medium transition-all active:scale-[0.96] ${
-                                  currentValue === 'true'
-                                    ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                                }`}
-                              >
-                                {currentValue === 'true' ? 'Activo' : 'Inactivo'}
-                              </button>
-                            ) : (
-                              <input
-                                type={setting.type === 'integer' ? 'number' : 'text'}
-                                value={currentValue}
-                                onChange={(e) => updateDraft(setting.key, e.target.value)}
-                                className={`w-40 rounded-lg border px-3 py-1 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
-                                  isModified ? 'border-blue-400 bg-blue-50/50' : 'border-gray-300'
-                                }`}
-                              />
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </FadeIn>
-                ))}
-                <div className="flex justify-end">
-                  <button
-                    type="button"
-                    onClick={saveAllSettings}
-                    disabled={!hasPendingChanges || saving}
-                    className="rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50"
-                  >
-                    {saving ? 'Guardando...' : 'Guardar cambios'}
-                  </button>
-                </div>
-              </div>
+              <SettingsTab
+                settings={settings}
+                drafts={drafts}
+                updateDraft={updateDraft}
+                hasPendingChanges={hasPendingChanges}
+                saving={saving}
+                onSave={saveAllSettings}
+              />
             )}
 
             {activeTab === 'templates' && (
-              <div className="space-y-3">
-                <FadeIn className="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4 shadow-sm">
-                  <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-indigo-700">
-                    <HiOutlineInformationCircle className="h-4 w-4" /> Variables disponibles
-                  </div>
-                  <p className="mb-2 text-xs text-indigo-600/70">Haz clic en una variable para insertarla, o arrástrala al campo de asunto o cuerpo.</p>
-                  <div className="flex flex-wrap gap-2">
-                    {TEMPLATE_VARIABLES.map((v) => (
-                      <button
-                        key={v.variable}
-                        type="button"
-                        draggable
-                        onDragStart={(e) => {
-                          e.dataTransfer.setData('text/plain', v.variable);
-                          e.dataTransfer.effectAllowed = 'copy';
-                        }}
-                        onClick={() => insertVariable(v.variable)}
-                        className="group flex items-center gap-1.5 rounded-lg bg-indigo-100 px-2.5 py-1.5 text-xs transition-all hover:bg-indigo-200 hover:shadow-sm active:scale-95 cursor-grab active:cursor-grabbing"
-                        title={v.desc}
-                      >
-                        <code className="font-mono font-semibold text-indigo-800">{v.variable}</code>
-                        <span className="text-indigo-600/70">{v.desc}</span>
-                      </button>
-                    ))}
-                  </div>
-                </FadeIn>
-                {templates.map((t) => {
-                  const draft = templateDrafts[t.id];
-                  const currentSubject = draft?.subject ?? t.subject;
-                  const currentBody = draft?.body ?? t.body;
-                  const currentActive = draft?.active ?? t.active;
-                  const isModified = t.id in templateDrafts;
-                  return (
-                    <FadeIn key={t.id} className={`rounded-2xl border bg-white p-4 shadow-sm ${isModified ? 'border-blue-200' : 'border-gray-100'}`}>
-                      <div className="mb-2 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <h4 className="text-sm font-semibold text-gray-900">{t.name}</h4>
-                          <span className="text-xs text-gray-400">{t.slug}</span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => updateTemplateDraft(t.id, { active: !currentActive })}
-                          className="transition-all active:scale-[0.96]"
-                        >
-                          <Badge variant={currentActive ? 'green' : 'gray'} size="sm">{currentActive ? 'Activa' : 'Inactiva'}</Badge>
-                        </button>
-                      </div>
-                      <div className="space-y-2">
-                        <div>
-                          <label className="text-xs font-medium text-gray-500">Asunto</label>
-                          <input
-                            type="text"
-                            value={currentSubject}
-                            onChange={(e) => updateTemplateDraft(t.id, { subject: e.target.value })}
-                            onFocus={(e) => { lastFocusedRef.current = { templateId: t.id, field: 'subject', element: e.target }; }}
-                            onDrop={(e) => handleDrop(e, t.id, 'subject')}
-                            onDragOver={handleDragOver}
-                            className={`mt-0.5 w-full rounded-lg border px-3 py-1.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
-                              isModified && draft?.subject != null ? 'border-blue-400 bg-blue-50/50' : 'border-gray-300'
-                            }`}
-                          />
-                        </div>
-                        <div>
-                          <label className="text-xs font-medium text-gray-500">Cuerpo</label>
-                          <textarea
-                            value={currentBody}
-                            onChange={(e) => updateTemplateDraft(t.id, { body: e.target.value })}
-                            onFocus={(e) => { lastFocusedRef.current = { templateId: t.id, field: 'body', element: e.target }; }}
-                            onDrop={(e) => handleDrop(e, t.id, 'body')}
-                            onDragOver={handleDragOver}
-                            rows={3}
-                            className={`mt-0.5 w-full rounded-lg border px-3 py-1.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
-                              isModified && draft?.body != null ? 'border-blue-400 bg-blue-50/50' : 'border-gray-300'
-                            }`}
-                          />
-                        </div>
-                      </div>
-                      {isModified && (
-                        <div className="mt-3 flex items-center justify-end gap-2 border-t border-gray-100 pt-3">
-                          {confirmingTemplateId === t.id ? (
-                            <>
-                              <span className="mr-auto text-xs text-amber-600">\u00bfGuardar cambios de esta plantilla?</span>
-                              <button
-                                type="button"
-                                onClick={() => setConfirmingTemplateId(null)}
-                                className="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-100"
-                              >
-                                Cancelar
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => saveTemplate(t.id)}
-                                disabled={savingTemplateId === t.id}
-                                className="rounded-lg bg-blue-600 px-4 py-1.5 text-xs font-medium text-white transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50"
-                              >
-                                {savingTemplateId === t.id ? 'Guardando...' : 'Confirmar'}
-                              </button>
-                            </>
-                          ) : (
-                            <>
-                              <button
-                                type="button"
-                                onClick={() => discardTemplateDraft(t.id)}
-                                className="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
-                              >
-                                Descartar
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setConfirmingTemplateId(t.id)}
-                                className="rounded-lg bg-blue-600 px-4 py-1.5 text-xs font-medium text-white shadow-sm transition-all hover:bg-blue-700 active:scale-[0.98]"
-                              >
-                                Guardar
-                              </button>
-                            </>
-                          )}
-                        </div>
-                      )}
-                    </FadeIn>
-                  );
-                })}
-                <div className="flex justify-end">
-                  <button
-                    type="button"
-                    onClick={saveAllTemplates}
-                    disabled={!hasPendingTemplateDrafts || saving}
-                    className="rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50"
-                  >
-                    {saving ? 'Guardando...' : 'Guardar todas'}
-                  </button>
-                </div>
-              </div>
+              <TemplatesTab
+                templates={templates}
+                templateDrafts={templateDrafts}
+                updateTemplateDraft={updateTemplateDraft}
+                hasPendingTemplateDrafts={hasPendingTemplateDrafts}
+                saving={saving}
+                savingTemplateId={savingTemplateId}
+                confirmingTemplateId={confirmingTemplateId}
+                setConfirmingTemplateId={setConfirmingTemplateId}
+                saveTemplate={saveTemplate}
+                discardTemplateDraft={discardTemplateDraft}
+                saveAllTemplates={saveAllTemplates}
+                insertVariable={insertVariable}
+                lastFocusedRef={lastFocusedRef}
+                handleDrop={handleDrop}
+                handleDragOver={handleDragOver}
+              />
             )}
 
             {activeTab === 'automation' && (

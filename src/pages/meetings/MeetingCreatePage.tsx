@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -6,25 +6,51 @@ import { AnimatePresence } from 'framer-motion';
 import { createMeetingSchema, type CreateMeetingFormData } from '../../schemas';
 import { meetingsApi } from '../../api/meetings';
 import { areasApi } from '../../api/areas';
-import { MEETING_CLASSIFICATION_LABELS } from '../../types/enums';
+import { MEETING_CLASSIFICATION_LABELS, Role } from '../../types/enums';
 import { ApiError } from '../../api/client';
 import type { Area } from '../../types';
-import { HiOutlineArrowLeft, HiOutlineExclamationCircle } from 'react-icons/hi';
+import { useAuth } from '../../context/useAuth';
+import { HiOutlineArrowLeft, HiOutlineExclamationCircle, HiOutlineOfficeBuilding } from 'react-icons/hi';
 import { PageTransition, FadeIn, SlideDown, Spinner } from '../../components/ui';
 
 export function MeetingCreatePage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isManager = user?.role?.slug === Role.AREA_MANAGER;
   const [serverError, setServerError] = useState('');
   const [areas, setAreas] = useState<Area[]>([]);
+  const [managerArea, setManagerArea] = useState<Area | null>(null);
 
-  useEffect(() => {
-    areasApi.listAll().then((res) => setAreas(res)).catch(() => {});
-  }, []);
-
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<CreateMeetingFormData>({
+  const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<CreateMeetingFormData>({
     resolver: zodResolver(createMeetingSchema),
     defaultValues: { classification: 'operational' },
   });
+
+  const loadAreas = useCallback(async () => {
+    try {
+      const res = await areasApi.listAll();
+      setAreas(res);
+      if (isManager) {
+        const uid = Number(user?.id);
+        const found =
+          (user?.area_id ? res.find((a) => Number(a.id) === Number(user.area_id)) : null) ??
+          res.find(
+            (a) =>
+              Number(a.manager_user_id) === uid ||
+              (a.manager?.id != null && Number(a.manager.id) === uid),
+          ) ??
+          null;
+        setManagerArea(found);
+        if (found) setValue('area_id', found.id);
+      }
+    } catch {
+      // silent
+    }
+  }, [isManager, user?.id, user?.area_id, setValue]);
+
+  useEffect(() => {
+    loadAreas();
+  }, [loadAreas]);
 
   const onSubmit = async (data: CreateMeetingFormData) => {
     setServerError('');
@@ -85,10 +111,18 @@ export function MeetingCreatePage() {
             </div>
             <div>
               <label htmlFor="area_id" className="mb-1.5 block text-sm font-medium text-gray-700">Área</label>
-              <select id="area_id" {...register('area_id', { setValueAs: (v: string) => v ? Number(v) : null })} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20">
-                <option value="">Sin área</option>
-                {areas.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
-              </select>
+              {isManager ? (
+                <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-700">
+                  <HiOutlineOfficeBuilding className="h-4 w-4 shrink-0 text-purple-500" />
+                  <span>{managerArea?.name ?? 'Cargando área...'}</span>
+                  <input type="hidden" {...register('area_id', { valueAsNumber: true })} />
+                </div>
+              ) : (
+                <select id="area_id" {...register('area_id', { setValueAs: (v: string) => v ? Number(v) : null })} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20">
+                  <option value="">Sin área</option>
+                  {areas.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
+                </select>
+              )}
             </div>
             <div>
               <label htmlFor="notes" className="mb-1.5 block text-sm font-medium text-gray-700">Notas</label>

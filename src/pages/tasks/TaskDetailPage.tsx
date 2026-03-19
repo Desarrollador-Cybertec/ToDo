@@ -29,9 +29,6 @@ import { areasApi } from '../../api/areas';
 import { usersApi } from '../../api/users';
 import {
   HiOutlineArrowLeft,
-  HiOutlinePaperClip,
-  HiOutlineChatAlt,
-  HiOutlineX,
   HiOutlinePencil,
   HiOutlineUpload,
   HiOutlineExclamationCircle,
@@ -39,17 +36,25 @@ import {
   HiOutlineClock,
   HiOutlineRefresh,
   HiOutlineTrash,
+  HiOutlineChatAlt,
 } from 'react-icons/hi';
-import { PageTransition, FadeIn, SlideDown, StaggerList, StaggerItem } from '../../components/ui';
+import { PageTransition, FadeIn, SlideDown } from '../../components/ui';
 import { SkeletonDetail, Badge, Spinner, STATUS_BADGE_VARIANT, PRIORITY_BADGE_VARIANT } from '../../components/ui';
 import { TaskStatusSelect } from '../../components/tasks/TaskStatusSelect';
-
-function statusProgress(status: string): number {
-  if (status === 'completed') return 100;
-  if (status === 'in_review') return 75;
-  if (status === 'in_progress' || status === 'rejected' || status === 'overdue') return 25;
-  return 0;
-}
+import { statusProgress } from '../../utils';
+import { TaskEditForm } from './components/TaskEditForm';
+import {
+  CommentFormPanel,
+  UpdateFormPanel,
+  ApproveFormPanel,
+  RejectFormPanel,
+  DelegateFormPanel,
+  UploadFormPanel,
+} from './components/TaskActionForms';
+import { TaskComments } from './components/TaskComments';
+import { TaskAttachments } from './components/TaskAttachments';
+import { TaskStatusHistory } from './components/TaskStatusHistory';
+import { TaskUpdates } from './components/TaskUpdates';
 
 export function TaskDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -153,8 +158,15 @@ export function TaskDetailPage() {
   const terminal = [TaskStatus.COMPLETED as string, TaskStatus.CANCELLED as string];
 
   const canDelete = isSuperAdmin;
-  // Manager can only delegate tasks in their own area — not tasks sent to a different area (pending_assignment there)
-  const managerOwnsTask = isManager && (
+  // Manager cannot delegate if the task is assigned to themselves (any responsible field)
+  const uid = Number(user?.id);
+  const taskAssignedToSelf =
+    (task?.assigned_to_user_id != null && Number(task.assigned_to_user_id) === uid) ||
+    (task?.current_responsible_user_id != null && Number(task.current_responsible_user_id) === uid) ||
+    (task?.current_responsible?.id != null && Number(task.current_responsible.id) === uid) ||
+    (task?.assigned_user?.id != null && Number(task.assigned_user.id) === uid);
+  // Manager can only delegate tasks in their own area — not tasks sent to a different area
+  const managerOwnsTask = isManager && !taskAssignedToSelf && (
     !task?.assigned_to_area_id ||
     Number(task.assigned_to_area_id) === Number(user?.area_id) ||
     Number(task?.area_id) === Number(user?.area_id)
@@ -329,138 +341,34 @@ export function TaskDetailPage() {
         <FadeIn className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
           <AnimatePresence mode="wait">
             {editing ? (
-              <motion.div
-                key="edit-mode"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="space-y-4"
-              >
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">Editar tarea</h3>
-                  <button type="button" onClick={cancelEditing} className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
-                    <HiOutlineX className="h-5 w-5" />
-                  </button>
-                </div>
-
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium text-gray-700">Título</label>
-                  <input
-                    type="text"
-                    value={editTitle}
-                    onChange={(e) => setEditTitle(e.target.value)}
-                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium text-gray-700">Descripción</label>
-                  <textarea
-                    value={editDescription}
-                    onChange={(e) => setEditDescription(e.target.value)}
-                    rows={3}
-                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                  />
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className="mb-1.5 block text-sm font-medium text-gray-700">Prioridad</label>
-                    <select
-                      value={editPriority}
-                      onChange={(e) => setEditPriority(e.target.value)}
-                      className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                    >
-                      {Object.entries(TASK_PRIORITY_LABELS).map(([value, label]) => (
-                        <option key={value} value={value}>{label}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="mb-1.5 block text-sm font-medium text-gray-700">Fecha límite</label>
-                    <input
-                      type="date"
-                      value={editDueDate}
-                      onChange={(e) => setEditDueDate(e.target.value)}
-                      className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1.5 block text-sm font-medium text-gray-700">Fecha de inicio</label>
-                    <input
-                      type="date"
-                      value={editStartDate}
-                      onChange={(e) => setEditStartDate(e.target.value)}
-                      className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                    />
-                  </div>
-                </div>
-
-                {/* Requisitos */}
-                <div className="rounded-xl border border-gray-200 bg-gray-50/50 p-4">
-                  <p className="mb-3 text-sm font-semibold text-gray-700">Requisitos</p>
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    {[
-                      { label: 'Requiere adjunto', value: editRequiresAttachment, set: setEditRequiresAttachment },
-                      { label: 'Requiere comentario de cierre', value: editRequiresComment, set: setEditRequiresComment },
-                      { label: 'Requiere aprobación del encargado', value: editRequiresApproval, set: setEditRequiresApproval },
-                      { label: 'Requiere fecha límite', value: editRequiresDueDate, set: setEditRequiresDueDate },
-                      { label: 'Requiere reporte de avance', value: editRequiresProgress, set: setEditRequiresProgress },
-                    ].map((opt) => (
-                      <label key={opt.label} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-gray-700 transition-colors hover:bg-white">
-                        <input
-                          type="checkbox"
-                          checked={opt.value}
-                          onChange={(e) => opt.set(e.target.checked)}
-                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500/20"
-                        />
-                        {opt.label}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Notificaciones */}
-                <div className="rounded-xl border border-gray-200 bg-gray-50/50 p-4">
-                  <p className="mb-3 text-sm font-semibold text-gray-700">Notificaciones</p>
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    {[
-                      { label: 'Notificar al vencer', value: editNotifyDue, set: setEditNotifyDue },
-                      { label: 'Notificar si vencida', value: editNotifyOverdue, set: setEditNotifyOverdue },
-                      { label: 'Notificar al completarse', value: editNotifyCompletion, set: setEditNotifyCompletion },
-                      { label: 'Notificar al completar (usuario)', value: editRequiresNotification, set: setEditRequiresNotification },
-                    ].map((opt) => (
-                      <label key={opt.label} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-gray-700 transition-colors hover:bg-white">
-                        <input
-                          type="checkbox"
-                          checked={opt.value}
-                          onChange={(e) => opt.set(e.target.checked)}
-                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500/20"
-                        />
-                        {opt.label}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">
-                  <button
-                    type="button"
-                    onClick={cancelEditing}
-                    className="rounded-xl px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={saveEdit}
-                    disabled={editSaving || !editTitle.trim()}
-                    className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50"
-                  >
-                    {editSaving ? <><Spinner size="sm" /> Guardando...</> : 'Guardar cambios'}
-                  </button>
-                </div>
-              </motion.div>
+              <TaskEditForm
+                editTitle={editTitle}
+                setEditTitle={setEditTitle}
+                editDescription={editDescription}
+                setEditDescription={setEditDescription}
+                editPriority={editPriority}
+                setEditPriority={setEditPriority}
+                editDueDate={editDueDate}
+                setEditDueDate={setEditDueDate}
+                editStartDate={editStartDate}
+                setEditStartDate={setEditStartDate}
+                requirementFields={[
+                  { label: 'Requiere adjunto', value: editRequiresAttachment, set: setEditRequiresAttachment },
+                  { label: 'Requiere comentario de cierre', value: editRequiresComment, set: setEditRequiresComment },
+                  { label: 'Requiere aprobación del encargado', value: editRequiresApproval, set: setEditRequiresApproval },
+                  { label: 'Requiere fecha límite', value: editRequiresDueDate, set: setEditRequiresDueDate },
+                  { label: 'Requiere reporte de avance', value: editRequiresProgress, set: setEditRequiresProgress },
+                ]}
+                notificationFields={[
+                  { label: 'Notificar al vencer', value: editNotifyDue, set: setEditNotifyDue },
+                  { label: 'Notificar si vencida', value: editNotifyOverdue, set: setEditNotifyOverdue },
+                  { label: 'Notificar al completarse', value: editNotifyCompletion, set: setEditNotifyCompletion },
+                  { label: 'Notificar al completar (usuario)', value: editRequiresNotification, set: setEditRequiresNotification },
+                ]}
+                saving={editSaving}
+                onSave={saveEdit}
+                onCancel={cancelEditing}
+              />
             ) : (
               <motion.div key="view-mode" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
           <div className="flex flex-wrap items-start justify-between gap-4">
@@ -608,250 +516,29 @@ export function TaskDetailPage() {
         {/* Modal forms */}
         <AnimatePresence>
           {showCommentForm && (
-            <SlideDown className="mt-4">
-              <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                <h3 className="mb-3 font-semibold text-gray-900">Agregar comentario</h3>
-                <form onSubmit={commentForm.handleSubmit(onComment)} className="space-y-3">
-                  <textarea {...commentForm.register('comment')} rows={3} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="Escribe tu comentario..." />
-                  {commentForm.formState.errors.comment && <p className="text-sm text-red-500">{commentForm.formState.errors.comment.message}</p>}
-                  <div className="flex gap-2">
-                    <button type="submit" disabled={commentForm.formState.isSubmitting} className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">Enviar</button>
-                    <button type="button" onClick={() => setShowCommentForm(false)} className="rounded-xl border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Cancelar</button>
-                  </div>
-                </form>
-              </div>
-            </SlideDown>
+            <CommentFormPanel form={commentForm} onSubmit={onComment} onClose={() => setShowCommentForm(false)} />
           )}
-
           {showUpdateForm && (
-            <SlideDown className="mt-4">
-              <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                <h3 className="mb-3 font-semibold text-gray-900">Reportar avance</h3>
-                <form onSubmit={updateForm.handleSubmit(onUpdate)} className="space-y-3">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <select {...updateForm.register('update_type')} className="rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none">
-                      <option value="progress">Progreso</option>
-                      <option value="evidence">Evidencia</option>
-                      <option value="note">Nota</option>
-                    </select>
-                    <input type="number" {...updateForm.register('progress_percent', { valueAsNumber: true })} min={0} max={100} placeholder="% avance" className="rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none" />
-                  </div>
-                  <textarea {...updateForm.register('comment')} rows={3} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none" placeholder="Describe el avance..." />
-                  <div className="flex gap-2">
-                    <button type="submit" disabled={updateForm.formState.isSubmitting} className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">Reportar</button>
-                    <button type="button" onClick={() => setShowUpdateForm(false)} className="rounded-xl border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Cancelar</button>
-                  </div>
-                </form>
-              </div>
-            </SlideDown>
+            <UpdateFormPanel form={updateForm} onSubmit={onUpdate} onClose={() => setShowUpdateForm(false)} />
           )}
-
           {showApproveForm && (
-            <SlideDown className="mt-4">
-              <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                <h3 className="mb-3 font-semibold text-gray-900">Aprobar tarea</h3>
-                <form onSubmit={approveForm.handleSubmit(onApprove)} className="space-y-3">
-                  <textarea {...approveForm.register('note')} rows={3} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="Nota de aprobación (opcional)..." />
-                  <div className="flex gap-2">
-                    <button type="submit" disabled={approveForm.formState.isSubmitting} className="rounded-xl bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50">Aprobar</button>
-                    <button type="button" onClick={() => setShowApproveForm(false)} className="rounded-xl border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Cancelar</button>
-                  </div>
-                </form>
-              </div>
-            </SlideDown>
+            <ApproveFormPanel form={approveForm} onSubmit={onApprove} onClose={() => setShowApproveForm(false)} />
           )}
-
           {showRejectForm && (
-            <SlideDown className="mt-4">
-              <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                <h3 className="mb-3 font-semibold text-gray-900">Rechazar tarea</h3>
-                <form onSubmit={rejectForm.handleSubmit(onReject)} className="space-y-3">
-                  <textarea {...rejectForm.register('note')} rows={3} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none" placeholder="Motivo del rechazo..." />
-                  {rejectForm.formState.errors.note && <p className="text-sm text-red-500">{rejectForm.formState.errors.note.message}</p>}
-                  <div className="flex gap-2">
-                    <button type="submit" disabled={rejectForm.formState.isSubmitting} className="rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50">Rechazar</button>
-                    <button type="button" onClick={() => setShowRejectForm(false)} className="rounded-xl border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Cancelar</button>
-                  </div>
-                </form>
-              </div>
-            </SlideDown>
+            <RejectFormPanel form={rejectForm} onSubmit={onReject} onClose={() => setShowRejectForm(false)} />
           )}
-
           {showDelegateForm && (
-            <SlideDown className="mt-4">
-              <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                <h3 className="mb-3 font-semibold text-gray-900">Delegar tarea</h3>
-                <form onSubmit={delegateForm.handleSubmit(onDelegate)} className="space-y-3">
-                  <select
-                    {...delegateForm.register('to_user_id', { valueAsNumber: true })}
-                    disabled={membersLoading}
-                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none disabled:bg-gray-50 disabled:text-gray-400"
-                  >
-                    <option value="">
-                      {membersLoading ? 'Cargando trabajadores...' : 'Seleccionar trabajador'}
-                    </option>
-                    {!membersLoading && areaMembers.filter(m => m.role?.slug === Role.WORKER).map((m) => (
-                      <option key={m.id} value={m.id}>{m.name}</option>
-                    ))}
-                  </select>
-                  {delegateForm.formState.errors.to_user_id && <p className="text-sm text-red-500">{delegateForm.formState.errors.to_user_id.message}</p>}
-                  <textarea {...delegateForm.register('note')} rows={2} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none" placeholder="Nota (opcional)..." />
-                  <div className="flex gap-2">
-                    <button type="submit" disabled={delegateForm.formState.isSubmitting} className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">Delegar</button>
-                    <button type="button" onClick={() => setShowDelegateForm(false)} className="rounded-xl border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Cancelar</button>
-                  </div>
-                </form>
-              </div>
-            </SlideDown>
+            <DelegateFormPanel form={delegateForm} onSubmit={onDelegate} onClose={() => setShowDelegateForm(false)} members={areaMembers} loading={membersLoading} />
           )}
-
           {showUploadForm && (
-            <SlideDown className="mt-4">
-              <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                <h3 className="mb-3 font-semibold text-gray-900">Subir archivo</h3>
-                <div className="space-y-3">
-                  <select value={attachmentType} onChange={(e) => setAttachmentType(e.target.value)} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none">
-                    <option value="evidence">Evidencia</option>
-                    <option value="support">Soporte</option>
-                    <option value="final_delivery">Entrega final</option>
-                  </select>
-                  <input type="file" onChange={(e) => setUploadFile(e.target.files?.[0] ?? null)} className="w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-blue-600 hover:file:bg-blue-100" />
-                  <div className="flex gap-2">
-                    <button type="button" onClick={onUpload} disabled={!uploadFile} className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">Subir</button>
-                    <button type="button" onClick={() => setShowUploadForm(false)} className="rounded-xl border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Cancelar</button>
-                  </div>
-                </div>
-              </div>
-            </SlideDown>
+            <UploadFormPanel file={uploadFile} setFile={setUploadFile} attachmentType={attachmentType} setAttachmentType={setAttachmentType} onUpload={onUpload} onClose={() => setShowUploadForm(false)} />
           )}
         </AnimatePresence>
 
-      {/* Comments */}
-      {(task.comments ?? []).length > 0 && (
-        <FadeIn delay={0.1} className="mt-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-          <h3 className="mb-4 flex items-center gap-2 font-semibold text-gray-900">
-            <HiOutlineChatAlt className="h-5 w-5 text-blue-500" /> Comentarios
-            <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-600">{(task.comments ?? []).length}</span>
-          </h3>
-          <StaggerList className="space-y-3">
-            {(task.comments ?? []).map((c) => (
-              <StaggerItem key={c.id}>
-                <div className="rounded-xl bg-gray-50 p-4 transition-colors hover:bg-gray-100/80">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-xs font-medium text-blue-600">{c.user?.name?.charAt(0) ?? '?'}</span>
-                      <span className="text-sm font-medium text-gray-900">{c.user?.name ?? 'Desconocido'}</span>
-                    </div>
-                    <span className="text-xs text-gray-400">{new Date(c.created_at).toLocaleString('es-PE')}</span>
-                  </div>
-                  <p className="mt-2 pl-9 text-sm text-gray-700">{c.comment}</p>
-                </div>
-              </StaggerItem>
-            ))}
-          </StaggerList>
-        </FadeIn>
-      )}
-
-      {/* Attachments */}
-      {(task.attachments ?? []).length > 0 && (
-        <FadeIn delay={0.15} className="mt-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-          <h3 className="mb-4 flex items-center gap-2 font-semibold text-gray-900">
-            <HiOutlinePaperClip className="h-5 w-5 text-indigo-500" /> Adjuntos
-            <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-600">{(task.attachments ?? []).length}</span>
-          </h3>
-          <StaggerList className="space-y-2">
-            {(task.attachments ?? []).map((a) => (
-              <StaggerItem key={a.id}>
-                <div className="flex items-center justify-between rounded-xl bg-gray-50 p-4 transition-colors hover:bg-gray-100/80">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50">
-                      <HiOutlinePaperClip className="h-4 w-4 text-indigo-500" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{a.file_name}</p>
-                      <p className="text-xs text-gray-500">{a.user?.name ?? 'Desconocido'} · <Badge variant="gray" size="sm">{a.attachment_type}</Badge></p>
-                    </div>
-                  </div>
-                </div>
-              </StaggerItem>
-            ))}
-          </StaggerList>
-        </FadeIn>
-      )}
-
-      {/* Status History */}
-      {(task.status_history ?? []).length > 0 && (
-        <FadeIn delay={0.2} className="mt-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-          <h3 className="mb-4 font-semibold text-gray-900">Historial de estados</h3>
-          {(() => {
-            const history = task.status_history ?? [];
-            // Workers only see entries where they were the responsible user at that moment
-            const visible = (isSuperAdmin || isManager)
-              ? history
-              : history.filter((h) => h.user_id === user?.id);
-            return (
-              <div className="relative ml-3 border-l-2 border-gray-200 pl-6">
-                {visible.length === 0 && (
-                  <p className="text-sm text-gray-400">No tienes interacciones registradas en esta tarea.</p>
-                )}
-                {visible.map((h, index) => (
-                  <div key={h.id} className={`relative pb-4 ${index === visible.length - 1 ? 'pb-0' : ''}`}>
-                    <div className="absolute -left-7.75 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 ring-4 ring-white">
-                      <div className="h-1.5 w-1.5 rounded-full bg-white" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        {h.from_status ? (
-                          <>
-                            <Badge variant={STATUS_BADGE_VARIANT[h.from_status]} size="sm">{TASK_STATUS_LABELS[h.from_status]}</Badge>
-                            <span className="mx-1.5 text-gray-400">→</span>
-                          </>
-                        ) : null}
-                        <Badge variant={STATUS_BADGE_VARIANT[h.to_status]} size="sm">{TASK_STATUS_LABELS[h.to_status]}</Badge>
-                      </p>
-                      <p className="mt-1 text-xs text-gray-500">{h.user?.name ?? 'Sistema'} · {new Date(h.created_at).toLocaleString('es-PE')}</p>
-                      {h.note && <p className="mt-1 text-xs text-gray-600">{h.note}</p>}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            );
-          })()}
-        </FadeIn>
-      )}
-
-      {/* Updates */}
-      {(task.updates ?? []).length > 0 && (
-        <FadeIn delay={0.25} className="mt-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-          <h3 className="mb-4 font-semibold text-gray-900">Reportes de avance</h3>
-          <StaggerList className="space-y-3">
-            {(task.updates ?? []).map((u) => (
-              <StaggerItem key={u.id}>
-                <div className="rounded-xl bg-gray-50 p-4 transition-colors hover:bg-gray-100/80">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-green-100 text-xs font-medium text-green-600">{u.user?.name?.charAt(0) ?? '?'}</span>
-                      <span className="text-sm font-medium text-gray-900">{u.user?.name ?? 'Desconocido'}</span>
-                    </div>
-                    <span className="text-xs text-gray-400">{new Date(u.created_at).toLocaleString('es-PE')}</span>
-                  </div>
-                  <div className="mt-2 pl-9">
-                    {u.progress_percent !== null && (
-                      <div className="mb-1 flex items-center gap-2">
-                        <div className="h-1.5 w-20 rounded-full bg-gray-200">
-                          <div className="h-1.5 rounded-full bg-green-500" style={{ width: `${u.progress_percent}%` }} />
-                        </div>
-                        <span className="text-xs font-semibold text-green-600">{u.progress_percent}%</span>
-                      </div>
-                    )}
-                    {u.comment && <p className="text-sm text-gray-700">{u.comment}</p>}
-                  </div>
-                </div>
-              </StaggerItem>
-            ))}
-          </StaggerList>
-        </FadeIn>
-      )}
+      <TaskComments comments={task.comments ?? []} />
+      <TaskAttachments attachments={task.attachments ?? []} />
+      <TaskStatusHistory history={task.status_history ?? []} isSuperAdmin={isSuperAdmin} isManager={isManager} userId={user?.id} />
+      <TaskUpdates updates={task.updates ?? []} />
       </div>
     </PageTransition>
   );

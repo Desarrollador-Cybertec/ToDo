@@ -3,35 +3,20 @@ import { Link } from 'react-router-dom';
 import { dashboardApi } from '../../api/dashboard';
 import { areasApi } from '../../api/areas';
 import { useAuth } from '../../context/useAuth';
-import { TaskStatus, TASK_STATUS_LABELS, TASK_PRIORITY_LABELS } from '../../types/enums';
-import type { PersonalDashboard, AreaDashboard, UpcomingTask, ResponsibleLoad } from '../../types';
+import { TaskStatus, TASK_STATUS_LABELS } from '../../types/enums';
+import type { PersonalDashboard, AreaDashboard } from '../../types';
 import {
   HiOutlineClipboardList,
   HiOutlineClock,
   HiOutlineExclamation,
   HiOutlineCheckCircle,
-  HiOutlineChevronRight,
-  HiOutlineEye,
-  HiOutlineLightningBolt,
   HiOutlineLightBulb,
   HiOutlinePlusCircle,
   HiOutlineUserGroup,
 } from 'react-icons/hi';
-import { FadeIn, SkeletonDashboard, Badge, STATUS_BADGE_VARIANT, PRIORITY_BADGE_VARIANT } from '../../components/ui';
-
-function formatRelativeDate(dateStr: string | null): string {
-  if (!dateStr) return '';
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diffMs = date.getTime() - now.getTime();
-  const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-  if (diffDays < 0) return `Hace ${Math.abs(diffDays)} día${Math.abs(diffDays) !== 1 ? 's' : ''}`;
-  if (diffDays === 0) return 'Hoy';
-  if (diffDays === 1) return 'Mañana';
-  const weekdays = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-  if (diffDays <= 6) return weekdays[date.getDay()];
-  return date.toLocaleDateString('es-PE', { day: 'numeric', month: 'short' });
-}
+import { FadeIn, SkeletonDashboard, Badge, STATUS_BADGE_VARIANT } from '../../components/ui';
+import { PRIORITY_ORDER } from '../../utils';
+import { ResponsibleRow, MiniStat, UrgentTaskRow, TaskRow } from './components/DashboardWidgets';
 
 const TIPS = [
   { icon: '✅', text: 'Revisa las tareas pendientes de aprobación para no frenar a tu equipo.' },
@@ -77,26 +62,29 @@ export function ManagerDashboardView() {
     resolveAndFetch();
   }, [user?.id, user?.area_id]);
 
+  const personalTasks = useMemo(() => {
+    return (data?.upcoming_tasks ?? []).filter(
+      (t) => t.status !== TaskStatus.COMPLETED && t.status !== TaskStatus.CANCELLED,
+    );
+  }, [data?.upcoming_tasks]);
+
   const urgentTasks = useMemo(() => {
-    if (!data?.upcoming_tasks) return [];
-    return data.upcoming_tasks.filter(
+    return personalTasks.filter(
       (t) => t.is_overdue || t.status === TaskStatus.OVERDUE || t.priority === 'urgent' || t.priority === 'high'
     );
-  }, [data]);
+  }, [personalTasks]);
 
   const allTasks = useMemo(() => {
-    if (!data?.upcoming_tasks) return [];
-    return [...data.upcoming_tasks].sort((a, b) => {
-      const prioOrder: Record<string, number> = { urgent: 0, high: 1, medium: 2, low: 3 };
-      const pa = prioOrder[a.priority] ?? 9;
-      const pb = prioOrder[b.priority] ?? 9;
+    return [...personalTasks].sort((a, b) => {
+      const pa = PRIORITY_ORDER[a.priority] ?? 9;
+      const pb = PRIORITY_ORDER[b.priority] ?? 9;
       if (pa !== pb) return pa - pb;
       if (a.due_date && b.due_date) return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
       if (a.due_date) return -1;
       if (b.due_date) return 1;
       return 0;
     });
-  }, [data]);
+  }, [personalTasks]);
 
   if (loading) return <SkeletonDashboard />;
   if (!data) return <p className="text-gray-500">No se pudo cargar el dashboard.</p>;
@@ -114,7 +102,7 @@ export function ManagerDashboardView() {
           </h2>
           <p className="mt-1 text-sm text-gray-500">
             Tu área tiene <span className="font-semibold text-gray-900">{areaData?.total_tasks ?? 0} tareas</span>
-            {' '}y tienes <span className="font-semibold text-gray-900">{data.active_tasks ?? 0} propias activas</span>
+            {' '}y tienes <span className="font-semibold text-gray-900">{personalTasks.length} tareas propias activas</span>
             {attentionCount > 0 && (
               <>. <span className="font-semibold text-red-600">{attentionCount} requieren tu atención</span></>
             )}.
@@ -317,101 +305,6 @@ export function ManagerDashboardView() {
           ))}
         </div>
       </FadeIn>
-    </div>
-  );
-}
-
-/* ── Sub-components ── */
-
-function ResponsibleRow({ responsible, max }: { responsible: ResponsibleLoad; max: number }) {
-  const ratio = max > 0 ? responsible.active_tasks / max : 0;
-  const pct = Math.round(ratio * 100);
-  const barColor = responsible.active_tasks === 0
-    ? 'bg-gray-200'
-    : ratio > 0.75
-    ? 'bg-red-500'
-    : ratio > 0.4
-    ? 'bg-amber-500'
-    : 'bg-blue-400';
-  return (
-    <div className="flex items-center gap-4 py-3">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-700">
-        {responsible.user_name.charAt(0).toUpperCase()}
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between">
-          <p className="truncate text-sm font-medium text-gray-900">{responsible.user_name}</p>
-          <span className="ml-2 shrink-0 text-sm font-semibold text-gray-900">{responsible.active_tasks}</span>
-        </div>
-        <div className="mt-1 h-1.5 w-full rounded-full bg-gray-100">
-          <div className={`h-1.5 rounded-full transition-all ${barColor}`} style={{ width: `${pct}%` }} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function MiniStat({ label, value, icon, color, alert }: { label: string; value: number; icon: React.ReactNode; color: string; alert?: boolean }) {
-  return (
-    <div className={`rounded-xl border px-4 py-3 transition-colors ${alert ? 'border-red-200 bg-red-50/40' : 'border-gray-100 bg-gray-50/50 hover:bg-gray-50'}`}>
-      <div className="flex items-center gap-2">
-        <span className={`flex h-7 w-7 items-center justify-center rounded-lg ${color}`}>{icon}</span>
-        <span className="text-xs text-gray-500">{label}</span>
-      </div>
-      <p className={`mt-1.5 text-xl font-bold ${alert ? 'text-red-700' : 'text-gray-900'}`}>{value}</p>
-    </div>
-  );
-}
-
-function UrgentTaskRow({ task }: { task: UpcomingTask }) {
-  const isOverdue = task.is_overdue ?? task.status === TaskStatus.OVERDUE;
-  return (
-    <div className="flex items-center justify-between gap-3 py-3.5">
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-gray-900">{task.title}</p>
-        <p className="mt-0.5 text-xs text-gray-500">
-          {isOverdue ? (
-            <span className="font-medium text-red-600">Vencida · {formatRelativeDate(task.due_date)}</span>
-          ) : (
-            <>Vence {task.due_date ? formatRelativeDate(task.due_date) : 'sin fecha'}</>
-          )}
-        </p>
-        <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-          <Badge variant={PRIORITY_BADGE_VARIANT[task.priority]} size="sm">{TASK_PRIORITY_LABELS[task.priority as keyof typeof TASK_PRIORITY_LABELS]}</Badge>
-        </div>
-      </div>
-      <div className="flex shrink-0 items-center gap-2">
-        <Link to={`/tasks/${task.id}`} className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50">
-          <HiOutlineEye className="inline h-3.5 w-3.5" /> Ver
-        </Link>
-        <Link to={`/tasks/${task.id}`} className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-700">
-          <HiOutlineLightningBolt className="inline h-3.5 w-3.5" /> Gestionar
-        </Link>
-      </div>
-    </div>
-  );
-}
-
-function TaskRow({ task }: { task: UpcomingTask }) {
-  return (
-    <div className="flex items-center justify-between gap-3 px-6 py-3.5">
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-gray-900">{task.title}</p>
-        <p className="mt-0.5 text-xs text-gray-500">
-          {task.due_date ? formatRelativeDate(task.due_date) : 'Sin fecha límite'}
-        </p>
-        <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-          <Badge variant={PRIORITY_BADGE_VARIANT[task.priority]} size="sm">{TASK_PRIORITY_LABELS[task.priority as keyof typeof TASK_PRIORITY_LABELS]}</Badge>
-          {task.status === TaskStatus.OVERDUE && <Badge variant="red" size="sm">Vencida</Badge>}
-          {task.status === TaskStatus.IN_REVIEW && <Badge variant="purple" size="sm">En revisión</Badge>}
-        </div>
-      </div>
-      <Link
-        to={`/tasks/${task.id}`}
-        className="flex shrink-0 items-center gap-1 rounded-lg bg-blue-600 px-3.5 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-700"
-      >
-        Revisar <HiOutlineChevronRight className="h-3.5 w-3.5" />
-      </Link>
     </div>
   );
 }

@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { meetingsApi } from '../../api/meetings';
 import { MEETING_CLASSIFICATION_LABELS, TASK_STATUS_LABELS, TASK_PRIORITY_LABELS } from '../../types/enums';
 import type { Meeting } from '../../types';
 import { HiOutlineArrowLeft, HiOutlineCalendar, HiOutlineChevronRight } from 'react-icons/hi';
 import { PageTransition, FadeIn, StaggerList, StaggerItem, Badge, STATUS_BADGE_VARIANT, PRIORITY_BADGE_VARIANT, SkeletonDetail } from '../../components/ui';
+import { MeetingTasksSection } from './components/MeetingTasksSection';
 
 const CLASSIFICATION_VARIANT: Record<string, 'purple' | 'blue' | 'green' | 'amber'> = {
   operational: 'blue',
@@ -19,12 +20,16 @@ export function MeetingDetailPage() {
   const [meeting, setMeeting] = useState<Meeting | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const loadMeeting = useCallback(() => {
     meetingsApi.get(Number(id))
       .then((res) => setMeeting(res))
       .catch(() => navigate('/meetings'))
       .finally(() => setLoading(false));
   }, [id, navigate]);
+
+  useEffect(() => {
+    loadMeeting();
+  }, [loadMeeting]);
 
   if (loading) return <SkeletonDetail />;
   if (!meeting) return null;
@@ -106,6 +111,12 @@ export function MeetingDetailPage() {
             </StaggerList>
           </FadeIn>
         )}
+
+        <MeetingTasksSection
+          meetingId={meeting.id}
+          areaId={meeting.area_id ?? meeting.area?.id ?? null}
+          onTasksCreated={loadMeeting}
+        />
       </div>
     </PageTransition>
   );
