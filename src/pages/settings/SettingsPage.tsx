@@ -203,7 +203,21 @@ export function SettingsPage() {
     }
   };
 
+  const MAX_IMPORT_SIZE = 5 * 1024 * 1024; // 5 MB
   const [importFile, setImportFile] = useState<File | null>(null);
+  const [importFileError, setImportFileError] = useState('');
+
+  const handleImportFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    if (file) {
+      const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+      if (ext !== 'csv') { setImportFileError('Solo se permiten archivos .csv'); setImportFile(null); return; }
+      if (file.size > MAX_IMPORT_SIZE) { setImportFileError(`El archivo excede el límite de ${MAX_IMPORT_SIZE / 1024 / 1024} MB.`); setImportFile(null); return; }
+    }
+    setImportFileError('');
+    setImportFile(file);
+  };
+
   const handleImport = async () => {
     if (!importFile) return;
     try {
@@ -384,9 +398,11 @@ export function SettingsPage() {
                   <input
                     type="file"
                     accept=".csv"
-                    onChange={(e) => setImportFile(e.target.files?.[0] ?? null)}
+                    onChange={handleImportFileChange}
                     className="w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-blue-600 hover:file:bg-blue-100"
                   />
+                  {importFileError && <p className="text-sm text-red-500">{importFileError}</p>}
+                  <p className="text-xs text-gray-400">Máx. 5 MB. Solo archivos .csv</p>
                   <button
                     type="button"
                     onClick={handleImport}

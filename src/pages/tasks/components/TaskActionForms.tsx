@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { Role } from '../../../types/enums';
 import type { User } from '../../../types';
@@ -156,6 +157,16 @@ export function DelegateFormPanel({
 }
 
 /* ── Upload Form ── */
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const ALLOWED_EXTENSIONS = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'txt', 'csv', 'zip', 'rar'];
+
+function validateFile(file: File): string | null {
+  if (file.size > MAX_FILE_SIZE) return `El archivo excede el límite de ${MAX_FILE_SIZE / 1024 / 1024} MB.`;
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+  if (!ALLOWED_EXTENSIONS.includes(ext)) return `Tipo de archivo no permitido (.${ext}). Tipos aceptados: ${ALLOWED_EXTENSIONS.join(', ')}.`;
+  return null;
+}
+
 export function UploadFormPanel({
   file, setFile, attachmentType, setAttachmentType, onUpload, onClose,
 }: {
@@ -166,6 +177,18 @@ export function UploadFormPanel({
   onUpload: () => void;
   onClose: () => void;
 }) {
+  const [fileError, setFileError] = useState<string | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0] ?? null;
+    if (selected) {
+      const error = validateFile(selected);
+      if (error) { setFileError(error); setFile(null); return; }
+    }
+    setFileError(null);
+    setFile(selected);
+  };
+
   return (
     <SlideDown className="mt-4">
       <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
@@ -176,7 +199,9 @@ export function UploadFormPanel({
             <option value="support">Soporte</option>
             <option value="final_delivery">Entrega final</option>
           </select>
-          <input type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-blue-600 hover:file:bg-blue-100" />
+          <input type="file" accept={ALLOWED_EXTENSIONS.map(e => `.${e}`).join(',')} onChange={handleFileChange} className="w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-blue-600 hover:file:bg-blue-100" />
+          {fileError && <p className="text-sm text-red-500">{fileError}</p>}
+          <p className="text-xs text-gray-400">Máx. 10 MB. Tipos: {ALLOWED_EXTENSIONS.join(', ')}</p>
           <div className="flex gap-2">
             <button type="button" onClick={onUpload} disabled={!file} className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">Subir</button>
             <button type="button" onClick={onClose} className="rounded-xl border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Cancelar</button>
