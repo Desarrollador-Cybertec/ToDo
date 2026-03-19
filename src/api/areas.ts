@@ -1,7 +1,6 @@
 import { apiClient } from './client';
 import type {
   Area,
-  AreaMember,
   ClaimWorkerResponse,
   CreateAreaRequest,
   UpdateAreaRequest,

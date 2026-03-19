@@ -74,7 +74,7 @@ export function AreaDashboardSection({ areaId, refreshKey }: AreaDashboardSectio
           </div>
           <div className="flex items-center justify-between text-sm">
             <span className="text-gray-600">Sin avance</span>
-            <span className="rounded-lg bg-amber-50 px-2 py-0.5 font-semibold text-amber-600">{dashboard.tasks_without_progress ?? 0}</span>
+            <span className="rounded-lg bg-amber-50 px-2 py-0.5 font-semibold text-amber-600">{dashboard.without_progress ?? 0}</span>
           </div>
         </div>
       </FadeIn>
