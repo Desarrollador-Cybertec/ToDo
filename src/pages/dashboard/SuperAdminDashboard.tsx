@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { dashboardApi } from '../../api/dashboard';
 import { meetingsApi } from '../../api/meetings';
 import { useAuth } from '../../context/useAuth';
-import { TaskStatus, TASK_STATUS_LABELS } from '../../types/enums';
+import {  TASK_STATUS_LABELS } from '../../types/enums';
 import type { GeneralDashboard, PendingByUser, Meeting } from '../../types';
 import {
   HiOutlineClipboardList,
@@ -162,26 +162,32 @@ export function SuperAdminDashboard() {
             <p className="text-xs text-gray-400">Distribución actual de todas las tareas.</p>
           </div>
           <div className="divide-y divide-gray-50 px-6">
-            {Object.entries(data.tasks_by_status ?? {}).map(([status, count]) => {
+            {(() => {
+              const entries = Object.entries(data.tasks_by_status ?? {}).filter(([, c]) => c > 0);
+              if (entries.length === 0) {
+                return <p className="py-6 text-center text-sm text-gray-400">Sin datos de estado disponibles</p>;
+              }
               const total = data.total_all || 1;
-              const pct = Math.round((count / total) * 100);
-              return (
-                <div key={status} className="flex items-center gap-3 py-3">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between">
-                      <Badge variant={STATUS_BADGE_VARIANT[status]}>{TASK_STATUS_LABELS[status as keyof typeof TASK_STATUS_LABELS] ?? status}</Badge>
-                      <span className="text-sm font-semibold text-gray-900">{count}</span>
-                    </div>
-                    <div className="mt-1.5 h-1.5 w-full rounded-full bg-gray-100">
-                      <div
-                        className={`h-1.5 rounded-full transition-all ${status === TaskStatus.COMPLETED ? 'bg-green-500' : status === TaskStatus.OVERDUE ? 'bg-red-500' : 'bg-blue-400'}`}
-                        style={{ width: `${pct}%` }}
-                      />
+              return entries.map(([status, count]) => {
+                const pct = Math.round((count / total) * 100);
+                return (
+                  <div key={status} className="flex items-center gap-3 py-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between">
+                        <Badge variant={STATUS_BADGE_VARIANT[status] ?? 'gray'}>{TASK_STATUS_LABELS[status as keyof typeof TASK_STATUS_LABELS] ?? status}</Badge>
+                        <span className="text-sm font-semibold text-gray-900">{count}</span>
+                      </div>
+                      <div className="mt-1.5 h-1.5 w-full rounded-full bg-gray-100">
+                        <div
+                          className={`h-1.5 rounded-full transition-all ${status === 'completed' ? 'bg-green-500' : status === 'overdue' ? 'bg-red-500' : 'bg-blue-400'}`}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              });
+            })()}
           </div>
         </FadeIn>
       </div>

@@ -4,7 +4,7 @@ import { dashboardApi } from '../../api/dashboard';
 import { meetingsApi } from '../../api/meetings';
 import { useAuth } from '../../context/useAuth';
 import { TaskStatus, TASK_STATUS_LABELS, TASK_PRIORITY_LABELS } from '../../types/enums';
-import type { PersonalDashboard, Meeting, UpcomingTask } from '../../types';
+import type { PersonalDashboard, AreaDashboard, Meeting, UpcomingTask } from '../../types';
 import {
   HiOutlineClipboardList,
   HiOutlineClock,
@@ -44,18 +44,22 @@ const TIPS = [
 export function ManagerDashboardView() {
   const { user } = useAuth();
   const [data, setData] = useState<PersonalDashboard | null>(null);
+  const [areaData, setAreaData] = useState<AreaDashboard | null>(null);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const areaId = user?.area_id;
     Promise.all([
       dashboardApi.personal(),
+      areaId ? dashboardApi.area(areaId).catch(() => null) : Promise.resolve(null),
       meetingsApi.list().catch(() => [] as Meeting[]),
-    ]).then(([dashboard, meetingList]) => {
+    ]).then(([dashboard, areaDashboard, meetingList]) => {
       setData(dashboard);
+      setAreaData(areaDashboard);
       setMeetings(Array.isArray(meetingList) ? meetingList : []);
     }).catch(() => {}).finally(() => setLoading(false));
-  }, []);
+  }, [user?.area_id]);
 
   const urgentTasks = useMemo(() => {
     if (!data?.upcoming_tasks) return [];
@@ -210,26 +214,33 @@ export function ManagerDashboardView() {
               <h3 className="font-semibold text-gray-900">Por estado</h3>
             </div>
             <div className="divide-y divide-gray-50 px-5">
-              {Object.entries(data.tasks_by_status ?? {}).map(([status, count]) => {
-                const total = (data.active_tasks + data.completed_tasks + data.overdue_tasks) || 1;
-                const pct = Math.round((count / total) * 100);
-                return (
-                  <div key={status} className="flex items-center gap-3 py-2.5">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between">
-                        <Badge variant={STATUS_BADGE_VARIANT[status]}>{TASK_STATUS_LABELS[status as keyof typeof TASK_STATUS_LABELS] ?? status}</Badge>
-                        <span className="text-sm font-semibold text-gray-900">{count}</span>
-                      </div>
-                      <div className="mt-1 h-1.5 w-full rounded-full bg-gray-100">
-                        <div
-                          className={`h-1.5 rounded-full transition-all ${status === TaskStatus.COMPLETED ? 'bg-green-500' : status === TaskStatus.OVERDUE ? 'bg-red-500' : 'bg-blue-400'}`}
-                          style={{ width: `${pct}%` }}
-                        />
+              {(() => {
+                const byStatus = areaData?.tasks_by_status ?? data.tasks_by_status ?? {};
+                const entries = Object.entries(byStatus).filter(([, c]) => c > 0);
+                if (entries.length === 0) {
+                  return <p className="py-6 text-center text-sm text-gray-400">Sin datos de estado disponibles</p>;
+                }
+                const total = entries.reduce((s, [, c]) => s + c, 0) || 1;
+                return entries.map(([status, count]) => {
+                  const pct = Math.round((count / total) * 100);
+                  return (
+                    <div key={status} className="flex items-center gap-3 py-2.5">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between">
+                          <Badge variant={STATUS_BADGE_VARIANT[status] ?? 'gray'}>{TASK_STATUS_LABELS[status as keyof typeof TASK_STATUS_LABELS] ?? status}</Badge>
+                          <span className="text-sm font-semibold text-gray-900">{count}</span>
+                        </div>
+                        <div className="mt-1 h-1.5 w-full rounded-full bg-gray-100">
+                          <div
+                            className={`h-1.5 rounded-full transition-all ${status === 'completed' ? 'bg-green-500' : status === 'overdue' ? 'bg-red-500' : 'bg-blue-400'}`}
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                });
+              })()}
             </div>
           </FadeIn>
 

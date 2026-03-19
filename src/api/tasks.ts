@@ -45,6 +45,9 @@ export const tasksApi = {
   cancel: (id: number) =>
     apiClient.post<Task>(`/tasks/${id}/cancel`),
 
+  reopen: (id: number) =>
+    apiClient.post<Task>(`/tasks/${id}/reopen`),
+
   addComment: (id: number, data: AddCommentRequest) =>
     apiClient.post<TaskComment>(`/tasks/${id}/comment`, data),
 

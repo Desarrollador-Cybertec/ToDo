@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { HiOutlineChevronDown } from 'react-icons/hi';
+import { HiOutlineChevronDown, HiOutlineRefresh } from 'react-icons/hi';
 import { tasksApi } from '../../api/tasks';
 import { TaskStatus, Role } from '../../types/enums';
 import type { Task } from '../../types';
 import { ApiError } from '../../api/client';
 
-type ActionKey = 'start' | 'submit_review' | 'approve' | 'reject' | 'cancel';
+type ActionKey = 'start' | 'submit_review' | 'approve' | 'reject' | 'cancel' | 'reopen';
 
 interface Action {
   key: ActionKey;
@@ -21,7 +21,9 @@ function getAvailableActions(
 
   const isResponsible =
     task.current_responsible_user_id === userId ||
-    (task.assigned_to_user_id === userId && task.current_responsible_user_id === null);
+    task.current_responsible?.id === userId ||
+    task.assigned_to_user_id === userId ||
+    task.assigned_user?.id === userId;
   const isCreator = task.created_by === userId;
   const isSuperAdmin = userRole === Role.SUPERADMIN;
   const isManager = userRole === Role.AREA_MANAGER;
@@ -45,8 +47,12 @@ function getAvailableActions(
     actions.push({ key: 'reject', label: 'Rechazar' });
   }
 
-  if ((isSuperAdmin || isCreator) && !terminal.includes(task.status)) {
+  if ((isSuperAdmin || isManager || isCreator) && !terminal.includes(task.status)) {
     actions.push({ key: 'cancel', label: 'Cancelar tarea' });
+  }
+
+  if ((isSuperAdmin || isManager) && terminal.includes(task.status)) {
+    actions.push({ key: 'reopen', label: 'Reabrir tarea' });
   }
 
   return actions;
@@ -68,6 +74,9 @@ export function TaskStatusSelect({ task, userId, userRole, onUpdated }: TaskStat
   const actions = getAvailableActions(task, userId, userRole);
   if (actions.length === 0) return null;
 
+  const reopenAction = actions.find((a) => a.key === 'reopen');
+  const otherActions = actions.filter((a) => a.key !== 'reopen');
+
   const execute = async (key: ActionKey, note?: string) => {
     setLoading(true);
     setError('');
@@ -88,6 +97,9 @@ export function TaskStatusSelect({ task, userId, userRole, onUpdated }: TaskStat
           break;
         case 'cancel':
           updated = await tasksApi.cancel(task.id);
+          break;
+        case 'reopen':
+          updated = await tasksApi.reopen(task.id);
           break;
         default:
           setLoading(false);
@@ -117,6 +129,17 @@ export function TaskStatusSelect({ task, userId, userRole, onUpdated }: TaskStat
 
   return (
     <div className="flex flex-col gap-1.5">
+      {reopenAction && (
+        <button
+          type="button"
+          onClick={() => execute('reopen')}
+          disabled={loading}
+          className="flex items-center justify-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700 transition-colors hover:border-amber-400 hover:bg-amber-100 disabled:opacity-60 cursor-pointer"
+        >
+          <HiOutlineRefresh className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          {loading ? 'Reabriendo...' : 'Reabrir tarea'}
+        </button>
+      )}
       {pendingReject ? (
         <div className="rounded-xl border border-red-200 bg-red-50 p-2.5 space-y-2 min-w-48">
           <p className="text-xs font-semibold text-red-700">Motivo del rechazo</p>
@@ -146,6 +169,7 @@ export function TaskStatusSelect({ task, userId, userRole, onUpdated }: TaskStat
           </div>
         </div>
       ) : (
+        otherActions.length > 0 && (
         <div className="relative">
           <select
             onChange={handleChange}
@@ -156,7 +180,7 @@ export function TaskStatusSelect({ task, userId, userRole, onUpdated }: TaskStat
             <option value="" disabled>
               {loading ? 'Ejecutando...' : 'Cambiar estado'}
             </option>
-            {actions.map((a) => (
+            {otherActions.map((a) => (
               <option key={a.key} value={a.key}>
                 {a.label}
               </option>
@@ -164,6 +188,7 @@ export function TaskStatusSelect({ task, userId, userRole, onUpdated }: TaskStat
           </select>
           <HiOutlineChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-500" />
         </div>
+        )
       )}
       {error && <p className="text-xs text-red-600">{error}</p>}
     </div>

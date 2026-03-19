@@ -19,6 +19,13 @@ import { PageTransition, StaggerList, StaggerItem, FadeIn } from '../../componen
 import { SkeletonList, Badge, STATUS_BADGE_VARIANT, PRIORITY_BADGE_VARIANT } from '../../components/ui';
 import { TaskStatusSelect } from '../../components/tasks/TaskStatusSelect';
 
+function statusProgress(status: string): number {
+  if (status === 'completed') return 100;
+  if (status === 'in_review') return 75;
+  if (status === 'in_progress' || status === 'rejected' || status === 'overdue') return 25;
+  return 0;
+}
+
 function formatRelativeDate(dateStr: string | null): string {
   if (!dateStr) return '';
   const date = new Date(dateStr);
@@ -281,17 +288,22 @@ export function TaskListPage() {
                         <Badge variant={PRIORITY_BADGE_VARIANT[task.priority]} size="sm">
                           {TASK_PRIORITY_LABELS[task.priority]}
                         </Badge>
-                        {task.progress_percent > 0 && (
-                          <span className="flex items-center gap-1.5 text-xs text-gray-500">
-                            <div className="h-1.5 w-16 rounded-full bg-gray-200">
-                              <div
-                                className={`h-1.5 rounded-full transition-all ${task.progress_percent >= 100 ? 'bg-green-500' : task.progress_percent >= 50 ? 'bg-blue-500' : 'bg-amber-500'}`}
-                                style={{ width: `${Math.min(task.progress_percent, 100)}%` }}
-                              />
-                            </div>
-                            <span className="font-medium">{task.progress_percent}%</span>
-                          </span>
-                        )}
+{(() => {
+                          const pct = statusProgress(task.status);
+                          return pct > 0 ? (
+                            <span className="flex items-center gap-1.5 text-xs text-gray-500">
+                              <div className="h-1.5 w-16 rounded-full bg-gray-200">
+                                <div
+                                  className={`h-1.5 rounded-full transition-all ${
+                                    pct >= 100 ? 'bg-green-500' : pct >= 75 ? 'bg-purple-500' : pct >= 50 ? 'bg-blue-500' : 'bg-amber-500'
+                                  }`}
+                                  style={{ width: `${pct}%` }}
+                                />
+                              </div>
+                              <span className="font-medium">{pct}%</span>
+                            </span>
+                          ) : null;
+                        })()}
                         {task.requires_attachment && (
                           <span className="rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-500">Adjunto obligatorio</span>
                         )}

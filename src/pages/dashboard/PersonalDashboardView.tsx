@@ -1,15 +1,15 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { dashboardApi } from '../../api/dashboard';
-import { meetingsApi } from '../../api/meetings';
 import { useAuth } from '../../context/useAuth';
 import { TaskStatus, TASK_PRIORITY_LABELS } from '../../types/enums';
-import type { PersonalDashboard, Meeting, UpcomingTask } from '../../types';
+import type { PersonalDashboard, UpcomingTask } from '../../types';
 import {
   HiOutlineClipboardList,
   HiOutlineClock,
   HiOutlineExclamation,
   HiOutlineCheckCircle,
+  HiOutlineChevronRight,
   HiOutlineEye,
   HiOutlineLightningBolt,
   HiOutlineCalendar,
@@ -43,17 +43,13 @@ const TIPS = [
 export function PersonalDashboardView() {
   const { user } = useAuth();
   const [data, setData] = useState<PersonalDashboard | null>(null);
-  const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([
-      dashboardApi.personal(),
-      meetingsApi.list().catch(() => [] as Meeting[]),
-    ]).then(([dashboard, meetingList]) => {
-      setData(dashboard);
-      setMeetings(Array.isArray(meetingList) ? meetingList : []);
-    }).catch(() => {}).finally(() => setLoading(false));
+    dashboardApi.personal()
+      .then((dashboard) => setData(dashboard))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   const urgentTasks = useMemo(() => {
@@ -65,25 +61,33 @@ export function PersonalDashboardView() {
 
   const myTasks = useMemo(() => {
     if (!data?.upcoming_tasks) return [];
-    return [...data.upcoming_tasks].sort((a, b) => {
-      const prioOrder: Record<string, number> = { urgent: 0, high: 1, medium: 2, low: 3 };
-      const pa = prioOrder[a.priority] ?? 9;
-      const pb = prioOrder[b.priority] ?? 9;
-      if (pa !== pb) return pa - pb;
-      if (a.due_date && b.due_date) return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
-      if (a.due_date) return -1;
-      if (b.due_date) return 1;
-      return 0;
-    });
+    const active = ['in_progress', 'in_review', 'rejected', 'overdue'];
+    return [...data.upcoming_tasks]
+      .filter((t) => active.includes(t.status))
+      .sort((a, b) => {
+        const prioOrder: Record<string, number> = { urgent: 0, high: 1, medium: 2, low: 3 };
+        const pa = prioOrder[a.priority] ?? 9;
+        const pb = prioOrder[b.priority] ?? 9;
+        if (pa !== pb) return pa - pb;
+        if (a.due_date && b.due_date) return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
+        if (a.due_date) return -1;
+        if (b.due_date) return 1;
+        return 0;
+      });
   }, [data]);
 
-  const upcomingMeetings = useMemo(() => {
-    const now = new Date();
-    return meetings
-      .filter((m) => new Date(m.meeting_date) >= now)
-      .sort((a, b) => new Date(a.meeting_date).getTime() - new Date(b.meeting_date).getTime())
-      .slice(0, 3);
-  }, [meetings]);
+  const pendingTasks = useMemo(() => {
+    if (!data?.upcoming_tasks) return [];
+    const notStarted = ['pending', 'pending_assignment'];
+    return [...data.upcoming_tasks]
+      .filter((t) => notStarted.includes(t.status))
+      .sort((a, b) => {
+        if (a.due_date && b.due_date) return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
+        if (a.due_date) return -1;
+        if (b.due_date) return 1;
+        return 0;
+      });
+  }, [data]);
 
   const inReviewCount = useMemo(() => data?.tasks_by_status?.[TaskStatus.IN_REVIEW] ?? 0, [data]);
 
@@ -171,8 +175,8 @@ export function PersonalDashboardView() {
         <FadeIn delay={0.15} className="lg:col-span-3 rounded-2xl border border-gray-100 bg-white shadow-sm">
           <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
             <div>
-              <h3 className="font-semibold text-gray-900">Mis tareas</h3>
-              <p className="text-xs text-gray-400">Lista ordenada por prioridad y fecha.</p>
+              <h3 className="font-semibold text-gray-900">Mis tareas activas</h3>
+              <p className="text-xs text-gray-400">En progreso, en revisión, vencidas o rechazadas.</p>
             </div>
             <Link to="/tasks" className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900">
               Ver todas
@@ -181,8 +185,9 @@ export function PersonalDashboardView() {
           <div className="divide-y divide-gray-50">
             {myTasks.length === 0 ? (
               <div className="flex flex-col items-center justify-center px-6 py-10 text-center">
-                <HiOutlineClipboardList className="mb-2 h-10 w-10 text-gray-300" />
-                <p className="text-sm text-gray-500">No tienes tareas asignadas</p>
+                <HiOutlineCheckCircle className="mb-2 h-10 w-10 text-green-400" />
+                <p className="text-sm font-medium text-gray-700">¡Sin tareas activas!</p>
+                <p className="text-xs text-gray-400">No tienes tareas en curso en este momento.</p>
               </div>
             ) : (
               myTasks.slice(0, 5).map((t) => (
@@ -198,18 +203,21 @@ export function PersonalDashboardView() {
           <FadeIn delay={0.2} className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
             <h3 className="mb-3 flex items-center gap-2 font-semibold text-gray-900">
               <HiOutlineCalendar className="h-4.5 w-4.5 text-indigo-500" />
-              Próximas actividades
+              Por iniciar
             </h3>
-            {upcomingMeetings.length === 0 ? (
-              <p className="py-3 text-center text-xs text-gray-400">Sin actividades próximas</p>
+            {pendingTasks.length === 0 ? (
+              <p className="py-3 text-center text-xs text-gray-400">Sin tareas pendientes de inicio</p>
             ) : (
               <div className="space-y-2">
-                {upcomingMeetings.map((m) => (
-                  <Link key={m.id} to={`/meetings/${m.id}`} className="group block rounded-xl border border-gray-100 p-3 transition-all hover:border-indigo-100 hover:bg-indigo-50/30">
-                    <p className="text-sm font-medium text-gray-900 group-hover:text-indigo-700">{m.title}</p>
-                    <p className="mt-0.5 text-xs text-gray-500">
-                      {formatRelativeDate(m.meeting_date)} · {new Date(m.meeting_date).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}
-                    </p>
+                {pendingTasks.slice(0, 4).map((t) => (
+                  <Link key={t.id} to={`/tasks/${t.id}`} className="group flex items-center justify-between rounded-xl border border-gray-100 p-3 transition-all hover:border-indigo-100 hover:bg-indigo-50/30">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-gray-900 group-hover:text-indigo-700">{t.title}</p>
+                      <p className="mt-0.5 text-xs text-gray-500">
+                        {t.due_date ? `Vence ${formatRelativeDate(t.due_date)}` : 'Sin fecha límite'}
+                      </p>
+                    </div>
+                    <HiOutlineChevronRight className="ml-2 h-4 w-4 shrink-0 text-gray-400 group-hover:text-indigo-500" />
                   </Link>
                 ))}
               </div>

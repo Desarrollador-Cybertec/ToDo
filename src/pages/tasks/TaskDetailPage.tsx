@@ -43,6 +43,13 @@ import { PageTransition, FadeIn, SlideDown, StaggerList, StaggerItem } from '../
 import { SkeletonDetail, Badge, Spinner, STATUS_BADGE_VARIANT, PRIORITY_BADGE_VARIANT } from '../../components/ui';
 import { TaskStatusSelect } from '../../components/tasks/TaskStatusSelect';
 
+function statusProgress(status: string): number {
+  if (status === 'completed') return 100;
+  if (status === 'in_review') return 75;
+  if (status === 'in_progress' || status === 'rejected' || status === 'overdue') return 25;
+  return 0;
+}
+
 export function TaskDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -131,12 +138,18 @@ export function TaskDetailPage() {
 
   const isSuperAdmin = user?.role.slug === Role.SUPERADMIN;
   const isManager = user?.role.slug === Role.AREA_MANAGER;
-  const isResponsible = task?.current_responsible_user_id === user?.id;
+  const isResponsible =
+    task?.current_responsible_user_id === user?.id ||
+    task?.current_responsible?.id === user?.id ||
+    task?.assigned_to_user_id === user?.id ||
+    task?.assigned_user?.id === user?.id;
+  const isCreator = task?.created_by === user?.id;
+  const terminal = [TaskStatus.COMPLETED as string, TaskStatus.CANCELLED as string];
 
   const canDelete = isSuperAdmin;
   const canDelegate = (isSuperAdmin || isManager) && task?.status !== TaskStatus.COMPLETED && task?.status !== TaskStatus.CANCELLED;
-  const canUpdate = isResponsible && task?.status === TaskStatus.IN_PROGRESS;
-  const canUpload = isResponsible || isSuperAdmin || isManager;
+  const canUpdate = (isResponsible || isSuperAdmin || isManager) && !terminal.includes(task?.status as string);
+  const canUpload = isResponsible || isCreator || isSuperAdmin || isManager;
   const canEdit = (isSuperAdmin || isManager) && task?.status !== TaskStatus.COMPLETED && task?.status !== TaskStatus.CANCELLED;
 
   const startEditing = () => {
@@ -485,10 +498,22 @@ export function TaskDetailPage() {
             <div>
               <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Avance</p>
               <div className="mt-1.5 flex items-center gap-2">
-                <div className="h-2 flex-1 rounded-full bg-gray-100">
-                  <div className="h-2 rounded-full bg-linear-to-r from-blue-500 to-indigo-500 transition-all duration-500" style={{ width: `${task.progress_percent}%` }} />
-                </div>
-                <span className="text-sm font-semibold text-gray-900">{task.progress_percent}%</span>
+                {(() => {
+                  const pct = statusProgress(task.status);
+                  const barColor =
+                    pct >= 100 ? 'from-green-500 to-emerald-500' :
+                    pct >= 75 ? 'from-purple-500 to-violet-500' :
+                    pct >= 25 ? 'from-blue-500 to-indigo-500' :
+                    'from-gray-300 to-gray-300';
+                  return (
+                    <>
+                      <div className="h-2 flex-1 rounded-full bg-gray-100">
+                        <div className={`h-2 rounded-full bg-linear-to-r ${barColor} transition-all duration-500`} style={{ width: `${pct}%` }} />
+                      </div>
+                      <span className="text-sm font-semibold text-gray-900">{pct}%</span>
+                    </>
+                  );
+                })()}
               </div>
             </div>
             <div>
