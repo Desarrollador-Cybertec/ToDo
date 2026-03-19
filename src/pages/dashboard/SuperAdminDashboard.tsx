@@ -1,24 +1,22 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { dashboardApi } from '../../api/dashboard';
-import { meetingsApi } from '../../api/meetings';
 import { useAuth } from '../../context/useAuth';
-import {  TASK_STATUS_LABELS } from '../../types/enums';
-import type { GeneralDashboard, PendingByUser, Meeting } from '../../types';
+import {  TASK_STATUS_LABELS, TASK_PRIORITY_LABELS } from '../../types/enums';
+import type { GeneralDashboard, MyTask, PendingByUser } from '../../types';
 import {
   HiOutlineClipboardList,
   HiOutlineExclamation,
   HiOutlineCheckCircle,
   HiOutlineTrendingUp,
   HiOutlineChevronRight,
-  HiOutlineCalendar,
   HiOutlineLightBulb,
   HiOutlineUserGroup,
   HiOutlineOfficeBuilding,
   HiOutlinePlusCircle,
   HiOutlineClock,
 } from 'react-icons/hi';
-import { FadeIn, SkeletonDashboard, Badge, STATUS_BADGE_VARIANT } from '../../components/ui';
+import { FadeIn, SkeletonDashboard, Badge, STATUS_BADGE_VARIANT, PRIORITY_BADGE_VARIANT } from '../../components/ui';
 
 function formatRelativeDate(dateStr: string | null): string {
   if (!dateStr) return '';
@@ -44,29 +42,15 @@ const TIPS = [
 export function SuperAdminDashboard() {
   const { user } = useAuth();
   const [data, setData] = useState<GeneralDashboard | null>(null);
-  const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    Promise.all([
-      dashboardApi.general(),
-      meetingsApi.list().catch(() => [] as Meeting[]),
-    ]).then(([dashboard, meetingList]) => {
-      setData(dashboard);
-      setMeetings(Array.isArray(meetingList) ? meetingList : []);
-    }).catch(() => {
-      setError(true);
-    }).finally(() => setLoading(false));
+    dashboardApi.general()
+      .then((dashboard) => setData(dashboard))
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
   }, []);
-
-  const upcomingMeetings = useMemo(() => {
-    const now = new Date();
-    return meetings
-      .filter((m) => new Date(m.meeting_date) >= now)
-      .sort((a, b) => new Date(a.meeting_date).getTime() - new Date(b.meeting_date).getTime())
-      .slice(0, 3);
-  }, [meetings]);
 
   const topOverloaded = useMemo(() => {
     if (!data?.pending_by_user) return [];
@@ -152,6 +136,12 @@ export function SuperAdminDashboard() {
               <p className="text-lg font-bold text-green-700">{data.completed_this_month}</p>
               <p className="text-xs text-gray-500">Completadas (mes)</p>
             </div>
+            {data.total_cancelled != null && (
+              <div className="rounded-xl bg-gray-50 px-3 py-2.5 text-center">
+                <p className="text-lg font-bold text-gray-500">{data.total_cancelled}</p>
+                <p className="text-xs text-gray-500">Canceladas</p>
+              </div>
+            )}
           </div>
         </FadeIn>
 
@@ -266,26 +256,29 @@ export function SuperAdminDashboard() {
             </div>
           </FadeIn>
 
-          {/* Próximas reuniones */}
-          <FadeIn delay={0.25} className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-            <h3 className="mb-3 flex items-center gap-2 font-semibold text-gray-900">
-              <HiOutlineCalendar className="h-4.5 w-4.5 text-indigo-500" />
-              Próximas reuniones
-            </h3>
-            {upcomingMeetings.length === 0 ? (
-              <p className="py-3 text-center text-xs text-gray-400">Sin reuniones próximas</p>
-            ) : (
-              <div className="space-y-2">
-                {upcomingMeetings.map((m) => (
-                  <Link key={m.id} to={`/meetings/${m.id}`} className="group block rounded-xl border border-gray-100 p-3 transition-all hover:border-indigo-100 hover:bg-indigo-50/30">
-                    <p className="text-sm font-medium text-gray-900 group-hover:text-indigo-700">{m.title}</p>
-                    <p className="mt-0.5 text-xs text-gray-500">
-                      {formatRelativeDate(m.meeting_date)} · {new Date(m.meeting_date).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                  </Link>
-                ))}
+          {/* Mis tareas */}
+          <FadeIn delay={0.25} className="rounded-2xl border border-gray-100 bg-white shadow-sm">
+            <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+              <div className="flex items-center gap-2">
+                <HiOutlineClipboardList className="h-4.5 w-4.5 text-blue-500" />
+                <h3 className="font-semibold text-gray-900">Mis tareas</h3>
               </div>
-            )}
+              <Link to="/tasks" className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900">
+                Ver todas
+              </Link>
+            </div>
+            <div className="divide-y divide-gray-50">
+              {!data.my_tasks || data.my_tasks.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <HiOutlineCheckCircle className="mb-2 h-8 w-8 text-green-400" />
+                  <p className="text-xs font-medium text-gray-600">Sin tareas asignadas</p>
+                </div>
+              ) : (
+                data.my_tasks.map((t) => (
+                  <MyTaskRow key={t.id} task={t} />
+                ))
+              )}
+            </div>
           </FadeIn>
 
           {/* Tips */}
@@ -305,11 +298,48 @@ export function SuperAdminDashboard() {
           </FadeIn>
         </div>
       </div>
+
     </div>
   );
 }
 
 /* ── Sub-components ── */
+
+function MyTaskRow({ task }: { task: MyTask }) {
+  return (
+    <div className="flex items-center justify-between gap-3 px-6 py-3.5">
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <p className="truncate text-sm font-medium text-gray-900">{task.title}</p>
+          {task.is_overdue && <Badge variant="red" size="sm">Vencida</Badge>}
+          {task.area_id == null && <Badge variant="gray" size="sm">Personal</Badge>}
+        </div>
+        <div className="mt-1.5 flex items-center gap-3">
+          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100">
+            <div
+              className={`h-1.5 rounded-full transition-all ${
+                task.progress_percent >= 100 ? 'bg-green-500' : task.is_overdue ? 'bg-red-400' : 'bg-blue-400'
+              }`}
+              style={{ width: `${Math.min(task.progress_percent, 100)}%` }}
+            />
+          </div>
+          <span className="shrink-0 text-xs text-gray-500">{task.progress_percent}%</span>
+        </div>
+        <p className="mt-1 text-xs text-gray-400">
+          {task.due_date ? formatRelativeDate(task.due_date) : 'Sin fecha'}
+        </p>
+      </div>
+      <div className="ml-3 flex shrink-0 items-center gap-2">
+        <Badge variant={PRIORITY_BADGE_VARIANT[task.priority] ?? 'gray'} size="sm">
+          {TASK_PRIORITY_LABELS[task.priority as keyof typeof TASK_PRIORITY_LABELS] ?? task.priority}
+        </Badge>
+        <Link to={`/tasks/${task.id}`} className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50">
+          Ver
+        </Link>
+      </div>
+    </div>
+  );
+}
 
 function MiniStat({ label, value, icon, color, alert }: { label: string; value: number; icon: React.ReactNode; color: string; alert?: boolean }) {
   return (

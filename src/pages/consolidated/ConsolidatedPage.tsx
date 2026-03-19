@@ -1,55 +1,17 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { dashboardApi } from '../../api/dashboard';
-import type { ConsolidatedDashboard } from '../../types';
-import { PageTransition, FadeIn, SkeletonStatCards, SkeletonTable } from '../../components/ui';
-
-interface ApiSummary {
-  total_tasks: number;
-  total_completed: number;
-  total_active: number;
-  total_overdue: number;
-  global_completion_rate: number;
-}
-
-interface ApiArea {
-  area_id: number;
-  area_name: string;
-  process_identifier: string | null;
-  manager: string | null;
-  total: number;
-  completed: number;
-  active: number;
-  overdue: number;
-  completion_rate: number;
-}
-
-interface ApiConsolidated {
-  summary: ApiSummary;
-  by_area: ApiArea[];
-}
+import type { ConsolidatedDashboard, ConsolidatedArea } from '../../types';
+import { TASK_STATUS_LABELS } from '../../types/enums';
+import { PageTransition, FadeIn, SkeletonStatCards, SkeletonTable, Badge, STATUS_BADGE_VARIANT } from '../../components/ui';
 
 export function ConsolidatedPage() {
-  const [data, setData] = useState<ApiConsolidated | null>(null);
+  const [data, setData] = useState<ConsolidatedDashboard | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     dashboardApi.consolidated()
-      .then((res) => {
-        const raw = res as unknown as ApiConsolidated | ConsolidatedDashboard;
-        // Normalize: API may return by_area or areas, and different summary field names
-        const normalized: ApiConsolidated = {
-          summary: {
-            total_tasks: (raw.summary as ApiSummary)?.total_tasks ?? (raw.summary as ConsolidatedDashboard['summary'])?.total ?? 0,
-            total_completed: (raw.summary as ApiSummary)?.total_completed ?? (raw.summary as ConsolidatedDashboard['summary'])?.completed ?? 0,
-            total_active: (raw.summary as ApiSummary)?.total_active ?? (raw.summary as ConsolidatedDashboard['summary'])?.active ?? 0,
-            total_overdue: (raw.summary as ApiSummary)?.total_overdue ?? (raw.summary as ConsolidatedDashboard['summary'])?.overdue ?? 0,
-            global_completion_rate: (raw.summary as ApiSummary)?.global_completion_rate ?? (raw.summary as ConsolidatedDashboard['summary'])?.completion_rate ?? 0,
-          },
-          by_area: ('by_area' in raw ? raw.by_area : 'areas' in raw ? (raw as ConsolidatedDashboard).areas : []) as ApiArea[] ?? [],
-        };
-        setData(normalized);
-      })
+      .then((res) => setData(res as ConsolidatedDashboard))
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
@@ -103,12 +65,16 @@ export function ConsolidatedPage() {
         </FadeIn>
       ) : (
         <FadeIn delay={0.2} className="space-y-3">
-          {areas.map((area, i) => {
+          {areas.map((area: ConsolidatedArea, i) => {
             const rateColor = area.completion_rate >= 80
               ? 'bg-green-50 text-green-700'
               : area.completion_rate >= 50
               ? 'bg-amber-50 text-amber-700'
               : 'bg-red-50 text-red-700';
+
+            const byStatus: Record<string, number> = Array.isArray(area.by_status) ? {} : (area.by_status as Record<string, number>) ?? {};
+            const completedCount = byStatus['completed'] ?? 0;
+            const statusEntries = Object.entries(byStatus).filter(([, c]) => c > 0);
 
             return (
               <motion.div
@@ -142,16 +108,16 @@ export function ConsolidatedPage() {
                     <p className="text-[11px] text-gray-500">Total</p>
                   </div>
                   <div className="rounded-xl bg-green-50/60 px-3 py-2 text-center">
-                    <p className="text-lg font-bold text-green-700">{area.completed ?? 0}</p>
+                    <p className="text-lg font-bold text-green-700">{completedCount}</p>
                     <p className="text-[11px] text-gray-500">Completadas</p>
                   </div>
-                  <div className="rounded-xl bg-blue-50/60 px-3 py-2 text-center">
-                    <p className="text-lg font-bold text-blue-700">{area.active ?? 0}</p>
-                    <p className="text-[11px] text-gray-500">Activas</p>
-                  </div>
                   <div className="rounded-xl bg-red-50/60 px-3 py-2 text-center">
-                    <p className={`text-lg font-bold ${(area.overdue ?? 0) > 0 ? 'text-red-600' : 'text-gray-400'}`}>{area.overdue ?? 0}</p>
+                    <p className={`text-lg font-bold ${area.overdue > 0 ? 'text-red-600' : 'text-gray-400'}`}>{area.overdue}</p>
                     <p className="text-[11px] text-gray-500">Vencidas</p>
+                  </div>
+                  <div className="rounded-xl bg-amber-50/60 px-3 py-2 text-center">
+                    <p className={`text-lg font-bold ${area.without_progress > 0 ? 'text-amber-600' : 'text-gray-400'}`}>{area.without_progress}</p>
+                    <p className="text-[11px] text-gray-500">Sin progreso</p>
                   </div>
                 </div>
 
@@ -161,6 +127,30 @@ export function ConsolidatedPage() {
                       className="h-full rounded-full bg-linear-to-r from-green-400 to-emerald-500 transition-all duration-500"
                       style={{ width: `${Math.min(area.completion_rate, 100)}%` }}
                     />
+                  </div>
+                )}
+
+                {statusEntries.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {statusEntries.map(([status, count]) => (
+                      <span key={status} className="inline-flex items-center gap-1 text-xs text-gray-500">
+                        <Badge variant={STATUS_BADGE_VARIANT[status] ?? 'gray'} size="sm">
+                          {TASK_STATUS_LABELS[status as keyof typeof TASK_STATUS_LABELS] ?? status}
+                        </Badge>
+                        <span className="font-semibold text-gray-700">{count}</span>
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {(area.oldest_pending_days != null || area.avg_days_without_update != null) && (
+                  <div className="mt-2 flex flex-wrap gap-3 text-xs text-gray-400">
+                    {area.oldest_pending_days != null && area.oldest_pending_days > 0 && (
+                      <span>Tarea más antigua: <span className="font-medium text-gray-600">{area.oldest_pending_days} días</span></span>
+                    )}
+                    {area.avg_days_without_update != null && area.avg_days_without_update > 0 && (
+                      <span>Prom. sin reporte: <span className="font-medium text-gray-600">{area.avg_days_without_update} días</span></span>
+                    )}
                   </div>
                 )}
               </motion.div>

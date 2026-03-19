@@ -260,7 +260,7 @@ function MiniStat({ label, value, icon, color, alert }: { label: string; value: 
 }
 
 function UrgentTaskRow({ task }: { task: UpcomingTask }) {
-  const isOverdue = task.status === TaskStatus.OVERDUE;
+  const isOverdue = task.is_overdue ?? task.status === TaskStatus.OVERDUE;
   return (
     <div className="flex items-center justify-between gap-3 py-3.5">
       <div className="min-w-0 flex-1">

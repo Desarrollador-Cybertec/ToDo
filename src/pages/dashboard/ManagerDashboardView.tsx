@@ -90,8 +90,6 @@ export function ManagerDashboardView() {
       .slice(0, 3);
   }, [meetings]);
 
-  const inReviewCount = useMemo(() => data?.tasks_by_status?.[TaskStatus.IN_REVIEW] ?? 0, [data]);
-
   if (loading) return <SkeletonDashboard />;
   if (!data) return <p className="text-gray-500">No se pudo cargar el dashboard.</p>;
 
@@ -162,11 +160,29 @@ export function ManagerDashboardView() {
           <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
             <h3 className="mb-4 font-semibold text-gray-900">Resumen del área</h3>
             <div className="grid grid-cols-2 gap-3">
-              <MiniStat label="Activas" value={data.active_tasks ?? 0} icon={<HiOutlineClipboardList className="h-4.5 w-4.5" />} color="text-blue-600 bg-blue-50" />
-              <MiniStat label="Vencidas" value={data.overdue_tasks ?? 0} icon={<HiOutlineExclamation className="h-4.5 w-4.5" />} color="text-red-600 bg-red-50" alert={data.overdue_tasks > 0} />
-              <MiniStat label="En revisión" value={inReviewCount} icon={<HiOutlineClock className="h-4.5 w-4.5" />} color="text-purple-600 bg-purple-50" />
-              <MiniStat label="Completadas" value={data.completed_tasks ?? 0} icon={<HiOutlineCheckCircle className="h-4.5 w-4.5" />} color="text-green-600 bg-green-50" />
+              <MiniStat label="Total área" value={areaData?.total ?? 0} icon={<HiOutlineClipboardList className="h-4.5 w-4.5" />} color="text-blue-600 bg-blue-50" />
+              <MiniStat label="Vencidas" value={areaData?.overdue_tasks ?? data.overdue_tasks ?? 0} icon={<HiOutlineExclamation className="h-4.5 w-4.5" />} color="text-red-600 bg-red-50" alert={(areaData?.overdue_tasks ?? 0) > 0} />
+              <MiniStat label="Sin progreso" value={areaData?.tasks_without_progress ?? 0} icon={<HiOutlineClock className="h-4.5 w-4.5" />} color="text-amber-600 bg-amber-50" alert={(areaData?.tasks_without_progress ?? 0) > 0} />
+              <MiniStat label="Completadas" value={areaData?.completed ?? data.completed_tasks ?? 0} icon={<HiOutlineCheckCircle className="h-4.5 w-4.5" />} color="text-green-600 bg-green-50" />
             </div>
+            {areaData?.completion_rate != null && (
+              <div className="mt-4">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-gray-500">Tasa de cumplimiento</span>
+                  <span className={`font-bold ${
+                    areaData.completion_rate >= 75 ? 'text-green-600' : areaData.completion_rate >= 50 ? 'text-amber-600' : 'text-red-600'
+                  }`}>{areaData.completion_rate}%</span>
+                </div>
+                <div className="mt-1.5 h-2 w-full rounded-full bg-gray-100">
+                  <div
+                    className={`h-2 rounded-full transition-all ${
+                      areaData.completion_rate >= 75 ? 'bg-green-500' : areaData.completion_rate >= 50 ? 'bg-amber-500' : 'bg-red-500'
+                    }`}
+                    style={{ width: `${Math.min(areaData.completion_rate, 100)}%` }}
+                  />
+                </div>
+              </div>
+            )}
             {data.due_soon_tasks > 0 && (
               <div className="mt-4 rounded-xl bg-amber-50 px-4 py-3 ring-1 ring-inset ring-amber-200/60">
                 <p className="text-xs font-semibold text-amber-700">Atención</p>
@@ -302,7 +318,7 @@ function MiniStat({ label, value, icon, color, alert }: { label: string; value: 
 }
 
 function UrgentTaskRow({ task }: { task: UpcomingTask }) {
-  const isOverdue = task.status === TaskStatus.OVERDUE;
+  const isOverdue = task.is_overdue ?? task.status === TaskStatus.OVERDUE;
   return (
     <div className="flex items-center justify-between gap-3 py-3.5">
       <div className="min-w-0 flex-1">
