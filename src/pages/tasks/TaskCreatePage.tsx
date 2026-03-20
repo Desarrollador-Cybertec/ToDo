@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -7,6 +7,7 @@ import {
   HiOutlineExclamationCircle,
   HiOutlineChevronDown,
   HiOutlineUser,
+  HiOutlineShieldCheck,
 } from 'react-icons/hi';
 import { createTaskSchema, type CreateTaskFormData } from '../../schemas';
 import { tasksApi } from '../../api/tasks';
@@ -17,17 +18,18 @@ import { useAuth } from '../../context/useAuth';
 import { Role, TASK_PRIORITY_LABELS } from '../../types/enums';
 import { ApiError } from '../../api/client';
 import type { User, Area, Meeting } from '../../types';
-import { PageTransition, SlideDown, FadeIn } from '../../components/ui';
+import { PageTransition, SlideDown, FadeIn, ConfirmModal } from '../../components/ui';
 import { Spinner } from '../../components/ui';
+import { useNavigationGuard } from '../../utils/useNavigationGuard';
 import { TaskCreatePreview } from './components/TaskCreatePreview';
 import { TaskCreateAdvanced } from './components/TaskCreateAdvanced';
 
 /* ── constants ── */
 const PRIORITY_STYLES: Record<string, { ring: string; bg: string; text: string; dot: string }> = {
-  low:      { ring: 'ring-green-300', bg: 'bg-green-50',  text: 'text-green-700',  dot: 'bg-green-500' },
-  medium:   { ring: 'ring-yellow-300', bg: 'bg-yellow-50', text: 'text-yellow-700', dot: 'bg-yellow-500' },
-  high:     { ring: 'ring-orange-300', bg: 'bg-orange-50', text: 'text-orange-700', dot: 'bg-orange-500' },
-  critical: { ring: 'ring-red-300',    bg: 'bg-red-50',    text: 'text-red-700',    dot: 'bg-red-500' },
+  low:    { ring: 'ring-emerald-400', bg: 'bg-emerald-50',  text: 'text-emerald-700', dot: 'bg-emerald-500' },
+  medium: { ring: 'ring-sky-400',     bg: 'bg-sky-50',      text: 'text-sky-700',     dot: 'bg-sky-500' },
+  high:   { ring: 'ring-amber-400',   bg: 'bg-amber-50',    text: 'text-amber-700',   dot: 'bg-amber-500' },
+  urgent: { ring: 'ring-rose-400',    bg: 'bg-rose-50',     text: 'text-rose-700',    dot: 'bg-rose-500' },
 };
 
 export function TaskCreatePage() {
@@ -35,6 +37,10 @@ export function TaskCreatePage() {
   const { user } = useAuth();
   const [serverError, setServerError] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [pendingFormData, setPendingFormData] = useState<CreateTaskFormData | null>(null);
+
   const [users, setUsers] = useState<User[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
@@ -50,7 +56,7 @@ export function TaskCreatePage() {
     handleSubmit,
     control,
     setValue,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<CreateTaskFormData>({
     resolver: zodResolver(createTaskSchema) as never,
     defaultValues: {
@@ -58,12 +64,12 @@ export function TaskCreatePage() {
       start_date: new Date().toISOString().slice(0, 10),
       requires_attachment: false,
       requires_completion_comment: false,
-      requires_manager_approval: true,
+      requires_manager_approval: !isWorker,   // workers have personal tasks — no approval needed
       requires_completion_notification: false,
       requires_due_date: false,
       requires_progress_report: false,
-      notify_on_due: true,
-      notify_on_overdue: true,
+      notify_on_due: !isWorker,
+      notify_on_overdue: !isWorker,
       notify_on_completion: false,
       ...(isWorker ? { assigned_to_user_id: user?.id } : {}),
     },
@@ -71,6 +77,9 @@ export function TaskCreatePage() {
 
   /* watches for live preview & mutual-exclusion */
   const watchTitle = useWatch({ control, name: 'title' }) || '';
+
+  // Block NavLink / browser back when form has been touched
+  const navGuard = useNavigationGuard(isDirty && !isSubmitting);
   const watchPriority = useWatch({ control, name: 'priority' }) || 'medium';
   const watchDueDate = useWatch({ control, name: 'due_date' });
   const watchAssignedUser = useWatch({ control, name: 'assigned_to_user_id' });
@@ -80,6 +89,23 @@ export function TaskCreatePage() {
   const hasUser = !!watchAssignedUser;
   const hasArea = !!watchAssignedArea;
   const hasExternalEmail = !!watchExternalEmail;
+
+  // Personal task: manager assigning to themselves
+  const isPersonalTask = useMemo(
+    () => isManager && !!watchAssignedUser && Number(watchAssignedUser) === Number(user?.id),
+    [isManager, watchAssignedUser, user?.id],
+  );
+
+  // Reset fields that don't apply to personal tasks
+  useEffect(() => {
+    if (isPersonalTask) {
+      setValue('requires_manager_approval', false);
+      setValue('requires_progress_report', false);
+      setValue('notify_on_due', false);
+      setValue('notify_on_overdue', false);
+      setValue('notify_on_completion', false);
+    }
+  }, [isPersonalTask, setValue]);
 
   /* requirement / notification watches */
   const reqAttach   = useWatch({ control, name: 'requires_attachment' });
@@ -141,20 +167,29 @@ export function TaskCreatePage() {
   })();
 
   const onSubmit = async (data: CreateTaskFormData) => {
+    // Show confirmation modal before actually creating
+    setPendingFormData(data);
+    setShowCreateModal(true);
+  };
+
+  const doCreate = async () => {
+    if (!pendingFormData) return;
+    setShowCreateModal(false);
     setServerError('');
     try {
       const payload = {
-        ...data,
-        assigned_to_user_id: data.assigned_to_user_id || undefined,
-        assigned_to_area_id: data.assigned_to_area_id || undefined,
-        external_email: data.external_email || undefined,
-        external_name: data.external_name || undefined,
-        meeting_id: data.meeting_id || undefined,
-        description: data.description || undefined,
-        due_date: data.due_date || undefined,
-        start_date: data.start_date || undefined,
+        ...pendingFormData,
+        assigned_to_user_id: pendingFormData.assigned_to_user_id || undefined,
+        assigned_to_area_id: pendingFormData.assigned_to_area_id || undefined,
+        external_email: pendingFormData.external_email || undefined,
+        external_name: pendingFormData.external_name || undefined,
+        meeting_id: pendingFormData.meeting_id || undefined,
+        description: pendingFormData.description || undefined,
+        due_date: pendingFormData.due_date || undefined,
+        start_date: pendingFormData.start_date || undefined,
       };
       await tasksApi.create(payload);
+      navGuard.skip();
       navigate('/tasks');
     } catch (error) {
       if (error instanceof ApiError) {
@@ -162,6 +197,8 @@ export function TaskCreatePage() {
       } else {
         setServerError('Error al crear la tarea');
       }
+    } finally {
+      setPendingFormData(null);
     }
   };
 
@@ -323,24 +360,41 @@ export function TaskCreatePage() {
                 </div>
 
                 {/* toggle advanced */}
-                <div className="mt-5 flex items-center justify-between border-t border-gray-100 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowAdvanced((v) => !v)}
-                    className="flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700"
-                  >
-                    <HiOutlineChevronDown className={`h-4 w-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
-                    {showAdvanced ? 'Ocultar opciones avanzadas' : 'Mostrar opciones avanzadas'}
-                  </button>
-
+                <div className="mt-5 border-t border-gray-100 pt-4">
                   {!showAdvanced && (
                     <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="flex items-center gap-2 rounded-xl bg-linear-to-r from-blue-600 to-indigo-600 px-5 py-2 text-sm font-medium text-white shadow-md shadow-blue-500/25 transition-all hover:shadow-lg active:scale-[0.98] disabled:opacity-50"
+                      type="button"
+                      onClick={() => setShowAdvanced(true)}
+                      className="flex w-full items-center justify-between rounded-xl border border-dashed border-blue-300 bg-blue-50/50 px-4 py-3 text-sm transition-all hover:bg-blue-50"
                     >
-                      {isSubmitting ? <><Spinner size="sm" className="border-white border-t-transparent" /> Creando...</> : 'Crear tarea'}
+                      <div className="flex items-center gap-2">
+                        <HiOutlineShieldCheck className="h-5 w-5 text-blue-500" />
+                        <span className="font-medium text-blue-700">Configurar requisitos, notificaciones y más</span>
+                      </div>
+                      <span className="text-xs text-blue-400">Recomendado</span>
                     </button>
+                  )}
+                  {showAdvanced && (
+                    <button
+                      type="button"
+                      onClick={() => setShowAdvanced(false)}
+                      className="flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700"
+                    >
+                      <HiOutlineChevronDown className="h-4 w-4 rotate-180 transition-transform" />
+                      Ocultar opciones avanzadas
+                    </button>
+                  )}
+
+                  {!showAdvanced && (
+                    <div className="mt-4 flex justify-end">
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="flex items-center gap-2 rounded-xl bg-linear-to-r from-blue-600 to-indigo-600 px-5 py-2 text-sm font-medium text-white shadow-md shadow-blue-500/25 transition-all hover:shadow-lg active:scale-[0.98] disabled:opacity-50"
+                      >
+                        {isSubmitting ? <><Spinner size="sm" className="border-white border-t-transparent" /> Creando...</> : 'Crear tarea'}
+                      </button>
+                    </div>
                   )}
                 </div>
               </FadeIn>
@@ -351,6 +405,7 @@ export function TaskCreatePage() {
                   register={register}
                   setValue={setValue}
                   isWorker={isWorker}
+                  isPersonalTask={isPersonalTask}
                   isSubmitting={isSubmitting}
                   errors={errors as Record<string, { message?: string }>}
                   areas={areas}
@@ -365,7 +420,7 @@ export function TaskCreatePage() {
                   notDue={!!notDue}
                   notOverdue={!!notOverdue}
                   notCompletion={!!notCompletion}
-                  onCancel={() => navigate('/tasks')}
+                  onCancel={() => setShowLeaveModal(true)}
                 />
               )}
             </div>
@@ -383,6 +438,28 @@ export function TaskCreatePage() {
             />
           </div>
         </form>
+
+        {/* ─── CONFIRM MODALS ─── */}
+        <ConfirmModal
+          open={showLeaveModal || navGuard.isBlocked}
+          title="¿Salir sin guardar?"
+          message="Los datos ingresados se perderán. ¿Estás seguro de que deseas salir?"
+          confirmLabel="Salir"
+          cancelLabel="Seguir editando"
+          variant="danger"
+          onConfirm={() => { if (navGuard.isBlocked) navGuard.confirm(); else navigate('/tasks'); }}
+          onCancel={() => { setShowLeaveModal(false); navGuard.cancel(); }}
+        />
+        <ConfirmModal
+          open={showCreateModal}
+          title="Confirmar creación"
+          message={`¿Crear la tarea "${watchTitle || 'Sin título'}"?`}
+          confirmLabel="Crear tarea"
+          cancelLabel="Revisar"
+          variant="primary"
+          onConfirm={doCreate}
+          onCancel={() => { setShowCreateModal(false); setPendingFormData(null); }}
+        />
       </div>
     </PageTransition>
   );

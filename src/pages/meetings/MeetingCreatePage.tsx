@@ -11,20 +11,26 @@ import { ApiError } from '../../api/client';
 import type { Area } from '../../types';
 import { useAuth } from '../../context/useAuth';
 import { HiOutlineArrowLeft, HiOutlineExclamationCircle, HiOutlineOfficeBuilding } from 'react-icons/hi';
-import { PageTransition, FadeIn, SlideDown, Spinner } from '../../components/ui';
+import { PageTransition, FadeIn, SlideDown, Spinner, ConfirmModal } from '../../components/ui';
+import { useNavigationGuard } from '../../utils/useNavigationGuard';
 
 export function MeetingCreatePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const isManager = user?.role?.slug === Role.AREA_MANAGER;
   const [serverError, setServerError] = useState('');
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [pendingFormData, setPendingFormData] = useState<CreateMeetingFormData | null>(null);
   const [areas, setAreas] = useState<Area[]>([]);
   const [managerArea, setManagerArea] = useState<Area | null>(null);
 
-  const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<CreateMeetingFormData>({
+  const { register, handleSubmit, setValue, formState: { errors, isSubmitting, isDirty } } = useForm<CreateMeetingFormData>({
     resolver: zodResolver(createMeetingSchema),
     defaultValues: { classification: 'operational' },
   });
+
+  const navGuard = useNavigationGuard(isDirty && !isSubmitting);
 
   const loadAreas = useCallback(async () => {
     try {
@@ -53,16 +59,26 @@ export function MeetingCreatePage() {
   }, [loadAreas]);
 
   const onSubmit = async (data: CreateMeetingFormData) => {
+    setPendingFormData(data);
+    setShowCreateModal(true);
+  };
+
+  const doCreate = async () => {
+    if (!pendingFormData) return;
+    setShowCreateModal(false);
     setServerError('');
     try {
       await meetingsApi.create({
-        ...data,
-        area_id: data.area_id || undefined,
-        notes: data.notes || undefined,
+        ...pendingFormData,
+        area_id: pendingFormData.area_id || undefined,
+        notes: pendingFormData.notes || undefined,
       });
+      navGuard.skip();
       navigate('/meetings');
     } catch (error) {
       setServerError(error instanceof ApiError ? error.data.message : 'Error al crear la reunión');
+    } finally {
+      setPendingFormData(null);
     }
   };
 
@@ -131,12 +147,33 @@ export function MeetingCreatePage() {
           </FadeIn>
 
           <div className="flex justify-end gap-3">
-            <button type="button" onClick={() => navigate('/meetings')} className="rounded-xl border border-gray-200 px-6 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">Cancelar</button>
+            <button type="button" onClick={() => setShowLeaveModal(true)} className="rounded-xl border border-gray-200 px-6 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">Cancelar</button>
             <button type="submit" disabled={isSubmitting} className="inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-purple-600 to-indigo-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98] disabled:opacity-50">
               {isSubmitting ? <><Spinner size="sm" /> Creando...</> : 'Crear reunión'}
             </button>
           </div>
         </form>
+
+        <ConfirmModal
+          open={showLeaveModal || navGuard.isBlocked}
+          title="¿Salir sin guardar?"
+          message="Los datos ingresados se perderán. ¿Estás seguro de que deseas salir?"
+          confirmLabel="Salir"
+          cancelLabel="Seguir editando"
+          variant="danger"
+          onConfirm={() => { if (navGuard.isBlocked) navGuard.confirm(); else navigate('/meetings'); }}
+          onCancel={() => { setShowLeaveModal(false); navGuard.cancel(); }}
+        />
+        <ConfirmModal
+          open={showCreateModal}
+          title="Confirmar creación"
+          message="¿Crear esta reunión?"
+          confirmLabel="Crear reunión"
+          cancelLabel="Revisar"
+          variant="primary"
+          onConfirm={doCreate}
+          onCancel={() => { setShowCreateModal(false); setPendingFormData(null); }}
+        />
       </div>
     </PageTransition>
   );

@@ -9,33 +9,49 @@ import { usersApi } from '../../api/users';
 import { ApiError } from '../../api/client';
 import type { User } from '../../types';
 import { HiOutlineArrowLeft, HiOutlineExclamationCircle } from 'react-icons/hi';
-import { PageTransition, FadeIn, SlideDown, Spinner } from '../../components/ui';
+import { PageTransition, FadeIn, SlideDown, Spinner, ConfirmModal } from '../../components/ui';
+import { useNavigationGuard } from '../../utils/useNavigationGuard';
 
 export function AreaCreatePage() {
   const navigate = useNavigate();
   const [serverError, setServerError] = useState('');
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [pendingFormData, setPendingFormData] = useState<CreateAreaFormData | null>(null);
   const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
     usersApi.listAll().then((res) => setUsers(res)).catch(() => {});
   }, []);
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<CreateAreaFormData>({
+  const { register, handleSubmit, formState: { errors, isSubmitting, isDirty } } = useForm<CreateAreaFormData>({
     resolver: zodResolver(createAreaSchema),
   });
 
+  const navGuard = useNavigationGuard(isDirty && !isSubmitting);
+
   const onSubmit = async (data: CreateAreaFormData) => {
+    setPendingFormData(data);
+    setShowCreateModal(true);
+  };
+
+  const doCreate = async () => {
+    if (!pendingFormData) return;
+    setShowCreateModal(false);
     setServerError('');
     try {
       await areasApi.create({
-        ...data,
-        description: data.description || undefined,
-        process_identifier: data.process_identifier || undefined,
-        manager_user_id: data.manager_user_id || undefined,
+        ...pendingFormData,
+        description: pendingFormData.description || undefined,
+        process_identifier: pendingFormData.process_identifier || undefined,
+        manager_user_id: pendingFormData.manager_user_id || undefined,
       });
+      navGuard.skip();
       navigate('/areas');
     } catch (error) {
       setServerError(error instanceof ApiError ? error.data.message : 'Error al crear el área');
+    } finally {
+      setPendingFormData(null);
     }
   };
 
@@ -86,12 +102,33 @@ export function AreaCreatePage() {
           </FadeIn>
 
           <div className="flex justify-end gap-3">
-            <button type="button" onClick={() => navigate('/areas')} className="rounded-xl border border-gray-200 px-6 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">Cancelar</button>
+            <button type="button" onClick={() => setShowLeaveModal(true)} className="rounded-xl border border-gray-200 px-6 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">Cancelar</button>
             <button type="submit" disabled={isSubmitting} className="inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-blue-600 to-indigo-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98] disabled:opacity-50">
               {isSubmitting ? <><Spinner size="sm" /> Creando...</> : 'Crear área'}
             </button>
           </div>
         </form>
+
+        <ConfirmModal
+          open={showLeaveModal || navGuard.isBlocked}
+          title="¿Salir sin guardar?"
+          message="Los datos ingresados se perderán. ¿Estás seguro de que deseas salir?"
+          confirmLabel="Salir"
+          cancelLabel="Seguir editando"
+          variant="danger"
+          onConfirm={() => { if (navGuard.isBlocked) navGuard.confirm(); else navigate('/areas'); }}
+          onCancel={() => { setShowLeaveModal(false); navGuard.cancel(); }}
+        />
+        <ConfirmModal
+          open={showCreateModal}
+          title="Confirmar creación"
+          message="¿Crear esta área?"
+          confirmLabel="Crear área"
+          cancelLabel="Revisar"
+          variant="primary"
+          onConfirm={doCreate}
+          onCancel={() => { setShowCreateModal(false); setPendingFormData(null); }}
+        />
       </div>
     </PageTransition>
   );

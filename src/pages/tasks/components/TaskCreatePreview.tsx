@@ -9,10 +9,10 @@ import { TASK_PRIORITY_LABELS } from '../../../types/enums';
 import { FadeIn } from '../../../components/ui';
 
 const PRIORITY_STYLES: Record<string, { bg: string; text: string; dot: string }> = {
-  low:      { bg: 'bg-green-50',  text: 'text-green-700',  dot: 'bg-green-500' },
-  medium:   { bg: 'bg-yellow-50', text: 'text-yellow-700', dot: 'bg-yellow-500' },
-  high:     { bg: 'bg-orange-50', text: 'text-orange-700', dot: 'bg-orange-500' },
-  critical: { bg: 'bg-red-50',    text: 'text-red-700',    dot: 'bg-red-500' },
+  low:    { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
+  medium: { bg: 'bg-sky-50',     text: 'text-sky-700',     dot: 'bg-sky-500' },
+  high:   { bg: 'bg-amber-50',   text: 'text-amber-700',   dot: 'bg-amber-500' },
+  urgent: { bg: 'bg-rose-50',    text: 'text-rose-700',    dot: 'bg-rose-500' },
 };
 
 const TIPS = [

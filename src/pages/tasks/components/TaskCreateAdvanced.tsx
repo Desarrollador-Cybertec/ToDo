@@ -33,6 +33,7 @@ interface Props {
   register: UseFormRegister<CreateTaskFormData>;
   setValue: UseFormSetValue<CreateTaskFormData>;
   isWorker: boolean;
+  isPersonalTask: boolean;
   isSubmitting: boolean;
   errors: Record<string, { message?: string }>;
   areas: Area[];
@@ -54,6 +55,7 @@ export function TaskCreateAdvanced({
   register,
   setValue,
   isWorker,
+  isPersonalTask,
   isSubmitting,
   errors,
   areas,
@@ -165,7 +167,7 @@ export function TaskCreateAdvanced({
           <div className="divide-y divide-gray-100">
             <ToggleField label="Requiere adjunto" description="El responsable deberá subir evidencia." checked={!!reqAttach} onChange={(v) => setValue('requires_attachment', v)} />
             <ToggleField label="Comentario de cierre" description="Obligatorio al marcar como completada." checked={!!reqComment} onChange={(v) => setValue('requires_completion_comment', v)} />
-            {!isWorker && (
+            {!isWorker && !isPersonalTask && (
               <>
                 <ToggleField label="Aprobación del jefe" description="Necesita validación antes de cerrarse." checked={!!reqApproval} onChange={(v) => setValue('requires_manager_approval', v)} />
                 <ToggleField label="Reportes de avance" description="El responsable enviará actualizaciones periódicas." checked={!!reqProgress} onChange={(v) => setValue('requires_progress_report', v)} />
@@ -175,6 +177,7 @@ export function TaskCreateAdvanced({
         </FadeIn>
 
         {/* notifications */}
+        {!isPersonalTask && (
         <FadeIn delay={0.2} className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
           <h3 className="mb-1 flex items-center gap-2 text-base font-semibold text-gray-900">
             <HiOutlineBell className="h-5 w-5 text-yellow-500" /> Notificaciones
@@ -186,6 +189,7 @@ export function TaskCreateAdvanced({
             <ToggleField label="Al completar" checked={!!notCompletion} onChange={(v) => setValue('notify_on_completion', v)} />
           </div>
         </FadeIn>
+        )}
 
         {/* bottom actions */}
         <div className="flex justify-end gap-3 pb-2">

@@ -2,3 +2,4 @@ export { Skeleton, SkeletonText, SkeletonCard, SkeletonTable, SkeletonStatCards,
 export { PageTransition, StaggerList, StaggerItem, FadeIn, ScaleIn, SlideDown } from './Animations';
 export { Badge } from './Badge';
 export { STATUS_BADGE_VARIANT, PRIORITY_BADGE_VARIANT } from './badge-variants';
+export { ConfirmModal } from './ConfirmModal';

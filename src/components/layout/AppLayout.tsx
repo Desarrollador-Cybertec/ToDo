@@ -82,9 +82,23 @@ export function AppLayout() {
 
   useEffect(() => {
     const areaId = user?.area_id;
-    if (!areaId) return;
-    areasApi.get(areaId).then((area) => setAreaName(area.name)).catch(() => setAreaName(null));
-  }, [user?.area_id]);
+    if (areaId) {
+      areasApi.get(areaId).then((area) => setAreaName(area.name)).catch(() => setAreaName(null));
+    } else if (user?.role.slug === Role.AREA_MANAGER && user?.id) {
+      // Managers may not have area_id set — scan the list
+      const uid = Number(user.id);
+      areasApi.listAll()
+        .then((areas) => {
+          const found = areas.find(
+            (a) =>
+              Number(a.manager_user_id) === uid ||
+              (a.manager?.id != null && Number(a.manager.id) === uid),
+          );
+          setAreaName(found?.name ?? null);
+        })
+        .catch(() => setAreaName(null));
+    }
+  }, [user?.area_id, user?.id, user?.role.slug]);
 
   const visibleItems = NAV_ITEMS.filter(
     (item) => !item.roles || (user && item.roles.includes(user.role.slug)),
@@ -184,7 +198,12 @@ export function AppLayout() {
               <p className="truncate text-xs text-gray-500">
                 {user?.role && ROLE_LABELS[user.role.slug]}
               </p>
-              {areaName && <p className="truncate text-xs text-gray-500">{areaName}</p>}
+              {areaName && (
+                <p className="mt-0.5 flex items-center gap-1 truncate text-xs font-medium text-blue-600">
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-400" />
+                  {areaName}
+                </p>
+              )}
             </div>
           </NavLink>
           <button

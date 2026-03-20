@@ -2,9 +2,10 @@ import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { dashboardApi } from '../../api/dashboard';
 import { areasApi } from '../../api/areas';
+import { tasksApi } from '../../api/tasks';
 import { useAuth } from '../../context/useAuth';
 import { TaskStatus, TASK_STATUS_LABELS } from '../../types/enums';
-import type { PersonalDashboard, AreaDashboard } from '../../types';
+import type { PersonalDashboard, AreaDashboard, UpcomingTask } from '../../types';
 import {
   HiOutlineClipboardList,
   HiOutlineClock,
@@ -47,11 +48,41 @@ export function ManagerDashboardView() {
             )?.id ?? null;
         }
 
-        const [dashboard, areaDashboard] = await Promise.all([
+        const [dashboard, areaDashboard, tasksPage] = await Promise.all([
           dashboardApi.personal(),
           areaId ? dashboardApi.area(areaId).catch(() => null) : Promise.resolve(null),
+          tasksApi.list('per_page=100'),
         ]);
-        setData(dashboard);
+
+        // Backend excludes personal tasks (no area) from /dashboard/me — merge them in
+        const terminal = ['completed', 'cancelled'];
+        const personalTasks = (tasksPage.data ?? []).filter((t) => !t.area_id && !t.area?.id);
+
+        if (personalTasks.length > 0) {
+          const personalUpcoming: UpcomingTask[] = personalTasks.map((t) => ({
+            id: t.id,
+            title: t.title,
+            status: t.status,
+            priority: t.priority,
+            due_date: t.due_date ?? null,
+            is_overdue: t.is_overdue,
+          }));
+
+          const addActive = personalTasks.filter((t) => !terminal.includes(t.status)).length;
+          const addOverdue = personalTasks.filter(
+            (t) => t.is_overdue || t.status === TaskStatus.OVERDUE,
+          ).length;
+
+          setData({
+            ...dashboard,
+            active_tasks: (dashboard.active_tasks ?? 0) + addActive,
+            overdue_tasks: (dashboard.overdue_tasks ?? 0) + addOverdue,
+            upcoming_tasks: [...(dashboard.upcoming_tasks ?? []), ...personalUpcoming],
+          });
+        } else {
+          setData(dashboard);
+        }
+
         setAreaData(areaDashboard);
       } catch {
         // silently fail — UI handles nulls
@@ -68,22 +99,38 @@ export function ManagerDashboardView() {
     );
   }, [data?.upcoming_tasks]);
 
+  // Urgentes: tareas iniciadas (en progreso, vencidas, rechazadas) o con prioridad alta/urgente
   const urgentTasks = useMemo(() => {
     return personalTasks.filter(
-      (t) => t.is_overdue || t.status === TaskStatus.OVERDUE || t.priority === 'urgent' || t.priority === 'high'
+      (t) =>
+        t.status === TaskStatus.IN_PROGRESS ||
+        t.status === TaskStatus.OVERDUE ||
+        t.status === TaskStatus.REJECTED ||
+        t.is_overdue ||
+        t.priority === 'urgent' ||
+        t.priority === 'high'
     );
   }, [personalTasks]);
 
+  // Próximas: tareas no iniciadas (pending, pending_assignment, in_review)
   const allTasks = useMemo(() => {
-    return [...personalTasks].sort((a, b) => {
-      const pa = PRIORITY_ORDER[a.priority] ?? 9;
-      const pb = PRIORITY_ORDER[b.priority] ?? 9;
-      if (pa !== pb) return pa - pb;
-      if (a.due_date && b.due_date) return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
-      if (a.due_date) return -1;
-      if (b.due_date) return 1;
-      return 0;
-    });
+    return personalTasks
+      .filter(
+        (t) =>
+          t.status !== TaskStatus.IN_PROGRESS &&
+          t.status !== TaskStatus.OVERDUE &&
+          t.status !== TaskStatus.REJECTED &&
+          !t.is_overdue
+      )
+      .sort((a, b) => {
+        const pa = PRIORITY_ORDER[a.priority] ?? 9;
+        const pb = PRIORITY_ORDER[b.priority] ?? 9;
+        if (pa !== pb) return pa - pb;
+        if (a.due_date && b.due_date) return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
+        if (a.due_date) return -1;
+        if (b.due_date) return 1;
+        return 0;
+      });
   }, [personalTasks]);
 
   if (loading) return <SkeletonDashboard />;
