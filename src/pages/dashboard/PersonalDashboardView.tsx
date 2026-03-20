@@ -45,6 +45,7 @@ export function PersonalDashboardView() {
   const { user } = useAuth();
   const [data, setData] = useState<PersonalDashboard | null>(null);
   const [loading, setLoading] = useState(true);
+  const [personalTaskIds, setPersonalTaskIds] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     const terminal = ['completed', 'cancelled'];
@@ -55,8 +56,12 @@ export function PersonalDashboardView() {
       tasksApi.list('per_page=100'),
     ])
       .then(([dashboard, tasksPage]) => {
-        // Filter personal tasks (no area_id) — backend excludes these from /dashboard/me
-        const personalTasks = (tasksPage.data ?? []).filter((t) => !t.area_id);
+        // Filter personal tasks (no area) — backend excludes these from /dashboard/me
+        // Use both area_id scalar and area relation, since list endpoint may omit the scalar
+        const personalTasks = (tasksPage.data ?? []).filter((t) => !t.area_id && !t.area?.id);
+
+        // Always track personal task IDs so urgentTasks can exclude them
+        setPersonalTaskIds(new Set(personalTasks.map((t) => t.id)));
 
         if (personalTasks.length === 0) {
           setData(dashboard);
@@ -105,12 +110,13 @@ export function PersonalDashboardView() {
       .finally(() => setLoading(false));
   }, []);
 
+  // "Lo importante hoy" = tasks assigned by manager/superadmin (i.e. area tasks, not personal)
   const urgentTasks = useMemo(() => {
     if (!data?.upcoming_tasks) return [];
     return data.upcoming_tasks.filter(
-      (t) => t.status === TaskStatus.OVERDUE || t.priority === 'urgent' || t.priority === 'high'
+      (t) => !personalTaskIds.has(t.id)
     );
-  }, [data]);
+  }, [data, personalTaskIds]);
 
   const myTasks = useMemo(() => {
     if (!data?.upcoming_tasks) return [];

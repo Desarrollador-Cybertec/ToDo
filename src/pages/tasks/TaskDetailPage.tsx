@@ -178,14 +178,10 @@ export function TaskDetailPage() {
   const canDelegate = !terminal.includes(task?.status as string) && (isSuperAdmin || managerOwnsTask);
   const isParticipant = isResponsible || isCreator || isSuperAdmin || isManager;
   const isActive = !terminal.includes(task?.status as string);
-  // For workers: only show action buttons when the task explicitly requires that action.
-  // For admins/managers: always available on active tasks.
-  const canUpdate = isActive && (
-    (isSuperAdmin || isManager) ||
-    (isResponsible && (!isWorker || !!task?.requires_progress_report))
-  );
-  const canUpload = isParticipant && isActive && (!isWorker || !!task?.requires_attachment);
-  const canComment = isParticipant && isActive && (!isWorker || !!task?.requires_completion_comment);
+  // Only show action buttons when the task has the corresponding requires_* flag active.
+  const canUpdate = isActive && !!task?.requires_progress_report && (isSuperAdmin || isManager || isResponsible);
+  const canUpload = isParticipant && isActive && !!task?.requires_attachment;
+  const canComment = isParticipant && isActive && !!task?.requires_completion_comment;
   const canEdit =
     ((isSuperAdmin || isManager) && isActive) ||
     (isWorker && isCreator && isPersonalTask && isActive);

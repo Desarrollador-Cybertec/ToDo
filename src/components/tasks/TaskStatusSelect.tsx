@@ -5,7 +5,7 @@ import { TaskStatus, Role } from '../../types/enums';
 import type { Task } from '../../types';
 import { ApiError } from '../../api/client';
 
-type ActionKey = 'start' | 'submit_review' | 'approve' | 'reject' | 'cancel' | 'reopen';
+type ActionKey = 'start' | 'submit_review' | 'approve' | 'reject' | 'cancel' | 'reopen' | 'claim';
 
 interface Action {
   key: ActionKey;
@@ -33,6 +33,14 @@ function getAvailableActions(
   const terminal: string[] = [TaskStatus.COMPLETED, TaskStatus.CANCELLED];
 
   const actions: Action[] = [];
+
+  // Manager/SuperAdmin can claim tasks in pending_assignment status
+  if (
+    (isSuperAdmin || isManager) &&
+    task.status === TaskStatus.PENDING_ASSIGNMENT
+  ) {
+    actions.push({ key: 'claim', label: 'Reclamar tarea' });
+  }
 
   if (
     isResponsible &&
@@ -106,6 +114,9 @@ export function TaskStatusSelect({ task, userId, userRole, onUpdated }: TaskStat
           break;
         case 'reopen':
           updated = await tasksApi.reopen(task.id);
+          break;
+        case 'claim':
+          updated = await tasksApi.claim(task.id);
           break;
         default:
           setLoading(false);
