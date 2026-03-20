@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { dashboardApi } from '../../api/dashboard';
+import { tasksApi } from '../../api/tasks';
 import { useAuth } from '../../context/useAuth';
 import { TaskStatus, TASK_PRIORITY_LABELS } from '../../types/enums';
 import type { PersonalDashboard, UpcomingTask } from '../../types';
@@ -14,7 +15,7 @@ import {
   HiOutlineLightningBolt,
   HiOutlineCalendar,
   HiOutlineQuestionMarkCircle,
-  HiOutlineRefresh,
+  HiOutlinePlus,
 } from 'react-icons/hi';
 import { FadeIn, SkeletonDashboard, Badge, PRIORITY_BADGE_VARIANT } from '../../components/ui';
 
@@ -46,8 +47,60 @@ export function PersonalDashboardView() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    dashboardApi.personal()
-      .then((dashboard) => setData(dashboard))
+    const terminal = ['completed', 'cancelled'];
+    const threeDaysFromNow = Date.now() + 3 * 24 * 60 * 60 * 1000;
+
+    Promise.all([
+      dashboardApi.personal(),
+      tasksApi.list('per_page=100'),
+    ])
+      .then(([dashboard, tasksPage]) => {
+        // Filter personal tasks (no area_id) — backend excludes these from /dashboard/me
+        const personalTasks = (tasksPage.data ?? []).filter((t) => !t.area_id);
+
+        if (personalTasks.length === 0) {
+          setData(dashboard);
+          return;
+        }
+
+        // Convert Task → UpcomingTask shape
+        const personalUpcoming: UpcomingTask[] = personalTasks.map((t) => ({
+          id: t.id,
+          title: t.title,
+          status: t.status,
+          priority: t.priority,
+          due_date: t.due_date ?? null,
+          is_overdue: t.is_overdue,
+        }));
+
+        // Merge and adjust stats
+        const mergedUpcoming = [...(dashboard.upcoming_tasks ?? []), ...personalUpcoming];
+
+        const addActive = personalTasks.filter((t) => !terminal.includes(t.status)).length;
+        const addOverdue = personalTasks.filter((t) => t.is_overdue || t.status === TaskStatus.OVERDUE).length;
+        const addCompleted = personalTasks.filter((t) => t.status === TaskStatus.COMPLETED).length;
+        const addDueSoon = personalTasks.filter((t) => {
+          if (!t.due_date || terminal.includes(t.status)) return false;
+          const due = new Date(t.due_date).getTime();
+          return due > Date.now() && due <= threeDaysFromNow;
+        }).length;
+
+        // Merge tasks_by_status counts
+        const mergedByStatus = { ...dashboard.tasks_by_status };
+        personalTasks.forEach((t) => {
+          mergedByStatus[t.status] = (mergedByStatus[t.status] ?? 0) + 1;
+        });
+
+        setData({
+          ...dashboard,
+          active_tasks: (dashboard.active_tasks ?? 0) + addActive,
+          overdue_tasks: (dashboard.overdue_tasks ?? 0) + addOverdue,
+          completed_tasks: (dashboard.completed_tasks ?? 0) + addCompleted,
+          due_soon_tasks: (dashboard.due_soon_tasks ?? 0) + addDueSoon,
+          tasks_by_status: mergedByStatus,
+          upcoming_tasks: mergedUpcoming,
+        });
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
@@ -113,11 +166,11 @@ export function PersonalDashboardView() {
           </p>
         </div>
         <Link
-          to="/tasks"
+          to="/tasks/create"
           className="inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow-md shadow-blue-500/25 transition-all hover:shadow-lg hover:shadow-blue-500/30 active:scale-[0.98]"
         >
-          <HiOutlineRefresh className="h-4 w-4" />
-          Reportar avance
+          <HiOutlinePlus className="h-4 w-4" />
+          Nueva tarea
         </Link>
       </FadeIn>
 

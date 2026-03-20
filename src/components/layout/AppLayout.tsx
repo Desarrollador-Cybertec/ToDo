@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, Outlet, useLocation, useNavigate, NavLink } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/useAuth';
 import { Role, ROLE_LABELS } from '../../types/enums';
+import { areasApi } from '../../api/areas';
 import {
   HiOutlineHome,
   HiOutlineClipboardList,
@@ -77,6 +78,13 @@ export function AppLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [areaName, setAreaName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const areaId = user?.area_id;
+    if (!areaId) return;
+    areasApi.get(areaId).then((area) => setAreaName(area.name)).catch(() => setAreaName(null));
+  }, [user?.area_id]);
 
   const visibleItems = NAV_ITEMS.filter(
     (item) => !item.roles || (user && item.roles.includes(user.role.slug)),
@@ -159,7 +167,15 @@ export function AppLayout() {
         </nav>
 
         <div className="border-t border-gray-100 p-4">
-          <div className="mb-3 flex items-center gap-3 rounded-xl bg-gray-50 px-3 py-2.5">
+          <NavLink
+            to="/profile"
+            onClick={() => setSidebarOpen(false)}
+            className={({ isActive }) =>
+              `mb-3 flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors ${
+                isActive ? 'bg-blue-50 ring-1 ring-blue-100' : 'bg-gray-50 hover:bg-gray-100'
+              }`
+            }
+          >
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-indigo-500 text-sm font-medium text-white">
               {user?.name?.charAt(0).toUpperCase()}
             </div>
@@ -168,8 +184,9 @@ export function AppLayout() {
               <p className="truncate text-xs text-gray-500">
                 {user?.role && ROLE_LABELS[user.role.slug]}
               </p>
+              {areaName && <p className="truncate text-xs text-gray-500">{areaName}</p>}
             </div>
-          </div>
+          </NavLink>
           <button
             type="button"
             onClick={handleLogout}

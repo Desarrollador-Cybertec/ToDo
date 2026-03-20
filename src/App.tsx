@@ -17,6 +17,7 @@ import { MeetingDetailPage } from './pages/meetings/MeetingDetailPage';
 import { UserListPage } from './pages/users/UserListPage';
 import { ConsolidatedPage } from './pages/consolidated/ConsolidatedPage';
 import { SettingsPage } from './pages/settings/SettingsPage';
+import { ProfilePage } from './pages/profile/ProfilePage';
 
 function App() {
   return (
@@ -36,7 +37,14 @@ function App() {
           <Route path="/tasks/create" element={<TaskCreatePage />} />
           <Route path="/tasks/:id" element={<TaskDetailPage />} />
 
-          {/* Meetings - all authenticated roles */}
+          {/* Profile - all authenticated roles */}
+          <Route path="/profile" element={<ProfilePage />} />
+        </Route>
+      </Route>
+
+      {/* Meetings - superadmin and area_manager only */}
+      <Route element={<ProtectedRoute allowedRoles={['superadmin', 'area_manager']} />}>
+        <Route element={<AppLayout />}>
           <Route path="/meetings" element={<MeetingListPage />} />
           <Route path="/meetings/create" element={<MeetingCreatePage />} />
           <Route path="/meetings/:id" element={<MeetingDetailPage />} />

@@ -40,8 +40,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(async (email: string, password: string) => {
     const response = await authApi.login({ email, password });
+    const meResponse = await authApi.me();
     setState({
-      user: response.user,
+      user: meResponse.user,
       token: response.token,
       isAuthenticated: true,
       isLoading: false,
@@ -61,8 +62,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const setUser = useCallback((user: AuthState['user']) => {
+    setState((prev) => ({ ...prev, user }));
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ ...state, login, logout }}>
+    <AuthContext.Provider value={{ ...state, login, logout, setUser }}>
       {children}
     </AuthContext.Provider>
   );

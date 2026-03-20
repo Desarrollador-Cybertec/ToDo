@@ -19,12 +19,15 @@ function getAvailableActions(
 ): Action[] {
   if (!userId || !userRole) return [];
 
+  const uid = Number(userId);
   const isResponsible =
-    task.current_responsible_user_id === userId ||
-    task.current_responsible?.id === userId ||
-    task.assigned_to_user_id === userId ||
-    task.assigned_user?.id === userId;
-  const isCreator = task.created_by === userId;
+    Number(task.current_responsible_user_id) === uid ||
+    Number(task.current_responsible?.id) === uid ||
+    Number(task.assigned_to_user_id) === uid ||
+    Number(task.assigned_user?.id) === uid;
+  const isCreator =
+    Number(task.created_by) === uid ||
+    Number(task.creator?.id) === uid;
   const isSuperAdmin = userRole === Role.SUPERADMIN;
   const isManager = userRole === Role.AREA_MANAGER;
   const terminal: string[] = [TaskStatus.COMPLETED, TaskStatus.CANCELLED];
@@ -51,8 +54,11 @@ function getAvailableActions(
     actions.push({ key: 'cancel', label: 'Cancelar tarea' });
   }
 
+  const isWorker = userRole === Role.WORKER;
   if ((isSuperAdmin || isManager) && terminal.includes(task.status)) {
     actions.push({ key: 'reopen', label: 'Reabrir tarea' });
+  } else if (isWorker && (isCreator || isResponsible) && terminal.includes(task.status)) {
+    actions.push({ key: 'reopen', label: 'Reabrir tarea personal' });
   }
 
   return actions;
@@ -137,7 +143,7 @@ export function TaskStatusSelect({ task, userId, userRole, onUpdated }: TaskStat
           className="flex items-center justify-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700 transition-colors hover:border-amber-400 hover:bg-amber-100 disabled:opacity-60 cursor-pointer"
         >
           <HiOutlineRefresh className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-          {loading ? 'Reabriendo...' : 'Reabrir tarea'}
+          {loading ? 'Reabriendo...' : reopenAction.label}
         </button>
       )}
       {pendingReject ? (

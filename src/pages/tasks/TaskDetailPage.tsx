@@ -149,17 +149,21 @@ export function TaskDetailPage() {
 
   const isSuperAdmin = user?.role.slug === Role.SUPERADMIN;
   const isManager = user?.role.slug === Role.AREA_MANAGER;
-  const isResponsible =
-    task?.current_responsible_user_id === user?.id ||
-    task?.current_responsible?.id === user?.id ||
-    task?.assigned_to_user_id === user?.id ||
-    task?.assigned_user?.id === user?.id;
-  const isCreator = task?.created_by === user?.id;
-  const terminal = [TaskStatus.COMPLETED as string, TaskStatus.CANCELLED as string];
-
-  const canDelete = isSuperAdmin;
-  // Manager cannot delegate if the task is assigned to themselves (any responsible field)
+  const isWorker = user?.role.slug === Role.WORKER;
   const uid = Number(user?.id);
+  const isResponsible =
+    Number(task?.current_responsible_user_id) === uid ||
+    Number(task?.current_responsible?.id) === uid ||
+    Number(task?.assigned_to_user_id) === uid ||
+    Number(task?.assigned_user?.id) === uid;
+  const isCreator =
+    Number(task?.created_by) === uid ||
+    Number(task?.creator?.id) === uid;
+  const terminal = [TaskStatus.COMPLETED as string, TaskStatus.CANCELLED as string];
+  const isPersonalTask = !task?.area_id && !task?.assigned_to_area_id;
+
+  const canDelete = isSuperAdmin || (isWorker && isCreator && isPersonalTask);
+  // Manager cannot delegate if the task is assigned to themselves (any responsible field)
   const taskAssignedToSelf =
     (task?.assigned_to_user_id != null && Number(task.assigned_to_user_id) === uid) ||
     (task?.current_responsible_user_id != null && Number(task.current_responsible_user_id) === uid) ||
@@ -172,10 +176,19 @@ export function TaskDetailPage() {
     Number(task?.area_id) === Number(user?.area_id)
   );
   const canDelegate = !terminal.includes(task?.status as string) && (isSuperAdmin || managerOwnsTask);
-  const canUpdate = (isResponsible || isSuperAdmin || isManager) && !terminal.includes(task?.status as string) && !!task?.requires_progress_report;
-  const canUpload = (isResponsible || isCreator || isSuperAdmin || isManager) && !!task?.requires_attachment;
-  const canComment = !!task?.requires_completion_comment;
-  const canEdit = (isSuperAdmin || isManager) && task?.status !== TaskStatus.COMPLETED && task?.status !== TaskStatus.CANCELLED;
+  const isParticipant = isResponsible || isCreator || isSuperAdmin || isManager;
+  const isActive = !terminal.includes(task?.status as string);
+  // For workers: only show action buttons when the task explicitly requires that action.
+  // For admins/managers: always available on active tasks.
+  const canUpdate = isActive && (
+    (isSuperAdmin || isManager) ||
+    (isResponsible && (!isWorker || !!task?.requires_progress_report))
+  );
+  const canUpload = isParticipant && isActive && (!isWorker || !!task?.requires_attachment);
+  const canComment = isParticipant && isActive && (!isWorker || !!task?.requires_completion_comment);
+  const canEdit =
+    ((isSuperAdmin || isManager) && isActive) ||
+    (isWorker && isCreator && isPersonalTask && isActive);
 
   const startEditing = () => {
     if (!task) return;
@@ -352,14 +365,17 @@ export function TaskDetailPage() {
                 setEditDueDate={setEditDueDate}
                 editStartDate={editStartDate}
                 setEditStartDate={setEditStartDate}
-                requirementFields={[
+                requirementFields={isWorker ? [
+                  { label: 'Requiere adjunto', value: editRequiresAttachment, set: setEditRequiresAttachment },
+                  { label: 'Requiere comentario de cierre', value: editRequiresComment, set: setEditRequiresComment },
+                ] : [
                   { label: 'Requiere adjunto', value: editRequiresAttachment, set: setEditRequiresAttachment },
                   { label: 'Requiere comentario de cierre', value: editRequiresComment, set: setEditRequiresComment },
                   { label: 'Requiere aprobación del encargado', value: editRequiresApproval, set: setEditRequiresApproval },
                   { label: 'Requiere fecha límite', value: editRequiresDueDate, set: setEditRequiresDueDate },
                   { label: 'Requiere reporte de avance', value: editRequiresProgress, set: setEditRequiresProgress },
                 ]}
-                notificationFields={[
+                notificationFields={isWorker ? [] : [
                   { label: 'Notificar al vencer', value: editNotifyDue, set: setEditNotifyDue },
                   { label: 'Notificar si vencida', value: editNotifyOverdue, set: setEditNotifyOverdue },
                   { label: 'Notificar al completarse', value: editNotifyCompletion, set: setEditNotifyCompletion },
