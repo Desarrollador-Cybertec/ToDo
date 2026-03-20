@@ -24,7 +24,6 @@ export const createUserSchema = z
 export const updateUserSchema = z
   .object({
     name: z.string().min(1, 'El nombre es obligatorio').max(255),
-    email: z.string().min(1, 'El correo es obligatorio').email('Correo inválido'),
     password: passwordRules.optional().or(z.literal('')),
     password_confirmation: z.string().optional().or(z.literal('')),
   })

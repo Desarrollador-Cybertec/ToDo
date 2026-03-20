@@ -11,6 +11,13 @@ interface DraftFormFields {
   due_date: string;
   assigned_to_user_id: number | null;
   assigned_to_area_id: number | null;
+  requires_attachment: boolean;
+  requires_completion_comment: boolean;
+  requires_manager_approval: boolean;
+  requires_progress_report: boolean;
+  notify_on_due: boolean;
+  notify_on_overdue: boolean;
+  notify_on_completion: boolean;
 }
 
 interface Props {
@@ -124,6 +131,48 @@ export function MeetingDraftTaskForm({
             placeholder="Detalle opcional…"
             className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
           />
+        </div>
+
+        {/* Requisitos */}
+        <div className="rounded-xl border border-gray-200 bg-white p-3">
+          <p className="mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Requisitos</p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+              <input type="checkbox" checked={form.requires_attachment} onChange={(e) => setForm((f) => ({ ...f, requires_attachment: e.target.checked }))} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+              Requiere adjunto
+            </label>
+            <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+              <input type="checkbox" checked={form.requires_completion_comment} onChange={(e) => setForm((f) => ({ ...f, requires_completion_comment: e.target.checked }))} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+              Comentario de cierre
+            </label>
+            <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+              <input type="checkbox" checked={form.requires_manager_approval} onChange={(e) => setForm((f) => ({ ...f, requires_manager_approval: e.target.checked }))} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+              Aprobación del encargado
+            </label>
+            <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+              <input type="checkbox" checked={form.requires_progress_report} onChange={(e) => setForm((f) => ({ ...f, requires_progress_report: e.target.checked }))} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+              Reportes de avance
+            </label>
+          </div>
+        </div>
+
+        {/* Notificaciones */}
+        <div className="rounded-xl border border-gray-200 bg-white p-3">
+          <p className="mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Notificaciones</p>
+          <div className="grid gap-2 sm:grid-cols-3">
+            <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+              <input type="checkbox" checked={form.notify_on_due} onChange={(e) => setForm((f) => ({ ...f, notify_on_due: e.target.checked }))} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+              Al vencer
+            </label>
+            <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+              <input type="checkbox" checked={form.notify_on_overdue} onChange={(e) => setForm((f) => ({ ...f, notify_on_overdue: e.target.checked }))} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+              Si vencida
+            </label>
+            <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+              <input type="checkbox" checked={form.notify_on_completion} onChange={(e) => setForm((f) => ({ ...f, notify_on_completion: e.target.checked }))} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+              Al completar
+            </label>
+          </div>
         </div>
 
         <div className="flex justify-end gap-2">

@@ -9,7 +9,6 @@ import { ROLE_LABELS } from '../../types/enums';
 import { PageTransition, FadeIn } from '../../components/ui';
 import {
   HiOutlineUser,
-  HiOutlineMail,
   HiOutlineLockClosed,
   HiOutlineCheckCircle,
   HiOutlineExclamationCircle,
@@ -29,7 +28,6 @@ export function ProfilePage() {
     resolver: zodResolver(updateUserSchema),
     defaultValues: {
       name: user?.name ?? '',
-      email: user?.email ?? '',
       password: '',
       password_confirmation: '',
     },
@@ -42,7 +40,6 @@ export function ProfilePage() {
     try {
       const payload: Record<string, string> = {
         name: data.name,
-        email: data.email,
       };
       if (data.password && data.password.length > 0) {
         payload.password = data.password;
@@ -51,7 +48,7 @@ export function ProfilePage() {
       const updated = await usersApi.update(user.id, payload);
       setUser(updated);
       setSuccess('Perfil actualizado correctamente');
-      reset({ name: updated.name, email: updated.email, password: '', password_confirmation: '' });
+      reset({ name: updated.name, password: '', password_confirmation: '' });
     } catch (error) {
       setServerError(error instanceof ApiError ? error.data.message : 'Error al actualizar el perfil');
     }
@@ -62,7 +59,7 @@ export function ProfilePage() {
       <div className="mx-auto max-w-lg">
         <FadeIn className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Mi perfil</h2>
-          <p className="mt-1 text-sm text-gray-500">Actualiza tu nombre, correo o contraseña.</p>
+          <p className="mt-1 text-sm text-gray-500">Actualiza tu nombre o contraseña.</p>
         </FadeIn>
 
         {/* Avatar + role card */}
@@ -107,19 +104,6 @@ export function ProfilePage() {
                 className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               />
               {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>}
-            </div>
-
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">
-                <HiOutlineMail className="mb-0.5 mr-1 inline h-4 w-4 text-gray-400" />
-                Correo electrónico
-              </label>
-              <input
-                type="email"
-                {...register('email')}
-                className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-              />
-              {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>}
             </div>
 
             <div className="border-t border-gray-100 pt-4">

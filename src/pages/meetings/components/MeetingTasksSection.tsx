@@ -26,6 +26,13 @@ interface DraftTask {
   due_date: string;
   assigned_to_user_id: number | null;
   assigned_to_area_id: number | null;
+  requires_attachment: boolean;
+  requires_completion_comment: boolean;
+  requires_manager_approval: boolean;
+  requires_progress_report: boolean;
+  notify_on_due: boolean;
+  notify_on_overdue: boolean;
+  notify_on_completion: boolean;
 }
 
 interface Props {
@@ -41,6 +48,13 @@ const EMPTY_DRAFT: Omit<DraftTask, 'tempId'> = {
   due_date: '',
   assigned_to_user_id: null,
   assigned_to_area_id: null,
+  requires_attachment: false,
+  requires_completion_comment: false,
+  requires_manager_approval: true,
+  requires_progress_report: false,
+  notify_on_due: true,
+  notify_on_overdue: true,
+  notify_on_completion: false,
 };
 
 function genId() {
@@ -161,6 +175,13 @@ export function MeetingTasksSection({ meetingId, areaId, onTasksCreated }: Props
       due_date: draft.due_date,
       assigned_to_user_id: draft.assigned_to_user_id,
       assigned_to_area_id: draft.assigned_to_area_id,
+      requires_attachment: draft.requires_attachment,
+      requires_completion_comment: draft.requires_completion_comment,
+      requires_manager_approval: draft.requires_manager_approval,
+      requires_progress_report: draft.requires_progress_report,
+      notify_on_due: draft.notify_on_due,
+      notify_on_overdue: draft.notify_on_overdue,
+      notify_on_completion: draft.notify_on_completion,
     });
   };
 
@@ -193,6 +214,13 @@ export function MeetingTasksSection({ meetingId, areaId, onTasksCreated }: Props
             meeting_id: meetingId,
             assigned_to_user_id: d.assigned_to_user_id ?? undefined,
             assigned_to_area_id: d.assigned_to_area_id ?? undefined,
+            requires_attachment: d.requires_attachment,
+            requires_completion_comment: d.requires_completion_comment,
+            requires_manager_approval: d.requires_manager_approval,
+            requires_progress_report: d.requires_progress_report,
+            notify_on_due: d.notify_on_due,
+            notify_on_overdue: d.notify_on_overdue,
+            notify_on_completion: d.notify_on_completion,
           }),
         ),
       );
