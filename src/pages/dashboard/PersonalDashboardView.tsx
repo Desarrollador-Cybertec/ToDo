@@ -184,7 +184,7 @@ export function PersonalDashboardView() {
       <div className="grid gap-6 lg:grid-cols-5">
         {/* Lo importante hoy - 3 cols */}
         <FadeIn delay={0.05} className="lg:col-span-3 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
-          <div className="flex items-center gap-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-800 px-6 py-4">
+          <div className="flex items-center gap-2 border-b border-gray-100 dark:border-gray-800 px-6 py-4">
             <span className="text-xl">🔥</span>
             <div>
               <h3 className="font-semibold text-gray-900 dark:text-gray-100">Lo importante hoy</h3>
@@ -232,7 +232,7 @@ export function PersonalDashboardView() {
       <div className="grid gap-6 lg:grid-cols-5">
         {/* Mis tareas - 3 cols */}
         <FadeIn delay={0.15} className="lg:col-span-3 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
-          <div className="flex items-center justify-between bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-800 px-6 py-4">
+          <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-6 py-4">
             <div>
               <h3 className="font-semibold text-gray-900 dark:text-gray-100">Mis tareas activas</h3>
               <p className="text-xs text-gray-400 dark:text-gray-500">En progreso, en revisión, vencidas o rechazadas.</p>

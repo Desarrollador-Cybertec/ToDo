@@ -83,7 +83,7 @@ export function ClaimWorkersPage() {
       <TeamMembersSection areaId={myArea.id} refreshKey={refreshKey} />
 
       {/* Divider */}
-      <div className="mb-8 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-t border-gray-200 dark:border-gray-700" />
+      <div className="mb-8 border-t border-gray-200 dark:border-gray-700" />
 
       {/* Available workers - endpoint: GET /areas/:id/available-workers */}
       <AvailableWorkersSection areaId={myArea.id} refreshKey={refreshKey} onClaimed={handleClaimed} />

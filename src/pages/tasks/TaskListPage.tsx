@@ -271,7 +271,7 @@ export function TaskListPage() {
         ) : (
           <FadeIn delay={0.1} className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
             {/* List header */}
-            <div className="flex items-center justify-between bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-800 px-6 py-3">
+            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-6 py-3">
               <p className="text-xs font-medium text-gray-400 dark:text-gray-500">
                 {filteredTasks.length} tarea{filteredTasks.length !== 1 ? 's' : ''}
                 {search && ` para "${search}"`}

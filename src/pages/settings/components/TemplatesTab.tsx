@@ -106,7 +106,7 @@ export function TemplatesTab({
                   onDrop={(e) => handleDrop(e, t.id, 'subject')}
                   onDragOver={handleDragOver}
                   className={`mt-0.5 w-full rounded-lg border px-3 py-1.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
-                    isModified && draft?.subject != null ? 'border-blue-400 dark:border-blue-600 bg-blue-50/50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600'
+                    isModified && draft?.subject != null ? 'border-blue-400 dark:border-blue-600 bg-blue-50/50 dark:bg-blue-900/20 text-gray-900 dark:text-gray-100' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100'
                   }`}
                 />
               </div>
@@ -120,13 +120,13 @@ export function TemplatesTab({
                   onDragOver={handleDragOver}
                   rows={3}
                   className={`mt-0.5 w-full rounded-lg border px-3 py-1.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
-                    isModified && draft?.body != null ? 'border-blue-400 dark:border-blue-600 bg-blue-50/50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600'
+                    isModified && draft?.body != null ? 'border-blue-400 dark:border-blue-600 bg-blue-50/50 dark:bg-blue-900/20 text-gray-900 dark:text-gray-100' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100'
                   }`}
                 />
               </div>
             </div>
             {isModified && (
-              <div className="mt-3 flex items-center justify-end gap-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-t border-gray-100 dark:border-gray-800 pt-3">
+              <div className="mt-3 flex items-center justify-end gap-2 border-t border-gray-100 dark:border-gray-800 pt-3">
                 {confirmingTemplateId === t.id ? (
                   <>
                     <span className="mr-auto text-xs text-amber-600 dark:text-amber-400">{'\u00bf'}Guardar cambios de esta plantilla?</span>

@@ -81,7 +81,7 @@ export function AreaTasksSection({ areaId, isManager, refreshKey }: AreaTasksSec
 
   return (
     <FadeIn delay={0.25} className="mt-6 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
-      <div className="flex items-center justify-between bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-800 px-6 py-4">
+      <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-6 py-4">
         <h3 className="font-semibold text-gray-900 dark:text-gray-100">Tareas del área</h3>
         <span className="rounded-lg bg-gray-100 dark:bg-gray-700 px-2.5 py-0.5 text-xs font-semibold text-gray-600 dark:text-gray-400">{tasks.length}</span>
       </div>

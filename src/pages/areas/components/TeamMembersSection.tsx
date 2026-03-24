@@ -53,7 +53,7 @@ export function TeamMembersSection({ areaId, refreshKey }: TeamMembersSectionPro
 
   return (
     <FadeIn delay={0.1} className="mt-6 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
-      <div className="flex items-center justify-between bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-800 px-6 py-4">
+      <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-6 py-4">
         <h3 className="flex items-center gap-2 font-semibold text-gray-900 dark:text-gray-100">
           <HiOutlineUsers className="h-5 w-5 text-indigo-500 dark:text-indigo-400" />
           Trabajadores del área

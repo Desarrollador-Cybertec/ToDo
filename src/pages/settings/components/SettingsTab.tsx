@@ -78,7 +78,7 @@ export function SettingsTab({
                       value={currentValue}
                       onChange={(e) => updateDraft(setting.key, e.target.value)}
                       className={`w-40 rounded-lg border px-3 py-1 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
-                        isModified ? 'border-blue-400 dark:border-blue-600 bg-blue-50/50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600'
+                        isModified ? 'border-blue-400 dark:border-blue-600 bg-blue-50/50 dark:bg-blue-900/20 text-gray-900 dark:text-gray-100' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100'
                       }`}
                     />
                   )}

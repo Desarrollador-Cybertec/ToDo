@@ -135,7 +135,7 @@ function CheckboxGroup({ title, fields }: { title: string; fields: EditField[] }
               type="checkbox"
               checked={opt.value}
               onChange={(e) => opt.set(e.target.checked)}
-              className="h-4 w-4 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500/20"
+              className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500/20"
             />
             {opt.label}
           </label>

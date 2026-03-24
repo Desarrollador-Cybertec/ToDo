@@ -138,19 +138,19 @@ export function MeetingDraftTaskForm({
           <p className="mb-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Requisitos</p>
           <div className="grid gap-2 sm:grid-cols-2">
             <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-              <input type="checkbox" checked={form.requires_attachment} onChange={(e) => setForm((f) => ({ ...f, requires_attachment: e.target.checked }))} className="rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500" />
+              <input type="checkbox" checked={form.requires_attachment} onChange={(e) => setForm((f) => ({ ...f, requires_attachment: e.target.checked }))} className="rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500" />
               Requiere adjunto
             </label>
             <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-              <input type="checkbox" checked={form.requires_completion_comment} onChange={(e) => setForm((f) => ({ ...f, requires_completion_comment: e.target.checked }))} className="rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500" />
+              <input type="checkbox" checked={form.requires_completion_comment} onChange={(e) => setForm((f) => ({ ...f, requires_completion_comment: e.target.checked }))} className="rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500" />
               Comentario de cierre
             </label>
             <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-              <input type="checkbox" checked={form.requires_manager_approval} onChange={(e) => setForm((f) => ({ ...f, requires_manager_approval: e.target.checked }))} className="rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500" />
+              <input type="checkbox" checked={form.requires_manager_approval} onChange={(e) => setForm((f) => ({ ...f, requires_manager_approval: e.target.checked }))} className="rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500" />
               Aprobación del encargado
             </label>
             <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-              <input type="checkbox" checked={form.requires_progress_report} onChange={(e) => setForm((f) => ({ ...f, requires_progress_report: e.target.checked }))} className="rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500" />
+              <input type="checkbox" checked={form.requires_progress_report} onChange={(e) => setForm((f) => ({ ...f, requires_progress_report: e.target.checked }))} className="rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500" />
               Reportes de avance
             </label>
           </div>
@@ -161,15 +161,15 @@ export function MeetingDraftTaskForm({
           <p className="mb-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Notificaciones</p>
           <div className="grid gap-2 sm:grid-cols-3">
             <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-              <input type="checkbox" checked={form.notify_on_due} onChange={(e) => setForm((f) => ({ ...f, notify_on_due: e.target.checked }))} className="rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500" />
+              <input type="checkbox" checked={form.notify_on_due} onChange={(e) => setForm((f) => ({ ...f, notify_on_due: e.target.checked }))} className="rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500" />
               Al vencer
             </label>
             <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-              <input type="checkbox" checked={form.notify_on_overdue} onChange={(e) => setForm((f) => ({ ...f, notify_on_overdue: e.target.checked }))} className="rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500" />
+              <input type="checkbox" checked={form.notify_on_overdue} onChange={(e) => setForm((f) => ({ ...f, notify_on_overdue: e.target.checked }))} className="rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500" />
               Si vencida
             </label>
             <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-              <input type="checkbox" checked={form.notify_on_completion} onChange={(e) => setForm((f) => ({ ...f, notify_on_completion: e.target.checked }))} className="rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500" />
+              <input type="checkbox" checked={form.notify_on_completion} onChange={(e) => setForm((f) => ({ ...f, notify_on_completion: e.target.checked }))} className="rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500" />
               Al completar
             </label>
           </div>

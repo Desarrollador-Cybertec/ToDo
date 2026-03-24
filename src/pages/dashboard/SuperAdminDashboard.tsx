@@ -147,7 +147,7 @@ export function SuperAdminDashboard() {
 
         {/* Tareas por estado - 2 cols */}
         <FadeIn delay={0.1} className="lg:col-span-2 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
-          <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-800 px-6 py-4">
+          <div className="border-b border-gray-100 dark:border-gray-800 px-6 py-4">
             <h3 className="font-semibold text-gray-900 dark:text-gray-100">Tareas por estado</h3>
             <p className="text-xs text-gray-400 dark:text-gray-500">Distribución actual de todas las tareas.</p>
           </div>
@@ -186,7 +186,7 @@ export function SuperAdminDashboard() {
       <div className="grid gap-6 lg:grid-cols-5">
         {/* Pendientes por usuario - 3 cols */}
         <FadeIn delay={0.15} className="lg:col-span-3 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
-          <div className="flex items-center justify-between bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-800 px-6 py-4">
+          <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-6 py-4">
             <div className="flex items-center gap-2">
               <HiOutlineUserGroup className="h-5 w-5 text-indigo-500 dark:text-indigo-400" />
               <div>
@@ -233,7 +233,7 @@ export function SuperAdminDashboard() {
         <div className="lg:col-span-2 space-y-6">
           {/* Tareas por área */}
           <FadeIn delay={0.2} className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
-            <div className="flex items-center gap-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-800 px-5 py-4">
+            <div className="flex items-center gap-2 border-b border-gray-100 dark:border-gray-800 px-5 py-4">
               <HiOutlineOfficeBuilding className="h-4.5 w-4.5 text-blue-500 dark:text-blue-400" />
               <h3 className="font-semibold text-gray-900 dark:text-gray-100">Por área</h3>
             </div>
@@ -258,7 +258,7 @@ export function SuperAdminDashboard() {
 
           {/* Mis tareas */}
           <FadeIn delay={0.25} className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
-            <div className="flex items-center justify-between bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-800 px-5 py-4">
+            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-5 py-4">
               <div className="flex items-center gap-2">
                 <HiOutlineClipboardList className="h-4.5 w-4.5 text-blue-500 dark:text-blue-400" />
                 <h3 className="font-semibold text-gray-900 dark:text-gray-100">Mis tareas</h3>

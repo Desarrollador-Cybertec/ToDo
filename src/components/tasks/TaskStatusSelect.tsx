@@ -179,7 +179,7 @@ export function TaskStatusSelect({ task, userId, userRole, onUpdated }: TaskStat
             <button
               type="button"
               onClick={() => { setPendingReject(false); setRejectNote(''); }}
-              className="rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-red-200 dark:border-red-800 px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 transition-colors hover:bg-red-100 dark:hover:bg-red-900/40"
+              className="rounded-lg bg-white dark:bg-gray-900 border border-red-200 dark:border-red-800 px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 transition-colors hover:bg-red-100 dark:hover:bg-red-900/40"
             >
               Cancelar
             </button>
