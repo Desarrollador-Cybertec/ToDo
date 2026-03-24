@@ -76,37 +76,37 @@ export function AvailableWorkersSection({ areaId, refreshKey, onClaimed }: Avail
 
   if (error) {
     return (
-      <div className="rounded-2xl border border-red-100 bg-red-50 p-4 text-sm text-red-600">
+      <div className="rounded-2xl border border-red-100 dark:border-red-900 bg-red-50 dark:bg-red-900/30 p-4 text-sm text-red-600 dark:text-red-400">
         {error}
-        <button type="button" onClick={load} className="ml-2 underline hover:text-red-800">Reintentar</button>
+        <button type="button" onClick={load} className="ml-2 underline hover:text-red-800 dark:hover:text-red-200">Reintentar</button>
       </div>
     );
   }
 
   return (
     <FadeIn delay={0.1}>
-      <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900">
-        <HiOutlineUserAdd className="h-5 w-5 text-blue-500" />
+      <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <HiOutlineUserAdd className="h-5 w-5 text-blue-500 dark:text-blue-400" />
         Trabajadores disponibles
-        <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-600">
+        <span className="rounded-full bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400">
           {workers.length}
         </span>
       </h3>
 
       {claimError && (
-        <div className="mb-4 flex items-center gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-600 ring-1 ring-inset ring-red-200">
+        <div className="mb-4 flex items-center gap-2 rounded-xl bg-red-50 dark:bg-red-900/30 p-3 text-sm text-red-600 dark:text-red-400 ring-1 ring-inset ring-red-200 dark:ring-red-800">
           {claimError}
         </div>
       )}
 
       <div className="relative mb-4">
-        <HiOutlineSearch className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+        <HiOutlineSearch className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar por nombre o correo..."
-          className="w-full rounded-xl border border-gray-300 py-2.5 pl-10 pr-4 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          className="w-full rounded-xl border border-gray-300 dark:border-gray-600 py-2.5 pl-10 pr-4 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
         />
       </div>
 
@@ -124,14 +124,14 @@ export function AvailableWorkersSection({ areaId, refreshKey, onClaimed }: Avail
         <StaggerList className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((worker) => (
             <StaggerItem key={worker.id}>
-              <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md hover:border-blue-100">
+              <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 shadow-sm transition-all hover:shadow-md hover:border-blue-100 dark:hover:border-blue-900">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-indigo-500 text-sm font-medium text-white">
                     {worker.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0">
-                    <p className="truncate font-semibold text-gray-900">{worker.name}</p>
-                    <p className="truncate text-xs text-gray-500">{worker.email}</p>
+                    <p className="truncate font-semibold text-gray-900 dark:text-gray-100">{worker.name}</p>
+                    <p className="truncate text-xs text-gray-500 dark:text-gray-400">{worker.email}</p>
                   </div>
                 </div>
                 <button

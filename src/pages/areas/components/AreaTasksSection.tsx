@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { tasksApi } from '../../../api/tasks';
 import { areasApi } from '../../../api/areas';
 import { ApiError } from '../../../api/client';
-import { TASK_STATUS_LABELS, TASK_PRIORITY_LABELS } from '../../../types/enums';
+import { TASK_STATUS_LABELS, TASK_PRIORITY_LABELS, Role } from '../../../types/enums';
 import type { Task } from '../../../types';
 import { HiOutlineUserAdd, HiOutlineCheckCircle, HiOutlineX } from 'react-icons/hi';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -29,11 +29,11 @@ export function AreaTasksSection({ areaId, isManager, refreshKey }: AreaTasksSec
     setError(false);
     try {
       const [tasksRes, membersRes] = await Promise.all([
-        tasksApi.list(`area_id=${areaId}`).catch(() => [] as Task[]),
+        tasksApi.list(`area_id=${areaId}`).catch(() => null),
         areasApi.membersAll(areaId).catch(() => []),
       ]);
-      setTasks(Array.isArray(tasksRes) ? tasksRes : []);
-      setMembers(Array.isArray(membersRes) ? membersRes : []);
+      setTasks(tasksRes?.data ?? []);
+      setMembers(Array.isArray(membersRes) ? membersRes.filter((u) => u.role?.slug === Role.WORKER) : []);
     } catch {
       setError(true);
     } finally {
@@ -72,24 +72,24 @@ export function AreaTasksSection({ areaId, isManager, refreshKey }: AreaTasksSec
 
   if (error) {
     return (
-      <div className="mt-6 rounded-2xl border border-red-100 bg-red-50 p-4 text-sm text-red-600">
+      <div className="mt-6 rounded-2xl border border-red-100 dark:border-red-900 bg-red-50 dark:bg-red-900/30 p-4 text-sm text-red-600 dark:text-red-400">
         Error al cargar las tareas del área.
-        <button type="button" onClick={load} className="ml-2 underline hover:text-red-800">Reintentar</button>
+        <button type="button" onClick={load} className="ml-2 underline hover:text-red-800 dark:hover:text-red-200">Reintentar</button>
       </div>
     );
   }
 
   return (
-    <FadeIn delay={0.25} className="mt-6 rounded-2xl border border-gray-100 bg-white shadow-sm">
-      <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-        <h3 className="font-semibold text-gray-900">Tareas del área</h3>
-        <span className="rounded-lg bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-600">{tasks.length}</span>
+    <FadeIn delay={0.25} className="mt-6 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
+      <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-6 py-4">
+        <h3 className="font-semibold text-gray-900 dark:text-gray-100">Tareas del área</h3>
+        <span className="rounded-lg bg-gray-100 dark:bg-gray-700 px-2.5 py-0.5 text-xs font-semibold text-gray-600 dark:text-gray-400">{tasks.length}</span>
       </div>
 
       <AnimatePresence>
         {assignMsg && (
           <SlideDown>
-            <div className="mx-6 mt-3 flex items-center gap-2 rounded-xl bg-green-50 px-3 py-2 text-sm text-green-700 ring-1 ring-inset ring-green-200">
+            <div className="mx-6 mt-3 flex items-center gap-2 rounded-xl bg-green-50 dark:bg-green-900/30 px-3 py-2 text-sm text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-200 dark:ring-green-800">
               <HiOutlineCheckCircle className="h-4 w-4 shrink-0" /> {assignMsg}
             </div>
           </SlideDown>
@@ -97,14 +97,14 @@ export function AreaTasksSection({ areaId, isManager, refreshKey }: AreaTasksSec
       </AnimatePresence>
 
       {tasks.length === 0 ? (
-        <p className="px-6 py-8 text-center text-sm text-gray-400">No hay tareas registradas para esta área.</p>
+        <p className="px-6 py-8 text-center text-sm text-gray-400 dark:text-gray-500">No hay tareas registradas para esta área.</p>
       ) : (
         <div className="divide-y divide-gray-50">
           {tasks.map((task) => (
             <div key={task.id} className="px-6 py-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium text-gray-900">{task.title}</p>
+                  <p className="truncate font-medium text-gray-900 dark:text-gray-100">{task.title}</p>
                   <div className="mt-1.5 flex flex-wrap items-center gap-2">
                     <Badge variant={STATUS_BADGE_VARIANT[task.status] ?? 'gray'} size="sm">
                       {TASK_STATUS_LABELS[task.status] ?? task.status}
@@ -113,7 +113,7 @@ export function AreaTasksSection({ areaId, isManager, refreshKey }: AreaTasksSec
                       {TASK_PRIORITY_LABELS[task.priority]}
                     </Badge>
                     {task.due_date && (
-                      <span className={`text-xs ${task.is_overdue ? 'font-semibold text-red-600' : 'text-gray-400'}`}>
+                      <span className={`text-xs ${task.is_overdue ? 'font-semibold text-red-600 dark:text-red-400' : 'text-gray-400 dark:text-gray-500'}`}>
                         Vence: {new Date(task.due_date).toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' })}
                       </span>
                     )}
@@ -122,14 +122,14 @@ export function AreaTasksSection({ areaId, isManager, refreshKey }: AreaTasksSec
 
                 <div className="flex shrink-0 items-center gap-3">
                   {task.current_responsible ? (
-                    <div className="flex items-center gap-1.5 rounded-lg bg-indigo-50 px-2.5 py-1">
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-200 text-xs font-bold text-indigo-700">
+                    <div className="flex items-center gap-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 px-2.5 py-1">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-200 text-xs font-bold text-indigo-700 dark:text-indigo-400">
                         {task.current_responsible.name.charAt(0)}
                       </span>
-                      <span className="text-xs font-medium text-indigo-700">{task.current_responsible.name}</span>
+                      <span className="text-xs font-medium text-indigo-700 dark:text-indigo-400">{task.current_responsible.name}</span>
                     </div>
                   ) : (
-                    <span className="rounded-lg bg-gray-100 px-2.5 py-1 text-xs text-gray-400">Sin asignar</span>
+                    <span className="rounded-lg bg-gray-100 dark:bg-gray-700 px-2.5 py-1 text-xs text-gray-400 dark:text-gray-500">Sin asignar</span>
                   )}
                   {isManager && (
                     <button
@@ -138,7 +138,7 @@ export function AreaTasksSection({ areaId, isManager, refreshKey }: AreaTasksSec
                         setAssigningTaskId(assigningTaskId === task.id ? null : task.id);
                         setAssignToUserId('');
                       }}
-                      className={`rounded-lg p-1.5 transition-colors ${assigningTaskId === task.id ? 'bg-red-50 text-red-500 hover:bg-red-100' : 'border border-gray-200 text-gray-400 hover:bg-gray-100 hover:text-gray-600'}`}
+                      className={`rounded-lg p-1.5 transition-colors ${assigningTaskId === task.id ? 'bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40' : 'border border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-400'}`}
                       title={assigningTaskId === task.id ? 'Cancelar' : 'Asignar'}
                     >
                       {assigningTaskId === task.id ? <HiOutlineX className="h-4 w-4" /> : <HiOutlineUserAdd className="h-4 w-4" />}
@@ -155,11 +155,11 @@ export function AreaTasksSection({ areaId, isManager, refreshKey }: AreaTasksSec
                     exit={{ opacity: 0, height: 0, marginTop: 0 }}
                     className="overflow-hidden"
                   >
-                    <div className="flex items-center gap-2 rounded-xl border border-indigo-100 bg-indigo-50/60 p-3">
+                    <div className="flex items-center gap-2 rounded-xl border border-indigo-100 dark:border-indigo-900 bg-indigo-50/60 dark:bg-indigo-900/20 p-3">
                       <select
                         value={assignToUserId}
                         onChange={(e) => setAssignToUserId(e.target.value)}
-                        className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                        className="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                       >
                         <option value="">— Seleccionar miembro —</option>
                         {members.map((m) => (

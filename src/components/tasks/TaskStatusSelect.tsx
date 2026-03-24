@@ -151,21 +151,21 @@ export function TaskStatusSelect({ task, userId, userRole, onUpdated }: TaskStat
           type="button"
           onClick={() => execute('reopen')}
           disabled={loading}
-          className="flex items-center justify-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700 transition-colors hover:border-amber-400 hover:bg-amber-100 disabled:opacity-60 cursor-pointer"
+          className="flex items-center justify-center gap-1.5 rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/30 px-3 py-2 text-sm font-medium text-amber-700 dark:text-amber-400 transition-colors hover:border-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 disabled:opacity-60 cursor-pointer"
         >
           <HiOutlineRefresh className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           {loading ? 'Reabriendo...' : reopenAction.label}
         </button>
       )}
       {pendingReject ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-2.5 space-y-2 min-w-48">
-          <p className="text-xs font-semibold text-red-700">Motivo del rechazo</p>
+        <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 p-2.5 space-y-2 min-w-48">
+          <p className="text-xs font-semibold text-red-700 dark:text-red-400">Motivo del rechazo</p>
           <textarea
             value={rejectNote}
             onChange={(e) => setRejectNote(e.target.value)}
             rows={2}
             placeholder="Escribe el motivo..."
-            className="w-full rounded-lg border border-red-200 bg-white px-3 py-1.5 text-sm placeholder:text-gray-400 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-400/20 resize-none"
+            className="w-full rounded-lg border border-red-200 dark:border-red-800 bg-white dark:bg-gray-900 px-3 py-1.5 text-sm placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-400/20 resize-none"
           />
           <div className="flex gap-2">
             <button
@@ -179,7 +179,7 @@ export function TaskStatusSelect({ task, userId, userRole, onUpdated }: TaskStat
             <button
               type="button"
               onClick={() => { setPendingReject(false); setRejectNote(''); }}
-              className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-100"
+              className="rounded-lg border border-red-200 dark:border-red-800 px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 transition-colors hover:bg-red-100 dark:hover:bg-red-900/40"
             >
               Cancelar
             </button>
@@ -192,7 +192,7 @@ export function TaskStatusSelect({ task, userId, userRole, onUpdated }: TaskStat
             onChange={handleChange}
             disabled={loading}
             defaultValue=""
-            className="w-full appearance-none rounded-xl border border-blue-200 bg-blue-50 py-2 pl-3 pr-8 text-sm font-medium text-blue-700 transition-colors hover:border-blue-300 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:opacity-60 cursor-pointer"
+            className="w-full appearance-none rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/30 py-2 pl-3 pr-8 text-sm font-medium text-blue-700 dark:text-blue-400 transition-colors hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/40 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:opacity-60 cursor-pointer"
           >
             <option value="" disabled>
               {loading ? 'Ejecutando...' : 'Cambiar estado'}
@@ -203,11 +203,11 @@ export function TaskStatusSelect({ task, userId, userRole, onUpdated }: TaskStat
               </option>
             ))}
           </select>
-          <HiOutlineChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-500" />
+          <HiOutlineChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-500 dark:text-blue-400" />
         </div>
         )
       )}
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
     </div>
   );
 }

@@ -151,7 +151,7 @@ export function PersonalDashboardView() {
   const inReviewCount = useMemo(() => data?.tasks_by_status?.[TaskStatus.IN_REVIEW] ?? 0, [data]);
 
   if (loading) return <SkeletonDashboard />;
-  if (!data) return <p className="text-gray-500">No se pudo cargar el dashboard.</p>;
+  if (!data) return <p className="text-gray-500 dark:text-gray-400">No se pudo cargar el dashboard.</p>;
 
   const attentionCount = urgentTasks.length;
   const firstName = user?.name?.split(' ')[0] ?? '';
@@ -159,15 +159,15 @@ export function PersonalDashboardView() {
   return (
     <div className="space-y-6">
       {/* Hero greeting */}
-      <FadeIn className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-white px-6 py-5 shadow-sm">
+      <FadeIn className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 px-6 py-5 shadow-sm">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             Hola, {firstName} <span className="inline-block animate-[wave_1.8s_ease-in-out_infinite] origin-[70%_70%]">👋</span>
           </h2>
-          <p className="mt-1 text-sm text-gray-500">
-            Tienes <span className="font-semibold text-gray-900">{data.active_tasks ?? 0} tareas activas</span>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Tienes <span className="font-semibold text-gray-900 dark:text-gray-100">{data.active_tasks ?? 0} tareas activas</span>
             {attentionCount > 0 && (
-              <> y <span className="font-semibold text-red-600">{attentionCount} requieren atención inmediata</span></>
+              <> y <span className="font-semibold text-red-600 dark:text-red-400">{attentionCount} requieren atención inmediata</span></>
             )}.
           </p>
         </div>
@@ -183,20 +183,20 @@ export function PersonalDashboardView() {
       {/* Lo importante hoy + Resumen rápido */}
       <div className="grid gap-6 lg:grid-cols-5">
         {/* Lo importante hoy - 3 cols */}
-        <FadeIn delay={0.05} className="lg:col-span-3 rounded-2xl border border-gray-100 bg-white shadow-sm">
-          <div className="flex items-center gap-2 border-b border-gray-100 px-6 py-4">
+        <FadeIn delay={0.05} className="lg:col-span-3 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
+          <div className="flex items-center gap-2 border-b border-gray-100 dark:border-gray-800 px-6 py-4">
             <span className="text-xl">🔥</span>
             <div>
-              <h3 className="font-semibold text-gray-900">Lo importante hoy</h3>
-              <p className="text-xs text-gray-500">Empieza por estas tareas para evitar atrasos.</p>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Lo importante hoy</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Empieza por estas tareas para evitar atrasos.</p>
             </div>
           </div>
           <div className="divide-y divide-gray-50 px-6">
             {urgentTasks.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 text-center">
                 <HiOutlineCheckCircle className="mb-2 h-10 w-10 text-green-400" />
-                <p className="text-sm font-medium text-gray-600">¡Todo al día!</p>
-                <p className="text-xs text-gray-400">No tienes tareas urgentes pendientes.</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">¡Todo al día!</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500">No tienes tareas urgentes pendientes.</p>
               </div>
             ) : (
               urgentTasks.slice(0, 4).map((t) => (
@@ -208,18 +208,18 @@ export function PersonalDashboardView() {
 
         {/* Resumen rápido - 2 cols */}
         <FadeIn delay={0.1} className="lg:col-span-2 space-y-6">
-          <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-            <h3 className="mb-4 font-semibold text-gray-900">Resumen rápido</h3>
+          <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 shadow-sm">
+            <h3 className="mb-4 font-semibold text-gray-900 dark:text-gray-100">Resumen rápido</h3>
             <div className="grid grid-cols-2 gap-3">
-              <MiniStat label="Activas" value={data.active_tasks ?? 0} icon={<HiOutlineClipboardList className="h-4.5 w-4.5" />} color="text-blue-600 bg-blue-50" />
-              <MiniStat label="Vencidas" value={data.overdue_tasks ?? 0} icon={<HiOutlineExclamation className="h-4.5 w-4.5" />} color="text-red-600 bg-red-50" alert={data.overdue_tasks > 0} />
-              <MiniStat label="En revisión" value={inReviewCount} icon={<HiOutlineClock className="h-4.5 w-4.5" />} color="text-purple-600 bg-purple-50" />
-              <MiniStat label="Completadas" value={data.completed_tasks ?? 0} icon={<HiOutlineCheckCircle className="h-4.5 w-4.5" />} color="text-green-600 bg-green-50" />
+              <MiniStat label="Activas" value={data.active_tasks ?? 0} icon={<HiOutlineClipboardList className="h-4.5 w-4.5" />} color="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30" />
+              <MiniStat label="Vencidas" value={data.overdue_tasks ?? 0} icon={<HiOutlineExclamation className="h-4.5 w-4.5" />} color="text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30" alert={data.overdue_tasks > 0} />
+              <MiniStat label="En revisión" value={inReviewCount} icon={<HiOutlineClock className="h-4.5 w-4.5" />} color="text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30" />
+              <MiniStat label="Completadas" value={data.completed_tasks ?? 0} icon={<HiOutlineCheckCircle className="h-4.5 w-4.5" />} color="text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30" />
             </div>
             {data.due_soon_tasks > 0 && (
-              <div className="mt-4 rounded-xl bg-amber-50 px-4 py-3 ring-1 ring-inset ring-amber-200/60">
-                <p className="text-xs font-semibold text-amber-700">Sugerencia del día</p>
-                <p className="mt-0.5 text-xs text-amber-600">
+              <div className="mt-4 rounded-xl bg-amber-50 dark:bg-amber-900/30 px-4 py-3 ring-1 ring-inset ring-amber-200 dark:ring-amber-800/60">
+                <p className="text-xs font-semibold text-amber-700 dark:text-amber-400">Sugerencia del día</p>
+                <p className="mt-0.5 text-xs text-amber-600 dark:text-amber-400">
                   Tienes {data.due_soon_tasks} tarea{data.due_soon_tasks !== 1 ? 's' : ''} próxima{data.due_soon_tasks !== 1 ? 's' : ''} a vencer. Revisa su avance para evitar atrasos.
                 </p>
               </div>
@@ -231,13 +231,13 @@ export function PersonalDashboardView() {
       {/* Mis tareas + Sidebar derecho */}
       <div className="grid gap-6 lg:grid-cols-5">
         {/* Mis tareas - 3 cols */}
-        <FadeIn delay={0.15} className="lg:col-span-3 rounded-2xl border border-gray-100 bg-white shadow-sm">
-          <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+        <FadeIn delay={0.15} className="lg:col-span-3 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
+          <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-6 py-4">
             <div>
-              <h3 className="font-semibold text-gray-900">Mis tareas activas</h3>
-              <p className="text-xs text-gray-400">En progreso, en revisión, vencidas o rechazadas.</p>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Mis tareas activas</h3>
+              <p className="text-xs text-gray-400 dark:text-gray-500">En progreso, en revisión, vencidas o rechazadas.</p>
             </div>
-            <Link to="/tasks" className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900">
+            <Link to="/tasks" className="rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100">
               Ver todas
             </Link>
           </div>
@@ -245,8 +245,8 @@ export function PersonalDashboardView() {
             {myTasks.length === 0 ? (
               <div className="flex flex-col items-center justify-center px-6 py-10 text-center">
                 <HiOutlineCheckCircle className="mb-2 h-10 w-10 text-green-400" />
-                <p className="text-sm font-medium text-gray-700">¡Sin tareas activas!</p>
-                <p className="text-xs text-gray-400">No tienes tareas en curso en este momento.</p>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">¡Sin tareas activas!</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500">No tienes tareas en curso en este momento.</p>
               </div>
             ) : (
               myTasks.slice(0, 5).map((t) => (
@@ -259,24 +259,24 @@ export function PersonalDashboardView() {
         {/* Sidebar derecho - 2 cols */}
         <div className="lg:col-span-2 space-y-6">
           {/* Próximas actividades */}
-          <FadeIn delay={0.2} className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-            <h3 className="mb-3 flex items-center gap-2 font-semibold text-gray-900">
-              <HiOutlineCalendar className="h-4.5 w-4.5 text-indigo-500" />
+          <FadeIn delay={0.2} className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 shadow-sm">
+            <h3 className="mb-3 flex items-center gap-2 font-semibold text-gray-900 dark:text-gray-100">
+              <HiOutlineCalendar className="h-4.5 w-4.5 text-indigo-500 dark:text-indigo-400" />
               Por iniciar
             </h3>
             {pendingTasks.length === 0 ? (
-              <p className="py-3 text-center text-xs text-gray-400">Sin tareas pendientes de inicio</p>
+              <p className="py-3 text-center text-xs text-gray-400 dark:text-gray-500">Sin tareas pendientes de inicio</p>
             ) : (
               <div className="space-y-2">
                 {pendingTasks.slice(0, 4).map((t) => (
-                  <Link key={t.id} to={`/tasks/${t.id}`} className="group flex items-center justify-between rounded-xl border border-gray-100 p-3 transition-all hover:border-indigo-100 hover:bg-indigo-50/30">
+                  <Link key={t.id} to={`/tasks/${t.id}`} className="group flex items-center justify-between rounded-xl border border-gray-100 dark:border-gray-800 p-3 transition-all hover:border-indigo-100 dark:hover:border-indigo-900 hover:bg-indigo-50 dark:hover:bg-indigo-900/30">
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-gray-900 group-hover:text-indigo-700">{t.title}</p>
-                      <p className="mt-0.5 text-xs text-gray-500">
+                      <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-indigo-700 dark:group-hover:text-indigo-400">{t.title}</p>
+                      <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                         {t.due_date ? `Vence ${formatRelativeDate(t.due_date)}` : 'Sin fecha límite'}
                       </p>
                     </div>
-                    <HiOutlineChevronRight className="ml-2 h-4 w-4 shrink-0 text-gray-400 group-hover:text-indigo-500" />
+                    <HiOutlineChevronRight className="ml-2 h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500 group-hover:text-indigo-500 dark:group-hover:text-indigo-400" />
                   </Link>
                 ))}
               </div>
@@ -284,16 +284,16 @@ export function PersonalDashboardView() {
           </FadeIn>
 
           {/* Ayuda rápida */}
-          <FadeIn delay={0.25} className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-            <h3 className="mb-3 flex items-center gap-2 font-semibold text-gray-900">
-              <HiOutlineQuestionMarkCircle className="h-4.5 w-4.5 text-blue-500" />
+          <FadeIn delay={0.25} className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 shadow-sm">
+            <h3 className="mb-3 flex items-center gap-2 font-semibold text-gray-900 dark:text-gray-100">
+              <HiOutlineQuestionMarkCircle className="h-4.5 w-4.5 text-blue-500 dark:text-blue-400" />
               Ayuda rápida
             </h3>
             <div className="space-y-2">
               {TIPS.slice(0, 3).map((tip, i) => (
-                <div key={i} className="flex items-start gap-2.5 rounded-xl bg-gray-50 px-3.5 py-2.5">
+                <div key={i} className="flex items-start gap-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 px-3.5 py-2.5">
                   <span className="mt-0.5 text-sm shrink-0">{tip.icon}</span>
-                  <p className="text-xs leading-relaxed text-gray-600">{tip.text}</p>
+                  <p className="text-xs leading-relaxed text-gray-600 dark:text-gray-400">{tip.text}</p>
                 </div>
               ))}
             </div>
@@ -308,12 +308,12 @@ export function PersonalDashboardView() {
 
 function MiniStat({ label, value, icon, color, alert }: { label: string; value: number; icon: React.ReactNode; color: string; alert?: boolean }) {
   return (
-    <div className={`rounded-xl border px-4 py-3 transition-colors ${alert ? 'border-red-200 bg-red-50/40' : 'border-gray-100 bg-gray-50/50 hover:bg-gray-50'}`}>
+    <div className={`rounded-xl border px-4 py-3 transition-colors ${alert ? 'border-red-200 dark:border-red-800 bg-red-50/40 dark:bg-red-900/20' : 'border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
       <div className="flex items-center gap-2">
         <span className={`flex h-7 w-7 items-center justify-center rounded-lg ${color}`}>{icon}</span>
-        <span className="text-xs text-gray-500">{label}</span>
+        <span className="text-xs text-gray-500 dark:text-gray-400">{label}</span>
       </div>
-      <p className={`mt-1.5 text-xl font-bold ${alert ? 'text-red-700' : 'text-gray-900'}`}>{value}</p>
+      <p className={`mt-1.5 text-xl font-bold ${alert ? 'text-red-700 dark:text-red-400' : 'text-gray-900 dark:text-gray-100'}`}>{value}</p>
     </div>
   );
 }
@@ -323,10 +323,10 @@ function UrgentTaskRow({ task }: { task: UpcomingTask }) {
   return (
     <div className="flex items-center justify-between gap-3 py-3.5">
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-gray-900">{task.title}</p>
-        <p className="mt-0.5 text-xs text-gray-500">
+        <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">{task.title}</p>
+        <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
           {isOverdue ? (
-            <span className="font-medium text-red-600">Vencida · {formatRelativeDate(task.due_date)}</span>
+            <span className="font-medium text-red-600 dark:text-red-400">Vencida · {formatRelativeDate(task.due_date)}</span>
           ) : (
             <>Vence {task.due_date ? formatRelativeDate(task.due_date) : 'sin fecha'}</>
           )}
@@ -336,7 +336,7 @@ function UrgentTaskRow({ task }: { task: UpcomingTask }) {
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-2">
-        <Link to={`/tasks/${task.id}`} className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50">
+        <Link to={`/tasks/${task.id}`} className="rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
           <HiOutlineEye className="inline h-3.5 w-3.5" /> Ver
         </Link>
         <Link to={`/tasks/${task.id}`} className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-700">
@@ -351,8 +351,8 @@ function TaskRow({ task }: { task: UpcomingTask }) {
   return (
     <div className="flex items-center justify-between gap-3 px-6 py-3.5">
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-gray-900">{task.title}</p>
-        <p className="mt-0.5 text-xs text-gray-500">
+        <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">{task.title}</p>
+        <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
           {task.due_date ? formatRelativeDate(task.due_date) : 'Sin fecha límite'}
         </p>
         <div className="mt-1.5 flex flex-wrap items-center gap-1.5">

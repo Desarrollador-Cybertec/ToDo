@@ -245,14 +245,14 @@ export function MeetingTasksSection({ meetingId, areaId, onTasksCreated }: Props
   };
 
   return (
-    <FadeIn delay={0.15} className="mt-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-      <h3 className="mb-4 flex items-center gap-2 font-semibold text-gray-900">
-        <HiOutlineUserGroup className="h-5 w-5 text-blue-500" />
+    <FadeIn delay={0.15} className="mt-6 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
+      <h3 className="mb-4 flex items-center gap-2 font-semibold text-gray-900 dark:text-gray-100">
+        <HiOutlineUserGroup className="h-5 w-5 text-blue-500 dark:text-blue-400" />
         Crear compromisos de reunión
       </h3>
 
       {error && (
-        <div className="mb-4 flex items-center gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-600 ring-1 ring-inset ring-red-200">
+        <div className="mb-4 flex items-center gap-2 rounded-xl bg-red-50 dark:bg-red-900/30 p-3 text-sm text-red-600 dark:text-red-400 ring-1 ring-inset ring-red-200 dark:ring-red-800">
           <HiOutlineExclamationCircle className="h-4 w-4 shrink-0" />
           {error}
         </div>
@@ -270,17 +270,17 @@ export function MeetingTasksSection({ meetingId, areaId, onTasksCreated }: Props
                   layout
                   initial={{ opacity: 0, y: -8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center justify-between rounded-xl border border-gray-100 p-3 transition-colors hover:bg-gray-50/50"
+                  className="flex items-center justify-between rounded-xl border border-gray-100 dark:border-gray-800 p-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="font-medium text-gray-900 truncate">{draft.title}</p>
+                    <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{draft.title}</p>
                     <div className="mt-1 flex flex-wrap items-center gap-2">
                       <Badge variant={PRIORITY_BADGE_VARIANT[draft.priority]} size="sm">
                         {TASK_PRIORITY_LABELS[draft.priority]}
                       </Badge>
-                      <span className="text-xs text-gray-500">{getAssigneeName(draft)}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">{getAssigneeName(draft)}</span>
                       {draft.due_date && (
-                        <span className="text-xs text-gray-400">
+                        <span className="text-xs text-gray-400 dark:text-gray-500">
                           📅 {new Date(draft.due_date + 'T00:00:00').toLocaleDateString('es-PE')}
                         </span>
                       )}
@@ -290,7 +290,7 @@ export function MeetingTasksSection({ meetingId, areaId, onTasksCreated }: Props
                     <button
                       type="button"
                       onClick={() => startEdit(draft)}
-                      className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                      className="rounded-lg p-1.5 text-gray-400 dark:text-gray-500 transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400"
                       title="Editar"
                     >
                       <HiOutlinePencil className="h-4 w-4" />
@@ -298,7 +298,7 @@ export function MeetingTasksSection({ meetingId, areaId, onTasksCreated }: Props
                     <button
                       type="button"
                       onClick={() => removeDraft(draft.tempId)}
-                      className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                      className="rounded-lg p-1.5 text-gray-400 dark:text-gray-500 transition-colors hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400"
                       title="Eliminar"
                     >
                       <HiOutlineTrash className="h-4 w-4" />
@@ -323,7 +323,7 @@ export function MeetingTasksSection({ meetingId, areaId, onTasksCreated }: Props
               setForm(EMPTY_DRAFT);
               setShowForm(true);
             }}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-dashed border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 transition-all hover:border-blue-400 hover:bg-blue-50/50 hover:text-blue-600"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-dashed border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 transition-all hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30/50 hover:text-blue-600 dark:hover:text-blue-400"
           >
             <HiOutlinePlus className="h-4 w-4" /> Agregar compromiso
           </button>
@@ -350,7 +350,7 @@ export function MeetingTasksSection({ meetingId, areaId, onTasksCreated }: Props
       </div>
 
       {drafts.length === 0 && !showForm && (
-        <p className="mt-2 text-sm text-gray-400">
+        <p className="mt-2 text-sm text-gray-400 dark:text-gray-500">
           Agrega los compromisos que surgieron de esta reunión. Se crearán todos juntos al guardar.
         </p>
       )}

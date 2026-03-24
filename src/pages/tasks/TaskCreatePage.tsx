@@ -26,10 +26,10 @@ import { TaskCreateAdvanced } from './components/TaskCreateAdvanced';
 
 /* ── constants ── */
 const PRIORITY_STYLES: Record<string, { ring: string; bg: string; text: string; dot: string }> = {
-  low:    { ring: 'ring-emerald-400', bg: 'bg-emerald-50',  text: 'text-emerald-700', dot: 'bg-emerald-500' },
-  medium: { ring: 'ring-sky-400',     bg: 'bg-sky-50',      text: 'text-sky-700',     dot: 'bg-sky-500' },
-  high:   { ring: 'ring-amber-400',   bg: 'bg-amber-50',    text: 'text-amber-700',   dot: 'bg-amber-500' },
-  urgent: { ring: 'ring-rose-400',    bg: 'bg-rose-50',     text: 'text-rose-700',    dot: 'bg-rose-500' },
+  low:    { ring: 'ring-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-900/30',  text: 'text-emerald-700 dark:text-emerald-400', dot: 'bg-emerald-500' },
+  medium: { ring: 'ring-sky-400',     bg: 'bg-sky-50 dark:bg-sky-900/30',      text: 'text-sky-700 dark:text-sky-400',     dot: 'bg-sky-500' },
+  high:   { ring: 'ring-amber-400',   bg: 'bg-amber-50 dark:bg-amber-900/30',    text: 'text-amber-700 dark:text-amber-400',   dot: 'bg-amber-500' },
+  urgent: { ring: 'ring-rose-400',    bg: 'bg-rose-50 dark:bg-rose-900/30',     text: 'text-rose-700 dark:text-rose-400',    dot: 'bg-rose-500' },
 };
 
 export function TaskCreatePage() {
@@ -136,7 +136,7 @@ export function TaskCreatePage() {
         } else {
           const matched = a.filter(
             (area) =>
-              Number(area.manager_user_id) === uid ||
+              Number(area.manager_user_id) === uid || Number(area.manager?.id) === uid ||
               (area.manager?.id != null && Number(area.manager.id) === uid),
           );
           areaIdsToFetch = matched.length ? matched.map((area) => area.id) : a.length ? [a[0].id] : [];
@@ -216,14 +216,14 @@ export function TaskCreatePage() {
       <div className="mx-auto max-w-6xl">
         {/* header */}
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Nueva Tarea</h2>
-          <p className="mt-1 text-sm text-gray-500">Completa los datos esenciales y crea tu tarea rápidamente.</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Nueva Tarea</h2>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Completa los datos esenciales y crea tu tarea rápidamente.</p>
         </div>
 
         <AnimatePresence>
           {serverError && (
             <SlideDown>
-              <div className="mb-4 flex items-center gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-600 ring-1 ring-inset ring-red-200">
+              <div className="mb-4 flex items-center gap-2 rounded-xl bg-red-50 dark:bg-red-900/30 p-3 text-sm text-red-600 dark:text-red-400 ring-1 ring-inset ring-red-200 dark:ring-red-800">
                 <HiOutlineExclamationCircle className="h-4 w-4 shrink-0" />
                 {serverError}
               </div>
@@ -237,36 +237,36 @@ export function TaskCreatePage() {
             <div className="space-y-6 lg:col-span-2">
 
               {/* quick creation card */}
-              <FadeIn delay={0.05} className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900">
+              <FadeIn delay={0.05} className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
+                <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
                   ⚡ Creación rápida
                 </h3>
                 <div className="space-y-4">
                   {/* title */}
                   <div>
-                    <label htmlFor="title" className="mb-1.5 block text-sm font-medium text-gray-700">Título *</label>
+                    <label htmlFor="title" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Título *</label>
                     <input
                       id="title"
                       {...register('title')}
                       placeholder="Ej: Enviar informe semanal"
-                      className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                      className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                     />
-                    {errors.title && <p className="mt-1 text-sm text-red-500">{errors.title.message}</p>}
+                    {errors.title && <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errors.title.message}</p>}
                   </div>
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     {/* responsible */}
                     {isWorker ? (
                       <div>
-                        <label className="mb-1.5 block text-sm font-medium text-gray-700">Destino</label>
+                        <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Destino</label>
                         <div className="flex gap-2">
                           <button
                             type="button"
                             onClick={() => { setWorkerDest('self'); setValue('assigned_to_user_id', user?.id ?? null); setValue('external_email', ''); setValue('external_name', ''); }}
                             className={`flex-1 rounded-xl border px-3 py-2.5 text-sm font-medium transition-all ${
                               workerDest === 'self'
-                                ? 'border-blue-300 bg-blue-50 text-blue-700 ring-1 ring-blue-200'
-                                : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                                ? 'border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 ring-1 ring-blue-200 dark:ring-blue-800'
+                                : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
                             }`}
                           >
                             <HiOutlineUser className="mr-1 inline h-4 w-4" />
@@ -277,8 +277,8 @@ export function TaskCreatePage() {
                             onClick={() => { setWorkerDest('external'); setValue('assigned_to_user_id', null); }}
                             className={`flex-1 rounded-xl border px-3 py-2.5 text-sm font-medium transition-all ${
                               workerDest === 'external'
-                                ? 'border-blue-300 bg-blue-50 text-blue-700 ring-1 ring-blue-200'
-                                : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                                ? 'border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 ring-1 ring-blue-200 dark:ring-blue-800'
+                                : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
                             }`}
                           >
                             ✉️ Correo externo
@@ -286,8 +286,8 @@ export function TaskCreatePage() {
                         </div>
                         {workerDest === 'self' && (
                           <>
-                            <div className="mt-2 flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-700">
-                              <HiOutlineUser className="h-4 w-4 text-gray-400" />
+                            <div className="mt-2 flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300">
+                              <HiOutlineUser className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                               {user?.name} (tú)
                             </div>
                             <input type="hidden" {...register('assigned_to_user_id', { value: user?.id })} />
@@ -299,26 +299,26 @@ export function TaskCreatePage() {
                               type="email"
                               {...register('external_email')}
                               placeholder="correo@ejemplo.com"
-                              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none"
+                              className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none"
                             />
-                            {errors.external_email && <p className="mt-1 text-sm text-red-500">{errors.external_email.message}</p>}
+                            {errors.external_email && <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errors.external_email.message}</p>}
                             <input
                               type="text"
                               {...register('external_name')}
                               placeholder="Nombre del destinatario"
-                              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none"
+                              className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none"
                             />
                           </div>
                         )}
                       </div>
                     ) : (
                       <div>
-                        <label htmlFor="assigned_to_user_id" className="mb-1.5 block text-sm font-medium text-gray-700">Responsable</label>
+                        <label htmlFor="assigned_to_user_id" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Responsable</label>
                         <select
                           id="assigned_to_user_id"
                           {...register('assigned_to_user_id', { setValueAs: (v: string) => v ? Number(v) : null })}
                           disabled={hasArea || hasExternalEmail}
-                          className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none disabled:bg-gray-50 disabled:text-gray-400"
+                          className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none disabled:bg-gray-50 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500"
                         >
                           <option value="">Seleccionar usuario</option>
                           {availableUsers.map((u) => (
@@ -330,14 +330,14 @@ export function TaskCreatePage() {
 
                     {/* due date */}
                     <div>
-                      <label htmlFor="due_date" className="mb-1.5 block text-sm font-medium text-gray-700">Fecha límite</label>
-                      <input id="due_date" type="date" {...register('due_date')} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none" />
+                      <label htmlFor="due_date" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha límite</label>
+                      <input id="due_date" type="date" {...register('due_date')} className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none" />
                     </div>
                   </div>
 
                   {/* priority pills */}
                   <div>
-                    <span className="mb-2 block text-sm font-medium text-gray-700">Prioridad</span>
+                    <span className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Prioridad</span>
                     <div className="flex flex-wrap gap-2">
                       {Object.entries(TASK_PRIORITY_LABELS).map(([value, label]) => {
                         const s = PRIORITY_STYLES[value] ?? PRIORITY_STYLES.medium;
@@ -347,7 +347,7 @@ export function TaskCreatePage() {
                             key={value}
                             type="button"
                             onClick={() => setValue('priority', value as CreateTaskFormData['priority'])}
-                            className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium ring-1 transition-all ${active ? `${s.bg} ${s.text} ${s.ring} shadow-sm` : 'bg-white text-gray-500 ring-gray-200 hover:bg-gray-50'}`}
+                            className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium ring-1 transition-all ${active ? `${s.bg} ${s.text} ${s.ring} shadow-sm` : 'bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 ring-gray-200 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
                           >
                             <span className={`h-2 w-2 rounded-full ${active ? s.dot : 'bg-gray-300'}`} />
                             {label}
@@ -355,21 +355,21 @@ export function TaskCreatePage() {
                         );
                       })}
                     </div>
-                    {errors.priority && <p className="mt-1 text-sm text-red-500">{errors.priority.message}</p>}
+                    {errors.priority && <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errors.priority.message}</p>}
                   </div>
                 </div>
 
                 {/* toggle advanced */}
-                <div className="mt-5 border-t border-gray-100 pt-4">
+                <div className="mt-5 border-t border-gray-100 dark:border-gray-800 pt-4">
                   {!showAdvanced && (
                     <button
                       type="button"
                       onClick={() => setShowAdvanced(true)}
-                      className="flex w-full items-center justify-between rounded-xl border border-dashed border-blue-300 bg-blue-50/50 px-4 py-3 text-sm transition-all hover:bg-blue-50"
+                      className="flex w-full items-center justify-between rounded-xl border border-dashed border-blue-300 dark:border-blue-700 bg-blue-50/50 dark:bg-blue-900/20 px-4 py-3 text-sm transition-all hover:bg-blue-50 dark:hover:bg-blue-900/30"
                     >
                       <div className="flex items-center gap-2">
-                        <HiOutlineShieldCheck className="h-5 w-5 text-blue-500" />
-                        <span className="font-medium text-blue-700">Configurar requisitos, notificaciones y más</span>
+                        <HiOutlineShieldCheck className="h-5 w-5 text-blue-500 dark:text-blue-400" />
+                        <span className="font-medium text-blue-700 dark:text-blue-400">Configurar requisitos, notificaciones y más</span>
                       </div>
                       <span className="text-xs text-blue-400">Recomendado</span>
                     </button>
@@ -378,7 +378,7 @@ export function TaskCreatePage() {
                     <button
                       type="button"
                       onClick={() => setShowAdvanced(false)}
-                      className="flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700"
+                      className="flex items-center gap-1.5 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700"
                     >
                       <HiOutlineChevronDown className="h-4 w-4 rotate-180 transition-transform" />
                       Ocultar opciones avanzadas

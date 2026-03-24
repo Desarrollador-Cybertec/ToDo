@@ -303,17 +303,38 @@ export function TaskDetailPage() {
 
   const handleDelegateOpen = async () => {
     setShowDelegateForm(true);
-    const areaId = task?.area_id ?? task?.assigned_to_area_id ?? task?.area?.id ?? task?.assigned_area?.id ?? user?.area_id ?? null;
-    if (areaId) {
-      setMembersLoading(true);
-      try {
-        const members = await areasApi.membersAll(areaId);
-        setAreaMembers(Array.isArray(members) ? members : []);
-      } catch {
-        setAreaMembers([]);
-      } finally {
-        setMembersLoading(false);
+    setMembersLoading(true);
+    try {
+      if (isSuperAdmin) {
+        // Superadmin can access all users; /areas/{id}/members is restricted to area owners
+        const allUsers = await usersApi.listAll();
+        setAreaMembers(allUsers);
+      } else {
+        // For manager: resolve the area THEY manage (not just any area linked to the task)
+        // Resolve the area the manager owns. Backend returns manager as nested { id } not manager_user_id.
+        const uid = Number(user?.id);
+        let areaId: number | null = null;
+        if (task?.area && (Number(task.area.manager_user_id) === uid || Number(task.area.manager?.id) === uid)) {
+          areaId = task.area.id;
+        } else if (task?.assigned_area && (Number(task.assigned_area.manager_user_id) === uid || Number(task.assigned_area.manager?.id) === uid)) {
+          areaId = task.assigned_area.id;
+        } else if (user?.area_id) {
+          areaId = user.area_id;
+        } else {
+          // Last resort: fetch areas list and find the one this manager owns
+          const areas = await areasApi.listAll();
+          const managedArea = areas.find((a) => (Number(a.manager_user_id) === uid || Number(a.manager?.id) === uid) && a.active);
+          areaId = managedArea?.id ?? null;
+        }
+        if (areaId) {
+          const members = await areasApi.membersAll(areaId);
+          setAreaMembers(Array.isArray(members) ? members : []);
+        }
       }
+    } catch {
+      setAreaMembers([]);
+    } finally {
+      setMembersLoading(false);
     }
   };
 
@@ -323,14 +344,14 @@ export function TaskDetailPage() {
   return (
     <PageTransition>
       <div className="mx-auto max-w-4xl">
-        <button type="button" onClick={() => navigate('/tasks')} className="mb-4 flex items-center gap-2 text-sm text-gray-500 transition-colors hover:text-gray-900">
+        <button type="button" onClick={() => navigate('/tasks')} className="mb-4 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 transition-colors hover:text-gray-900 dark:hover:text-gray-100">
           <HiOutlineArrowLeft className="h-4 w-4" /> Volver a tareas
         </button>
 
         <AnimatePresence>
           {actionError && (
             <SlideDown>
-              <div className="mb-4 flex items-center gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-600 ring-1 ring-inset ring-red-200">
+              <div className="mb-4 flex items-center gap-2 rounded-xl bg-red-50 dark:bg-red-900/30 p-3 text-sm text-red-600 dark:text-red-400 ring-1 ring-inset ring-red-200 dark:ring-red-800">
                 <HiOutlineExclamationCircle className="h-4 w-4 shrink-0" />
                 {actionError}
               </div>
@@ -338,7 +359,7 @@ export function TaskDetailPage() {
           )}
           {actionSuccess && (
             <SlideDown>
-              <div className="mb-4 flex items-center gap-2 rounded-xl bg-green-50 p-3 text-sm text-green-600 ring-1 ring-inset ring-green-200">
+              <div className="mb-4 flex items-center gap-2 rounded-xl bg-green-50 dark:bg-green-900/30 p-3 text-sm text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-200 dark:ring-green-800">
                 <HiOutlineCheckCircle className="h-4 w-4 shrink-0" />
                 {actionSuccess}
               </div>
@@ -347,7 +368,7 @@ export function TaskDetailPage() {
         </AnimatePresence>
 
         {/* Task Header */}
-        <FadeIn className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+        <FadeIn className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
           <AnimatePresence mode="wait">
             {editing ? (
               <TaskEditForm
@@ -385,8 +406,8 @@ export function TaskDetailPage() {
               <motion.div key="view-mode" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">{task.title}</h2>
-              {task.description && <p className="mt-2 text-gray-600">{task.description}</p>}
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{task.title}</h2>
+              {task.description && <p className="mt-2 text-gray-600 dark:text-gray-400">{task.description}</p>}
             </div>
             <div className="flex flex-wrap gap-2">
               <Badge variant={STATUS_BADGE_VARIANT[task.status]} size="md">
@@ -400,40 +421,40 @@ export function TaskDetailPage() {
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div>
-              <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Creado por</p>
+              <p className="text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Creado por</p>
               <div className="mt-1 flex items-center gap-2">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-50 text-xs font-medium text-blue-600">{task.creator?.name?.charAt(0) ?? '?'}</span>
-                <p className="text-sm text-gray-900">{task.creator?.name ?? 'Desconocido'}</p>
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30 text-xs font-medium text-blue-600 dark:text-blue-400">{task.creator?.name?.charAt(0) ?? '?'}</span>
+                <p className="text-sm text-gray-900 dark:text-gray-100">{task.creator?.name ?? 'Desconocido'}</p>
               </div>
             </div>
             <div>
-              <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Responsable</p>
+              <p className="text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Responsable</p>
               <div className="mt-1 flex items-center gap-2">
                 {task.current_responsible ? (
                   <>
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-50 text-xs font-medium text-indigo-600">{task.current_responsible.name.charAt(0)}</span>
-                    <p className="text-sm text-gray-900">{task.current_responsible.name}</p>
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-xs font-medium text-indigo-600 dark:text-indigo-400">{task.current_responsible.name.charAt(0)}</span>
+                    <p className="text-sm text-gray-900 dark:text-gray-100">{task.current_responsible.name}</p>
                   </>
                 ) : (
-                  <p className="text-sm text-gray-400">Sin asignar</p>
+                  <p className="text-sm text-gray-400 dark:text-gray-500">Sin asignar</p>
                 )}
               </div>
             </div>
             <div>
-              <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Área</p>
-              <p className="mt-1 text-sm text-gray-900">{task.area?.name ?? task.assigned_area?.name ?? 'Sin área'}</p>
+              <p className="text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Área</p>
+              <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{task.area?.name ?? task.assigned_area?.name ?? 'Sin área'}</p>
             </div>
             {task.due_date && (
               <div>
-                <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Fecha límite</p>
-                <p className={`mt-1 flex items-center gap-1.5 text-sm ${task.is_overdue ? 'font-medium text-red-600' : 'text-gray-900'}`}>
+                <p className="text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Fecha límite</p>
+                <p className={`mt-1 flex items-center gap-1.5 text-sm ${task.is_overdue ? 'font-medium text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-gray-100'}`}>
                   <HiOutlineClock className="h-4 w-4" />
                   {new Date(task.due_date).toLocaleDateString('es-PE')}
                 </p>
               </div>
             )}
             <div>
-              <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Avance</p>
+              <p className="text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Avance</p>
               <div className="mt-1.5 flex items-center gap-2">
                 {(() => {
                   const pct = statusProgress(task.status);
@@ -444,29 +465,29 @@ export function TaskDetailPage() {
                     'from-gray-300 to-gray-300';
                   return (
                     <>
-                      <div className="h-2 flex-1 rounded-full bg-gray-100">
+                      <div className="h-2 flex-1 rounded-full bg-gray-100 dark:bg-gray-700">
                         <div className={`h-2 rounded-full bg-linear-to-r ${barColor} transition-all duration-500`} style={{ width: `${pct}%` }} />
                       </div>
-                      <span className="text-sm font-semibold text-gray-900">{pct}%</span>
+                      <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{pct}%</span>
                     </>
                   );
                 })()}
               </div>
             </div>
             <div>
-              <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Antigüedad</p>
-              <p className="mt-1 text-sm text-gray-900">{task.age_days} días</p>
+              <p className="text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Antigüedad</p>
+              <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{task.age_days} días</p>
             </div>
             {task.meeting && (
               <div>
-                <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Reunión de origen</p>
-                <p className="mt-1 text-sm text-gray-900">{task.meeting.title}</p>
+                <p className="text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Reunión de origen</p>
+                <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{task.meeting.title}</p>
               </div>
             )}
           </div>
 
           {/* Actions */}
-          <div className="mt-6 flex flex-wrap gap-2 border-t border-gray-100 pt-4">
+          <div className="mt-6 flex flex-wrap gap-2 border-t border-gray-100 dark:border-gray-800 pt-4">
             <TaskStatusSelect
               task={task}
               userId={user?.id}
@@ -482,39 +503,39 @@ export function TaskDetailPage() {
               </button>
             )}
             {canDelegate && (
-              <button type="button" onClick={handleDelegateOpen} className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">
+              <button type="button" onClick={handleDelegateOpen} className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
                 <HiOutlineRefresh className="h-4 w-4" /> Delegar
               </button>
             )}
             {canUpdate && (
-              <button type="button" onClick={() => setShowUpdateForm(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">
+              <button type="button" onClick={() => setShowUpdateForm(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
                 Reportar avance
               </button>
             )}
             {canUpload && (
-              <button type="button" onClick={() => setShowUploadForm(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">
+              <button type="button" onClick={() => setShowUploadForm(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
                 <HiOutlineUpload className="h-4 w-4" /> Adjuntar
               </button>
             )}
             {canComment && (
-              <button type="button" onClick={() => setShowCommentForm(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">
+              <button type="button" onClick={() => setShowCommentForm(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
                 <HiOutlineChatAlt className="h-4 w-4" /> Comentar
               </button>
             )}
             {canDelete && (
               confirmDelete ? (
-                <div className="flex items-center gap-2 rounded-xl border border-red-300 bg-red-50 px-4 py-2">
-                  <span className="text-sm text-red-700">¿Eliminar?</span>
+                <div className="flex items-center gap-2 rounded-xl border border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/30 px-4 py-2">
+                  <span className="text-sm text-red-700 dark:text-red-400">¿Eliminar?</span>
                   <button type="button" onClick={handleDelete} disabled={deleting} className="inline-flex items-center gap-1 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition-all hover:bg-red-700 disabled:opacity-50">
                     {deleting ? <Spinner size="sm" /> : null}
                     Sí, eliminar
                   </button>
-                  <button type="button" onClick={() => setConfirmDelete(false)} className="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-red-100">
+                  <button type="button" onClick={() => setConfirmDelete(false)} className="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-red-100 dark:hover:bg-red-900/40">
                     No
                   </button>
                 </div>
               ) : (
-                <button type="button" onClick={() => setConfirmDelete(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50">
+                <button type="button" onClick={() => setConfirmDelete(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 dark:border-red-800 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-900/30">
                   <HiOutlineTrash className="h-4 w-4" /> Eliminar
                 </button>
               )

@@ -49,11 +49,11 @@ export function TemplatesTab({
 }) {
   return (
     <div className="space-y-3">
-      <FadeIn className="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4 shadow-sm">
-        <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-indigo-700">
+      <FadeIn className="rounded-2xl border border-indigo-100 dark:border-indigo-900 bg-indigo-50/50 dark:bg-indigo-900/20 p-4 shadow-sm">
+        <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-indigo-700 dark:text-indigo-400">
           <HiOutlineInformationCircle className="h-4 w-4" /> Variables disponibles
         </div>
-        <p className="mb-2 text-xs text-indigo-600/70">Haz clic en una variable para insertarla, o arrástrala al campo de asunto o cuerpo.</p>
+        <p className="mb-2 text-xs text-indigo-600 dark:text-indigo-400/70">Haz clic en una variable para insertarla, o arrástrala al campo de asunto o cuerpo.</p>
         <div className="flex flex-wrap gap-2">
           {TEMPLATE_VARIABLES.map((v) => (
             <button
@@ -65,11 +65,11 @@ export function TemplatesTab({
                 e.dataTransfer.effectAllowed = 'copy';
               }}
               onClick={() => insertVariable(v.variable)}
-              className="group flex items-center gap-1.5 rounded-lg bg-indigo-100 px-2.5 py-1.5 text-xs transition-all hover:bg-indigo-200 hover:shadow-sm active:scale-95 cursor-grab active:cursor-grabbing"
+              className="group flex items-center gap-1.5 rounded-lg bg-indigo-100 dark:bg-indigo-900/40 px-2.5 py-1.5 text-xs transition-all hover:bg-indigo-200 hover:shadow-sm active:scale-95 cursor-grab active:cursor-grabbing"
               title={v.desc}
             >
-              <code className="font-mono font-semibold text-indigo-800">{v.variable}</code>
-              <span className="text-indigo-600/70">{v.desc}</span>
+              <code className="font-mono font-semibold text-indigo-800 dark:text-indigo-300">{v.variable}</code>
+              <span className="text-indigo-600 dark:text-indigo-400/70">{v.desc}</span>
             </button>
           ))}
         </div>
@@ -81,11 +81,11 @@ export function TemplatesTab({
         const currentActive = draft?.active ?? t.active;
         const isModified = t.id in templateDrafts;
         return (
-          <FadeIn key={t.id} className={`rounded-2xl border bg-white p-4 shadow-sm ${isModified ? 'border-blue-200' : 'border-gray-100'}`}>
+          <FadeIn key={t.id} className={`rounded-2xl border bg-white dark:bg-gray-900 p-4 shadow-sm ${isModified ? 'border-blue-200 dark:border-blue-800' : 'border-gray-100 dark:border-gray-800'}`}>
             <div className="mb-2 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <h4 className="text-sm font-semibold text-gray-900">{t.name}</h4>
-                <span className="text-xs text-gray-400">{t.slug}</span>
+                <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t.name}</h4>
+                <span className="text-xs text-gray-400 dark:text-gray-500">{t.slug}</span>
               </div>
               <button
                 type="button"
@@ -97,7 +97,7 @@ export function TemplatesTab({
             </div>
             <div className="space-y-2">
               <div>
-                <label className="text-xs font-medium text-gray-500">Asunto</label>
+                <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Asunto</label>
                 <input
                   type="text"
                   value={currentSubject}
@@ -106,12 +106,12 @@ export function TemplatesTab({
                   onDrop={(e) => handleDrop(e, t.id, 'subject')}
                   onDragOver={handleDragOver}
                   className={`mt-0.5 w-full rounded-lg border px-3 py-1.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
-                    isModified && draft?.subject != null ? 'border-blue-400 bg-blue-50/50' : 'border-gray-300'
+                    isModified && draft?.subject != null ? 'border-blue-400 dark:border-blue-600 bg-blue-50/50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600'
                   }`}
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-gray-500">Cuerpo</label>
+                <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Cuerpo</label>
                 <textarea
                   value={currentBody}
                   onChange={(e) => updateTemplateDraft(t.id, { body: e.target.value })}
@@ -120,20 +120,20 @@ export function TemplatesTab({
                   onDragOver={handleDragOver}
                   rows={3}
                   className={`mt-0.5 w-full rounded-lg border px-3 py-1.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
-                    isModified && draft?.body != null ? 'border-blue-400 bg-blue-50/50' : 'border-gray-300'
+                    isModified && draft?.body != null ? 'border-blue-400 dark:border-blue-600 bg-blue-50/50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600'
                   }`}
                 />
               </div>
             </div>
             {isModified && (
-              <div className="mt-3 flex items-center justify-end gap-2 border-t border-gray-100 pt-3">
+              <div className="mt-3 flex items-center justify-end gap-2 border-t border-gray-100 dark:border-gray-800 pt-3">
                 {confirmingTemplateId === t.id ? (
                   <>
-                    <span className="mr-auto text-xs text-amber-600">{'\u00bf'}Guardar cambios de esta plantilla?</span>
+                    <span className="mr-auto text-xs text-amber-600 dark:text-amber-400">{'\u00bf'}Guardar cambios de esta plantilla?</span>
                     <button
                       type="button"
                       onClick={() => setConfirmingTemplateId(null)}
-                      className="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-100"
+                      className="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
                       Cancelar
                     </button>
@@ -151,7 +151,7 @@ export function TemplatesTab({
                     <button
                       type="button"
                       onClick={() => discardTemplateDraft(t.id)}
-                      className="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                      className="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300"
                     >
                       Descartar
                     </button>

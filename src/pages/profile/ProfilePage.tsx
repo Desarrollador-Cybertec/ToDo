@@ -58,20 +58,20 @@ export function ProfilePage() {
     <PageTransition>
       <div className="mx-auto max-w-lg">
         <FadeIn className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Mi perfil</h2>
-          <p className="mt-1 text-sm text-gray-500">Actualiza tu nombre o contraseña.</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Mi perfil</h2>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Actualiza tu nombre o contraseña.</p>
         </FadeIn>
 
         {/* Avatar + role card */}
-        <FadeIn delay={0.05} className="mb-6 flex items-center gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+        <FadeIn delay={0.05} className="mb-6 flex items-center gap-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 shadow-sm">
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-indigo-500 text-xl font-bold text-white">
             {user?.name?.charAt(0).toUpperCase()}
           </div>
           <div>
-            <p className="font-semibold text-gray-900">{user?.name}</p>
-            <p className="text-sm text-gray-500">{user?.email}</p>
+            <p className="font-semibold text-gray-900 dark:text-gray-100">{user?.name}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{user?.email}</p>
             {user?.role && (
-              <span className="mt-1 inline-block rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-blue-200/60">
+              <span className="mt-1 inline-block rounded-full bg-blue-50 dark:bg-blue-900/30 px-2.5 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-400 ring-1 ring-blue-200 dark:ring-blue-800/60">
                 {ROLE_LABELS[user.role.slug]}
               </span>
             )}
@@ -79,15 +79,15 @@ export function ProfilePage() {
         </FadeIn>
 
         {/* Form */}
-        <FadeIn delay={0.1} className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+        <FadeIn delay={0.1} className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
           {serverError && (
-            <div className="mb-4 flex items-center gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-600 ring-1 ring-inset ring-red-200">
+            <div className="mb-4 flex items-center gap-2 rounded-xl bg-red-50 dark:bg-red-900/30 p-3 text-sm text-red-600 dark:text-red-400 ring-1 ring-inset ring-red-200 dark:ring-red-800">
               <HiOutlineExclamationCircle className="h-4 w-4 shrink-0" />
               {serverError}
             </div>
           )}
           {success && (
-            <div className="mb-4 flex items-center gap-2 rounded-xl bg-green-50 p-3 text-sm text-green-600 ring-1 ring-inset ring-green-200">
+            <div className="mb-4 flex items-center gap-2 rounded-xl bg-green-50 dark:bg-green-900/30 p-3 text-sm text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-200 dark:ring-green-800">
               <HiOutlineCheckCircle className="h-4 w-4 shrink-0" />
               {success}
             </div>
@@ -95,46 +95,46 @@ export function ProfilePage() {
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">
-                <HiOutlineUser className="mb-0.5 mr-1 inline h-4 w-4 text-gray-400" />
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <HiOutlineUser className="mb-0.5 mr-1 inline h-4 w-4 text-gray-400 dark:text-gray-500" />
                 Nombre
               </label>
               <input
                 {...register('name')}
-                className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               />
-              {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>}
+              {errors.name && <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errors.name.message}</p>}
             </div>
 
-            <div className="border-t border-gray-100 pt-4">
-              <p className="mb-3 text-xs text-gray-400">Deja en blanco si no quieres cambiar la contraseña.</p>
+            <div className="border-t border-gray-100 dark:border-gray-800 pt-4">
+              <p className="mb-3 text-xs text-gray-400 dark:text-gray-500">Deja en blanco si no quieres cambiar la contraseña.</p>
               <div className="space-y-3">
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-gray-700">
-                    <HiOutlineLockClosed className="mb-0.5 mr-1 inline h-4 w-4 text-gray-400" />
+                  <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <HiOutlineLockClosed className="mb-0.5 mr-1 inline h-4 w-4 text-gray-400 dark:text-gray-500" />
                     Nueva contraseña
                   </label>
                   <input
                     type="password"
                     {...register('password')}
                     placeholder="••••••••"
-                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                   />
-                  {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>}
+                  {errors.password && <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errors.password.message}</p>}
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-gray-700">
-                    <HiOutlineLockClosed className="mb-0.5 mr-1 inline h-4 w-4 text-gray-400" />
+                  <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <HiOutlineLockClosed className="mb-0.5 mr-1 inline h-4 w-4 text-gray-400 dark:text-gray-500" />
                     Confirmar contraseña
                   </label>
                   <input
                     type="password"
                     {...register('password_confirmation')}
                     placeholder="••••••••"
-                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                   />
                   {errors.password_confirmation && (
-                    <p className="mt-1 text-sm text-red-500">{errors.password_confirmation.message}</p>
+                    <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errors.password_confirmation.message}</p>
                   )}
                 </div>
               </div>

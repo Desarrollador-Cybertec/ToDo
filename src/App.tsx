@@ -18,10 +18,13 @@ import { UserListPage } from './pages/users/UserListPage';
 import { ConsolidatedPage } from './pages/consolidated/ConsolidatedPage';
 import { SettingsPage } from './pages/settings/SettingsPage';
 import { ProfilePage } from './pages/profile/ProfilePage';
+import { DarkModeToggle } from './components/ui/DarkModeToggle';
 
 function App() {
   return (
-    <Routes>
+    <>
+      <DarkModeToggle />
+      <Routes>
       {/* Guest routes */}
       <Route element={<GuestRoute />}>
         <Route path="/login" element={<LoginPage />} />
@@ -80,6 +83,7 @@ function App() {
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
+    </>
   );
 }
 

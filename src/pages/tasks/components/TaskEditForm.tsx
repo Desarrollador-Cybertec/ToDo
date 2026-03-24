@@ -45,39 +45,39 @@ export function TaskEditForm({
       className="space-y-4"
     >
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900">Editar tarea</h3>
-        <button type="button" onClick={onCancel} className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Editar tarea</h3>
+        <button type="button" onClick={onCancel} className="rounded-lg p-1.5 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-400">
           <HiOutlineX className="h-5 w-5" />
         </button>
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-gray-700">Título</label>
+        <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Título</label>
         <input
           type="text"
           value={editTitle}
           onChange={(e) => setEditTitle(e.target.value)}
-          className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
         />
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-gray-700">Descripción</label>
+        <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Descripción</label>
         <textarea
           value={editDescription}
           onChange={(e) => setEditDescription(e.target.value)}
           rows={3}
-          className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
         />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-gray-700">Prioridad</label>
+          <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Prioridad</label>
           <select
             value={editPriority}
             onChange={(e) => setEditPriority(e.target.value)}
-            className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
           >
             {Object.entries(TASK_PRIORITY_LABELS).map(([value, label]) => (
               <option key={value} value={value}>{label}</option>
@@ -85,21 +85,21 @@ export function TaskEditForm({
           </select>
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-gray-700">Fecha límite</label>
+          <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha límite</label>
           <input
             type="date"
             value={editDueDate}
             onChange={(e) => setEditDueDate(e.target.value)}
-            className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
           />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-gray-700">Fecha de inicio</label>
+          <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha de inicio</label>
           <input
             type="date"
             value={editStartDate}
             onChange={(e) => setEditStartDate(e.target.value)}
-            className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
           />
         </div>
       </div>
@@ -107,8 +107,8 @@ export function TaskEditForm({
       <CheckboxGroup title="Requisitos" fields={requirementFields} />
       <CheckboxGroup title="Notificaciones" fields={notificationFields} />
 
-      <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">
-        <button type="button" onClick={onCancel} className="rounded-xl px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100">
+      <div className="flex justify-end gap-3 border-t border-gray-100 dark:border-gray-800 pt-4">
+        <button type="button" onClick={onCancel} className="rounded-xl px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700">
           Cancelar
         </button>
         <button
@@ -126,16 +126,16 @@ export function TaskEditForm({
 
 function CheckboxGroup({ title, fields }: { title: string; fields: EditField[] }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-gray-50/50 p-4">
-      <p className="mb-3 text-sm font-semibold text-gray-700">{title}</p>
+    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 p-4">
+      <p className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">{title}</p>
       <div className="grid gap-2 sm:grid-cols-2">
         {fields.map((opt) => (
-          <label key={opt.label} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-gray-700 transition-colors hover:bg-white">
+          <label key={opt.label} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-gray-700 dark:text-gray-300 transition-colors hover:bg-white">
             <input
               type="checkbox"
               checked={opt.value}
               onChange={(e) => opt.set(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500/20"
+              className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500/20"
             />
             {opt.label}
           </label>

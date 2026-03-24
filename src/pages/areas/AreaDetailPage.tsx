@@ -26,7 +26,7 @@ export function AreaDetailPage() {
   return (
     <PageTransition>
       <div className="mx-auto max-w-4xl">
-        <button type="button" onClick={() => navigate('/areas')} className="mb-4 flex items-center gap-2 text-sm text-gray-500 transition-colors hover:text-gray-900">
+        <button type="button" onClick={() => navigate('/areas')} className="mb-4 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 transition-colors hover:text-gray-900 dark:hover:text-gray-100">
           <HiOutlineArrowLeft className="h-4 w-4" /> Volver a áreas
         </button>
 

@@ -177,12 +177,12 @@ export function UserListPage() {
   return (
     <PageTransition>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-2xl font-bold text-gray-900">Usuarios</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Usuarios</h2>
         <div className="flex items-center gap-3">
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 shadow-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
           >
             <option value="">Todos los roles</option>
             <option value="superadmin">{ROLE_LABELS[Role.SUPERADMIN]}</option>
@@ -202,14 +202,14 @@ export function UserListPage() {
       <AnimatePresence>
         {serverError && (
           <SlideDown>
-            <div className="mb-4 flex items-center gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-600 ring-1 ring-inset ring-red-200">
+            <div className="mb-4 flex items-center gap-2 rounded-xl bg-red-50 dark:bg-red-900/30 p-3 text-sm text-red-600 dark:text-red-400 ring-1 ring-inset ring-red-200 dark:ring-red-800">
               <HiOutlineExclamationCircle className="h-4 w-4 shrink-0" /> {serverError}
             </div>
           </SlideDown>
         )}
         {successMsg && (
           <SlideDown>
-            <div className="mb-4 flex items-center gap-2 rounded-xl bg-green-50 p-3 text-sm text-green-600 ring-1 ring-inset ring-green-200">
+            <div className="mb-4 flex items-center gap-2 rounded-xl bg-green-50 dark:bg-green-900/30 p-3 text-sm text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-200 dark:ring-green-800">
               <HiOutlineCheckCircle className="h-4 w-4 shrink-0" /> {successMsg}
             </div>
           </SlideDown>
@@ -229,27 +229,27 @@ export function UserListPage() {
       {loading ? (
         <SkeletonTable />
       ) : (
-        <FadeIn className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+        <FadeIn className="overflow-hidden rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
           <table className="w-full text-left text-sm">
-            <thead className="border-b bg-gray-50/80">
+            <thead className="border-b bg-gray-50/80 dark:bg-gray-800/80">
               <tr>
-                <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500">Usuario</th>
-                <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500">Correo</th>
-                <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500">Rol</th>
-                <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500">Estado</th>
-                <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500">Acciones</th>
+                <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Usuario</th>
+                <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Correo</th>
+                <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Rol</th>
+                <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Estado</th>
+                <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {users.map((u) => (
-                <tr key={u.id} className="group transition-colors hover:bg-gray-50/50">
+                <tr key={u.id} className="group transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-linear-to-br from-blue-100 to-indigo-100 text-sm font-medium text-blue-700">{u.name.charAt(0)}</span>
-                      <span className="font-medium text-gray-900">{u.name}</span>
+                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-linear-to-br from-blue-100 dark:from-blue-900 to-indigo-100 dark:to-indigo-900 text-sm font-medium text-blue-700 dark:text-blue-400">{u.name.charAt(0)}</span>
+                      <span className="font-medium text-gray-900 dark:text-gray-100">{u.name}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-gray-600">{u.email}</td>
+                  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{u.email}</td>
                   <td className="px-6 py-4">
                     <Badge variant={ROLE_BADGE[u.role.slug] ?? 'gray'} size="sm">{ROLE_LABELS[u.role.slug]}</Badge>
                   </td>
@@ -261,7 +261,7 @@ export function UserListPage() {
                       <button
                         type="button"
                         onClick={() => startEditing(u)}
-                        className="rounded-lg border border-gray-200 p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                        className="rounded-lg border border-gray-200 dark:border-gray-700 p-1.5 text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300"
                         title="Editar"
                       >
                         <HiOutlinePencil className="h-3.5 w-3.5" />
@@ -269,7 +269,7 @@ export function UserListPage() {
                       <button
                         type="button"
                         onClick={() => handleToggleActive(u.id)}
-                        className={`rounded-xl px-3 py-1.5 text-xs font-medium transition-colors ${u.active ? 'border border-red-200 text-red-600 hover:bg-red-50' : 'border border-green-200 text-green-600 hover:bg-green-50'}`}
+                        className={`rounded-xl px-3 py-1.5 text-xs font-medium transition-colors ${u.active ? 'border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30' : 'border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30'}`}
                       >
                         {u.active ? 'Desactivar' : 'Activar'}
                       </button>
@@ -285,7 +285,7 @@ export function UserListPage() {
       {/* Pagination */}
       {!loading && (
         <div className="mt-4 flex items-center justify-between">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             {total} usuario{total !== 1 ? 's' : ''} en total
           </p>
           <div className="flex items-center gap-2">
@@ -293,18 +293,18 @@ export function UserListPage() {
               type="button"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex items-center gap-1 rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <HiOutlineChevronLeft className="h-4 w-4" /> Anterior
             </button>
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-gray-600 dark:text-gray-400">
               Página {page} de {lastPage}
             </span>
             <button
               type="button"
               onClick={() => setPage((p) => Math.min(lastPage, p + 1))}
               disabled={page === lastPage}
-              className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex items-center gap-1 rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-40"
             >
               Siguiente <HiOutlineChevronRight className="h-4 w-4" />
             </button>

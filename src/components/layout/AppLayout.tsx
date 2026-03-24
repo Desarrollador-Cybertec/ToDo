@@ -112,7 +112,7 @@ export function AppLayout() {
   const isActive = (path: string) => location.pathname.startsWith(path);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
+    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-800">
       {/* Mobile overlay */}
       <AnimatePresence>
         {sidebarOpen && (
@@ -129,20 +129,20 @@ export function AppLayout() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r border-gray-200/80 bg-white transition-transform duration-300 ease-out lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r border-gray-200/80 dark:border-gray-700 bg-white dark:bg-gray-900 transition-transform duration-300 ease-out lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
         }`}
       >
-        <div className="flex h-16 items-center justify-between border-b border-gray-100 px-6">
+        <div className="flex h-16 items-center justify-between border-b border-gray-100 dark:border-gray-800 px-6">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-blue-600 to-indigo-600 text-xs font-bold text-white shadow-sm">
               T
             </div>
-            <h1 className="text-lg font-bold tracking-tight text-gray-900">TAPE</h1>
+            <h1 className="text-lg font-bold tracking-tight text-gray-900 dark:text-gray-100">TAPE</h1>
           </div>
           <button
             type="button"
-            className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 lg:hidden"
+            className="rounded-lg p-1.5 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-400 lg:hidden"
             onClick={() => setSidebarOpen(false)}
             aria-label="Cerrar menú"
           >
@@ -160,8 +160,8 @@ export function AppLayout() {
                 onClick={() => setSidebarOpen(false)}
                 className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
                   active
-                    ? 'bg-blue-50 text-blue-700 shadow-sm'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 shadow-sm'
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
                 }`}
               >
                 {active && (
@@ -171,7 +171,7 @@ export function AppLayout() {
                     transition={{ type: 'spring', stiffness: 350, damping: 30 }}
                   />
                 )}
-                <span className={`transition-colors ${active ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'}`}>
+                <span className={`transition-colors ${active ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-600'}`}>
                   {item.icon}
                 </span>
                 {item.label}
@@ -180,13 +180,13 @@ export function AppLayout() {
           })}
         </nav>
 
-        <div className="border-t border-gray-100 p-4">
+        <div className="border-t border-gray-100 dark:border-gray-800 p-4">
           <NavLink
             to="/profile"
             onClick={() => setSidebarOpen(false)}
             className={({ isActive }) =>
               `mb-3 flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors ${
-                isActive ? 'bg-blue-50 ring-1 ring-blue-100' : 'bg-gray-50 hover:bg-gray-100'
+                isActive ? 'bg-blue-50 dark:bg-blue-900/30 ring-1 ring-blue-100' : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'
               }`
             }
           >
@@ -194,12 +194,12 @@ export function AppLayout() {
               {user?.name?.charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-gray-900">{user?.name}</p>
-              <p className="truncate text-xs text-gray-500">
+              <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">{user?.name}</p>
+              <p className="truncate text-xs text-gray-500 dark:text-gray-400">
                 {user?.role && ROLE_LABELS[user.role.slug]}
               </p>
               {areaName && (
-                <p className="mt-0.5 flex items-center gap-1 truncate text-xs font-medium text-blue-600">
+                <p className="mt-0.5 flex items-center gap-1 truncate text-xs font-medium text-blue-600 dark:text-blue-400">
                   <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-400" />
                   {areaName}
                 </p>
@@ -209,7 +209,7 @@ export function AppLayout() {
           <button
             type="button"
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-500 dark:text-gray-400 transition-colors hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400"
           >
             <HiOutlineLogout className="h-5 w-5" />
             Cerrar sesión
@@ -219,10 +219,10 @@ export function AppLayout() {
 
       {/* Main content */}
       <div className="flex flex-1 flex-col lg:ml-64">
-        <header className="sticky top-0 z-10 flex h-12 items-center border-b border-gray-200/80 bg-white/80 px-6 backdrop-blur-md lg:hidden lg:px-8">
+        <header className="sticky top-0 z-10 flex h-12 items-center border-b border-gray-200/80 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 px-6 backdrop-blur-md lg:hidden lg:px-8">
           <button
             type="button"
-            className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="rounded-lg p-1.5 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-400"
             onClick={() => setSidebarOpen(true)}
             aria-label="Abrir menú"
           >
@@ -230,7 +230,7 @@ export function AppLayout() {
           </button>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <Outlet />
         </main>
       </div>

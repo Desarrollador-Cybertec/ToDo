@@ -238,7 +238,7 @@ export function SettingsPage() {
 
   return (
     <PageTransition>
-      <h2 className="mb-6 text-2xl font-bold text-gray-900">Configuración del Sistema</h2>
+      <h2 className="mb-6 text-2xl font-bold text-gray-900 dark:text-gray-100">Configuración del Sistema</h2>
 
       {/* Confirmation Modal */}
       <AnimatePresence>
@@ -255,15 +255,15 @@ export function SettingsPage() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"
+              className="w-full max-w-sm rounded-2xl bg-white dark:bg-gray-900 p-6 shadow-xl"
             >
-              <h3 className="text-lg font-semibold text-gray-900">{confirmAction.title}</h3>
-              <p className="mt-2 text-sm text-gray-600">{confirmAction.description}</p>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{confirmAction.title}</h3>
+              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{confirmAction.description}</p>
               <div className="mt-5 flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setConfirmAction(null)}
-                  className="rounded-xl px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100"
+                  className="rounded-xl px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   Cancelar
                 </button>
@@ -283,34 +283,34 @@ export function SettingsPage() {
       <AnimatePresence>
         {message && (
           <SlideDown>
-            <div className="mb-4 flex items-center gap-2 rounded-xl bg-green-50 p-3 text-sm text-green-600 ring-1 ring-inset ring-green-200">
+            <div className="mb-4 flex items-center gap-2 rounded-xl bg-green-50 dark:bg-green-900/30 p-3 text-sm text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-200 dark:ring-green-800">
               <HiOutlineCheckCircle className="h-4 w-4 shrink-0" /> {message}
             </div>
           </SlideDown>
         )}
         {error && (
           <SlideDown>
-            <div className="mb-4 flex items-center gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-600 ring-1 ring-inset ring-red-200">
+            <div className="mb-4 flex items-center gap-2 rounded-xl bg-red-50 dark:bg-red-900/30 p-3 text-sm text-red-600 dark:text-red-400 ring-1 ring-inset ring-red-200 dark:ring-red-800">
               <HiOutlineExclamationCircle className="h-4 w-4 shrink-0" /> {error}
             </div>
           </SlideDown>
         )}
       </AnimatePresence>
 
-      <div className="mb-6 flex gap-1 rounded-xl bg-gray-100 p-1">
+      <div className="mb-6 flex gap-1 rounded-xl bg-gray-100 dark:bg-gray-700 p-1">
         {tabs.map((tab) => (
           <button
             key={tab.key}
             type="button"
             onClick={() => setActiveTab(tab.key)}
             className={`relative inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
-              activeTab === tab.key ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'
+              activeTab === tab.key ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
             }`}
           >
             {activeTab === tab.key && (
               <motion.div
                 layoutId="settings-tab"
-                className="absolute inset-0 rounded-lg bg-white shadow-sm"
+                className="absolute inset-0 rounded-lg bg-white dark:bg-gray-900 shadow-sm"
                 transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
               />
             )}
@@ -365,8 +365,8 @@ export function SettingsPage() {
             )}
 
             {activeTab === 'automation' && (
-              <FadeIn className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                <h3 className="mb-4 text-lg font-semibold text-gray-900">Ejecutar procesos manualmente</h3>
+              <FadeIn className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
+                <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">Ejecutar procesos manualmente</h3>
                 <div className="grid gap-3 sm:grid-cols-2">
                   {[
                     { name: 'Detección de vencidas', fn: automationApi.detectOverdue, desc: 'Marca como vencidas las tareas pasadas de fecha', icon: '⏰' },
@@ -378,10 +378,10 @@ export function SettingsPage() {
                       key={item.name}
                       type="button"
                       onClick={() => runAutomation(item.name, item.fn)}
-                      className="rounded-xl border border-gray-100 px-4 py-4 text-left text-sm transition-all hover:border-blue-100 hover:bg-blue-50/30 active:scale-[0.98]"
+                      className="rounded-xl border border-gray-100 dark:border-gray-800 px-4 py-4 text-left text-sm transition-all hover:border-blue-100 dark:hover:border-blue-900 hover:bg-blue-50 dark:hover:bg-blue-900/30 active:scale-[0.98]"
                     >
-                      <p className="flex items-center gap-2 font-medium text-gray-900"><span>{item.icon}</span> {item.name}</p>
-                      <p className="mt-1 text-xs text-gray-500">{item.desc}</p>
+                      <p className="flex items-center gap-2 font-medium text-gray-900 dark:text-gray-100"><span>{item.icon}</span> {item.name}</p>
+                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{item.desc}</p>
                     </button>
                   ))}
                 </div>
@@ -389,9 +389,9 @@ export function SettingsPage() {
             )}
 
             {activeTab === 'import' && (
-              <FadeIn className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                <h3 className="mb-4 text-lg font-semibold text-gray-900">Importar tareas desde CSV</h3>
-                <p className="mb-4 text-sm text-gray-600">
+              <FadeIn className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
+                <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">Importar tareas desde CSV</h3>
+                <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
                   Sube un archivo CSV con columnas: titulo, descripcion, responsable_email, area, prioridad, estado, fecha_inicio, fecha_limite.
                 </p>
                 <div className="space-y-3">
@@ -399,10 +399,10 @@ export function SettingsPage() {
                     type="file"
                     accept=".csv"
                     onChange={handleImportFileChange}
-                    className="w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-blue-600 hover:file:bg-blue-100"
+                    className="w-full text-sm text-gray-600 dark:text-gray-400 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-blue-600 hover:file:bg-blue-100"
                   />
-                  {importFileError && <p className="text-sm text-red-500">{importFileError}</p>}
-                  <p className="text-xs text-gray-400">Máx. 5 MB. Solo archivos .csv</p>
+                  {importFileError && <p className="text-sm text-red-500 dark:text-red-400">{importFileError}</p>}
+                  <p className="text-xs text-gray-400 dark:text-gray-500">Máx. 5 MB. Solo archivos .csv</p>
                   <button
                     type="button"
                     onClick={handleImport}
