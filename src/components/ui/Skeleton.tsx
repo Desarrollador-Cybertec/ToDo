@@ -45,7 +45,7 @@ export function SkeletonTable({ rows = 5, cols = 4, className = '' }: { rows?: n
           ))}
         </div>
       </div>
-      <div className="divide-y divide-gray-50">
+      <div className="divide-y divide-gray-50 dark:divide-gray-800">
         {Array.from({ length: rows }).map((_, i) => (
           <div key={i} className="flex items-center gap-6 px-6 py-4">
             {Array.from({ length: cols }).map((_, j) => (
@@ -62,7 +62,7 @@ export function SkeletonStatCards({ count = 4 }: { count?: number }) {
   return (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
+        <div key={i} className="rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm text-gray-900 dark:text-gray-100">
           <div className="flex items-center gap-4">
             <Skeleton className="h-12 w-12 rounded-xl" />
             <div className="flex-1 space-y-2">
@@ -81,11 +81,11 @@ export function SkeletonDashboard() {
     <div className="space-y-8">
       <SkeletonStatCards />
       <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
+        <div className="rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm text-gray-900 dark:text-gray-100">
           <Skeleton className="mb-4 h-5 w-40" />
           <SkeletonText lines={5} />
         </div>
-        <div className="rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
+        <div className="rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm text-gray-900 dark:text-gray-100">
           <Skeleton className="mb-4 h-5 w-40" />
           <SkeletonText lines={5} />
         </div>
@@ -97,7 +97,7 @@ export function SkeletonDashboard() {
 export function SkeletonDetail() {
   return (
     <div className="space-y-6">
-      <div className="rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
+      <div className="rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm text-gray-900 dark:text-gray-100">
         <Skeleton className="mb-4 h-7 w-2/3" />
         <Skeleton className="mb-6 h-4 w-full" />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -109,7 +109,7 @@ export function SkeletonDetail() {
           ))}
         </div>
       </div>
-      <div className="rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
+      <div className="rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm text-gray-900 dark:text-gray-100">
         <Skeleton className="mb-4 h-5 w-32" />
         <SkeletonText lines={4} />
       </div>

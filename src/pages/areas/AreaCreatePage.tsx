@@ -79,20 +79,20 @@ export function AreaCreatePage() {
           <FadeIn className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm space-y-4">
             <div>
               <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre *</label>
-              <input id="name" {...register('name')} className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+              <input id="name" {...register('name')} className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
               {errors.name && <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errors.name.message}</p>}
             </div>
             <div>
               <label htmlFor="description" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Descripción</label>
-              <textarea id="description" rows={3} {...register('description')} className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+              <textarea id="description" rows={3} {...register('description')} className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
             </div>
             <div>
               <label htmlFor="process_identifier" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Identificador de proceso</label>
-              <input id="process_identifier" {...register('process_identifier')} className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+              <input id="process_identifier" {...register('process_identifier')} className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
             </div>
             <div>
               <label htmlFor="manager_user_id" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Encargado</label>
-              <select id="manager_user_id" {...register('manager_user_id', { setValueAs: (v: string) => v ? Number(v) : null })} className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+              <select id="manager_user_id" {...register('manager_user_id', { setValueAs: (v: string) => v ? Number(v) : null })} className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
                 <option value="">Sin encargado</option>
                 {users.filter((u) => u.role.slug === 'area_manager' || u.role.slug === 'superadmin').map((u) => (
                   <option key={u.id} value={u.id}>{u.name}</option>
@@ -102,7 +102,7 @@ export function AreaCreatePage() {
           </FadeIn>
 
           <div className="flex justify-end gap-3">
-            <button type="button" onClick={() => setShowLeaveModal(true)} className="rounded-xl border border-gray-200 dark:border-gray-700 px-6 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
+            <button type="button" onClick={() => setShowLeaveModal(true)} className="rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-6 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
             <button type="submit" disabled={isSubmitting} className="inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-blue-600 to-indigo-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98] disabled:opacity-50">
               {isSubmitting ? <><Spinner size="sm" /> Creando...</> : 'Crear área'}
             </button>

@@ -165,7 +165,7 @@ export function ManagerDashboardView() {
           </Link>
           <Link
             to="/claim-workers"
-            className="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-700 px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+            className="inline-flex items-center gap-2 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
           >
             <HiOutlineUserGroup className="h-4 w-4" />
             Mi equipo
@@ -182,7 +182,7 @@ export function ManagerDashboardView() {
           <div className="flex items-center gap-2">
             <span className="text-base">🏢</span>
             <h3 className="text-sm font-semibold text-gray-800">Panel del área</h3>
-            <div className="flex-1 border-t border-gray-200 dark:border-gray-700" />
+            <div className="flex-1 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-t border-gray-200 dark:border-gray-700" />
           </div>
 
           {/* Area stats + completion rate — single card */}
@@ -218,14 +218,14 @@ export function ManagerDashboardView() {
           <div className="grid gap-6 sm:grid-cols-2">
             {/* Carga del equipo */}
             <FadeIn delay={0.25} className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
-              <div className="flex items-center gap-2 border-b border-gray-100 dark:border-gray-800 px-5 py-4">
+              <div className="flex items-center gap-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-800 px-5 py-4">
                 <HiOutlineUserGroup className="h-4.5 w-4.5 text-indigo-500 dark:text-indigo-400" />
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-gray-100">Carga del equipo</h3>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Tareas activas por responsable.</p>
                 </div>
               </div>
-              <div className="divide-y divide-gray-50 px-5">
+              <div className="divide-y divide-gray-50 dark:divide-gray-800 px-5">
                 {!areaData?.by_responsible?.length ? (
                   <div className="flex flex-col items-center justify-center py-8 text-center">
                     <HiOutlineUserGroup className="mb-2 h-8 w-8 text-gray-300 dark:text-gray-500" />
@@ -245,10 +245,10 @@ export function ManagerDashboardView() {
 
             {/* Por estado del área */}
             <FadeIn delay={0.3} className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
-              <div className="border-b border-gray-100 dark:border-gray-800 px-5 py-4">
+              <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-800 px-5 py-4">
                 <h3 className="font-semibold text-gray-900 dark:text-gray-100">Por estado (área)</h3>
               </div>
-              <div className="divide-y divide-gray-50 px-5">
+              <div className="divide-y divide-gray-50 dark:divide-gray-800 px-5">
                 {(() => {
                   const byStatus = areaData?.tasks_by_status ?? {};
                   const entries = Object.entries(byStatus).filter(([, c]) => c > 0);
@@ -287,19 +287,19 @@ export function ManagerDashboardView() {
           <div className="flex items-center gap-2">
             <span className="text-base">👤</span>
             <h3 className="text-sm font-semibold text-gray-800">Mi panel personal</h3>
-            <div className="flex-1 border-t border-gray-200 dark:border-gray-700" />
+            <div className="flex-1 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-t border-gray-200 dark:border-gray-700" />
           </div>
 
           {/* Urgent tasks */}
           <FadeIn delay={0.1} className="flex-1 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
-            <div className="flex items-center gap-2 border-b border-gray-100 dark:border-gray-800 px-5 py-4">
+            <div className="flex items-center gap-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-800 px-5 py-4">
               <span className="text-lg">🔥</span>
               <div>
                 <h3 className="font-semibold text-gray-900 dark:text-gray-100">Urgentes</h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400">Vencidas o alta prioridad.</p>
               </div>
             </div>
-            <div className="divide-y divide-gray-50 px-5">
+            <div className="divide-y divide-gray-50 dark:divide-gray-800 px-5">
               {urgentTasks.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <HiOutlineCheckCircle className="mb-2 h-8 w-8 text-green-400" />
@@ -315,13 +315,13 @@ export function ManagerDashboardView() {
 
           {/* Upcoming personal tasks */}
           <FadeIn delay={0.15} className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
-            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-5 py-4">
+            <div className="flex items-center justify-between bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-800 px-5 py-4">
               <h3 className="font-semibold text-gray-900 dark:text-gray-100">Mis próximas tareas</h3>
-              <Link to="/tasks" className="rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
+              <Link to="/tasks" className="rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
                 Ver todas
               </Link>
             </div>
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-gray-50 dark:divide-gray-800">
               {allTasks.length === 0 ? (
                 <div className="flex flex-col items-center justify-center px-5 py-8 text-center">
                   <HiOutlineClipboardList className="mb-2 h-8 w-8 text-gray-300 dark:text-gray-500" />
@@ -345,7 +345,7 @@ export function ManagerDashboardView() {
         </h3>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           {TIPS.map((tip, i) => (
-            <div key={i} className="flex items-start gap-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 px-3.5 py-2.5">
+            <div key={i} className="flex items-start gap-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 px-3.5 py-2.5 text-gray-700 dark:text-gray-300">
               <span className="mt-0.5 shrink-0 text-sm">{tip.icon}</span>
               <p className="text-xs leading-relaxed text-gray-600 dark:text-gray-400">{tip.text}</p>
             </div>

@@ -101,16 +101,16 @@ export function MeetingDetailPage() {
               )}
               <div>
                 <label htmlFor="edit-title" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Título</label>
-                <input id="edit-title" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20" />
+                <input id="edit-title" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20" />
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label htmlFor="edit-date" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha</label>
-                  <input id="edit-date" type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-purple-500 focus:outline-none" />
+                  <input id="edit-date" type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-purple-500 focus:outline-none" />
                 </div>
                 <div>
                   <label htmlFor="edit-classification" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Clasificación</label>
-                  <select id="edit-classification" value={editClassification} onChange={(e) => setEditClassification(e.target.value)} className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-purple-500 focus:outline-none">
+                  <select id="edit-classification" value={editClassification} onChange={(e) => setEditClassification(e.target.value)} className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-purple-500 focus:outline-none">
                     {Object.entries(MEETING_CLASSIFICATION_LABELS).map(([value, label]) => (
                       <option key={value} value={value}>{label}</option>
                     ))}
@@ -119,10 +119,10 @@ export function MeetingDetailPage() {
               </div>
               <div>
                 <label htmlFor="edit-notes" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Notas</label>
-                <textarea id="edit-notes" rows={4} value={editNotes} onChange={(e) => setEditNotes(e.target.value)} className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-purple-500 focus:outline-none" />
+                <textarea id="edit-notes" rows={4} value={editNotes} onChange={(e) => setEditNotes(e.target.value)} className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-purple-500 focus:outline-none" />
               </div>
-              <div className="flex justify-end gap-2 border-t border-gray-100 dark:border-gray-800 pt-4">
-                <button type="button" onClick={cancelEditing} className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
+              <div className="flex justify-end gap-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-t border-gray-100 dark:border-gray-800 pt-4">
+                <button type="button" onClick={cancelEditing} className="inline-flex items-center gap-1.5 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
                   <HiOutlineX className="h-4 w-4" /> Cancelar
                 </button>
                 <button type="button" onClick={saveEdit} disabled={editSaving || !editTitle.trim()} className="inline-flex items-center gap-1.5 rounded-xl bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700 disabled:opacity-50">
@@ -172,7 +172,7 @@ export function MeetingDetailPage() {
             )}
           </div>
           {meeting.notes && (
-            <div className="mt-4 border-t border-gray-100 dark:border-gray-800 pt-4">
+            <div className="mt-4 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-t border-gray-100 dark:border-gray-800 pt-4">
               <p className="text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Notas</p>
               <p className="mt-1.5 whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">{meeting.notes}</p>
             </div>
@@ -190,7 +190,7 @@ export function MeetingDetailPage() {
             <StaggerList className="space-y-3">
               {meeting.tasks.map((task) => (
                 <StaggerItem key={task.id}>
-                  <Link to={`/tasks/${task.id}`} className="group flex items-center justify-between rounded-xl border border-gray-100 dark:border-gray-800 p-4 transition-all hover:border-blue-100 dark:hover:border-blue-900 hover:bg-blue-50 dark:hover:bg-blue-900/30">
+                  <Link to={`/tasks/${task.id}`} className="group flex items-center justify-between rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-100 dark:border-gray-800 p-4 transition-all hover:border-blue-100 dark:hover:border-blue-900 hover:bg-blue-50 dark:hover:bg-blue-900/30">
                     <div>
                       <p className="font-medium text-gray-900 dark:text-gray-100">{task.title}</p>
                       <div className="mt-1.5 flex flex-wrap items-center gap-2">

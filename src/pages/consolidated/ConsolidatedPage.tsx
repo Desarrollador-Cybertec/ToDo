@@ -103,7 +103,7 @@ export function ConsolidatedPage() {
                 </div>
 
                 <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  <div className="rounded-xl bg-gray-50 dark:bg-gray-800 px-3 py-2 text-center">
+                  <div className="rounded-xl bg-gray-50 dark:bg-gray-800 px-3 py-2 text-center text-gray-700 dark:text-gray-300">
                     <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{area.total}</p>
                     <p className="text-[11px] text-gray-500 dark:text-gray-400">Total</p>
                   </div>

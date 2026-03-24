@@ -106,18 +106,18 @@ export function MeetingCreatePage() {
           <FadeIn className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm space-y-4">
             <div>
               <label htmlFor="title" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Título *</label>
-              <input id="title" {...register('title')} className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20" />
+              <input id="title" {...register('title')} className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20" />
               {errors.title && <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errors.title.message}</p>}
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="meeting_date" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha *</label>
-                <input id="meeting_date" type="date" {...register('meeting_date')} className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20" />
+                <input id="meeting_date" type="date" {...register('meeting_date')} className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20" />
                 {errors.meeting_date && <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errors.meeting_date.message}</p>}
               </div>
               <div>
                 <label htmlFor="classification" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Clasificación *</label>
-                <select id="classification" {...register('classification')} className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20">
+                <select id="classification" {...register('classification')} className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20">
                   {Object.entries(MEETING_CLASSIFICATION_LABELS).map(([value, label]) => (
                     <option key={value} value={value}>{label}</option>
                   ))}
@@ -134,7 +134,7 @@ export function MeetingCreatePage() {
                   <input type="hidden" {...register('area_id', { valueAsNumber: true })} />
                 </div>
               ) : (
-                <select id="area_id" {...register('area_id', { setValueAs: (v: string) => v ? Number(v) : null })} className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20">
+                <select id="area_id" {...register('area_id', { setValueAs: (v: string) => v ? Number(v) : null })} className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20">
                   <option value="">Sin área</option>
                   {areas.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
                 </select>
@@ -142,12 +142,12 @@ export function MeetingCreatePage() {
             </div>
             <div>
               <label htmlFor="notes" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Notas</label>
-              <textarea id="notes" rows={4} {...register('notes')} className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20" />
+              <textarea id="notes" rows={4} {...register('notes')} className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20" />
             </div>
           </FadeIn>
 
           <div className="flex justify-end gap-3">
-            <button type="button" onClick={() => setShowLeaveModal(true)} className="rounded-xl border border-gray-200 dark:border-gray-700 px-6 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
+            <button type="button" onClick={() => setShowLeaveModal(true)} className="rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-6 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
             <button type="submit" disabled={isSubmitting} className="inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-purple-600 to-indigo-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98] disabled:opacity-50">
               {isSubmitting ? <><Spinner size="sm" /> Creando...</> : 'Crear reunión'}
             </button>

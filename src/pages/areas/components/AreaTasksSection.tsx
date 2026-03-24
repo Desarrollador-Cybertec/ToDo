@@ -81,7 +81,7 @@ export function AreaTasksSection({ areaId, isManager, refreshKey }: AreaTasksSec
 
   return (
     <FadeIn delay={0.25} className="mt-6 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
-      <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-6 py-4">
+      <div className="flex items-center justify-between bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-800 px-6 py-4">
         <h3 className="font-semibold text-gray-900 dark:text-gray-100">Tareas del área</h3>
         <span className="rounded-lg bg-gray-100 dark:bg-gray-700 px-2.5 py-0.5 text-xs font-semibold text-gray-600 dark:text-gray-400">{tasks.length}</span>
       </div>
@@ -99,7 +99,7 @@ export function AreaTasksSection({ areaId, isManager, refreshKey }: AreaTasksSec
       {tasks.length === 0 ? (
         <p className="px-6 py-8 text-center text-sm text-gray-400 dark:text-gray-500">No hay tareas registradas para esta área.</p>
       ) : (
-        <div className="divide-y divide-gray-50">
+        <div className="divide-y divide-gray-50 dark:divide-gray-800">
           {tasks.map((task) => (
             <div key={task.id} className="px-6 py-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -159,7 +159,7 @@ export function AreaTasksSection({ areaId, isManager, refreshKey }: AreaTasksSec
                       <select
                         value={assignToUserId}
                         onChange={(e) => setAssignToUserId(e.target.value)}
-                        className="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                        className="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-gray-900 dark:text-gray-100"
                       >
                         <option value="">— Seleccionar miembro —</option>
                         {members.map((m) => (

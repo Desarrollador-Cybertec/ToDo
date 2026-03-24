@@ -104,7 +104,7 @@ export function AreaInfoSection({ areaId, userRole, refreshKey }: AreaInfoSectio
                   setShowManagerSelect(!showManagerSelect);
                   setSelectedManagerId(area.manager_user_id ? String(area.manager_user_id) : area.manager?.id ? String(area.manager.id) : '');
                 }}
-                className="rounded-lg border border-gray-200 dark:border-gray-700 px-2 py-0.5 text-xs text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300"
+                className="rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-2 py-0.5 text-xs text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300"
               >
                 {showManagerSelect ? 'Cancelar' : area.manager ? 'Cambiar' : 'Asignar'}
               </button>
@@ -122,7 +122,7 @@ export function AreaInfoSection({ areaId, userRole, refreshKey }: AreaInfoSectio
                   <select
                     value={selectedManagerId}
                     onChange={(e) => setSelectedManagerId(e.target.value)}
-                    className="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    className="flex-1 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                   >
                     <option value="">— Seleccionar —</option>
                     {managerCandidates.map((u) => (

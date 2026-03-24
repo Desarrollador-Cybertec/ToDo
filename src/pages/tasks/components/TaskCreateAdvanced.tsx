@@ -21,7 +21,7 @@ function ToggleField({ label, description, checked, onChange }: {
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
-        className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${checked ? 'bg-blue-600' : 'bg-gray-300'}`}
+        className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${checked ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}`}
       >
         <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white dark:bg-gray-900 shadow transition-transform ${checked ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
       </button>
@@ -87,17 +87,17 @@ export function TaskCreateAdvanced({
           <div className="space-y-4">
             <div>
               <label htmlFor="description" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Descripción</label>
-              <textarea id="description" rows={3} {...register('description')} placeholder="Describe la tarea con más detalle…" className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+              <textarea id="description" rows={3} {...register('description')} placeholder="Describe la tarea con más detalle…" className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
             </div>
             <div className={`grid gap-4 ${!isWorker ? 'sm:grid-cols-2' : ''}`}>
               <div>
                 <label htmlFor="start_date" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha inicio</label>
-                <input id="start_date" type="date" {...register('start_date')} className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none" />
+                <input id="start_date" type="date" {...register('start_date')} className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none" />
               </div>
               {!isWorker && (
               <div>
                 <label htmlFor="meeting_id" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Reunión de origen</label>
-                <select id="meeting_id" {...register('meeting_id', { setValueAs: (v: string) => v ? Number(v) : null })} className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none">
+                <select id="meeting_id" {...register('meeting_id', { setValueAs: (v: string) => v ? Number(v) : null })} className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none">
                   <option value="">Sin reunión</option>
                   {meetings.map((m) => (
                     <option key={m.id} value={m.id}>{m.title}</option>
@@ -121,7 +121,7 @@ export function TaskCreateAdvanced({
                   id="assigned_to_area_id"
                   {...register('assigned_to_area_id', { setValueAs: (v: string) => v ? Number(v) : null })}
                   disabled={hasUser || hasExternalEmail}
-                  className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none disabled:bg-gray-50 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500"
+                  className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none disabled:bg-gray-50 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500"
                 >
                   <option value="">Sin asignar</option>
                   {areas.map((a) => (
@@ -138,7 +138,7 @@ export function TaskCreateAdvanced({
                     {...register('external_email')}
                     disabled={hasUser || hasArea}
                     placeholder="correo@ejemplo.com"
-                    className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none disabled:bg-gray-50 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500"
+                    className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none disabled:bg-gray-50 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500"
                   />
                   {errors.external_email && <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errors.external_email.message}</p>}
                 </div>
@@ -150,7 +150,7 @@ export function TaskCreateAdvanced({
                     {...register('external_name')}
                     disabled={hasUser || hasArea}
                     placeholder="Nombre del destinatario"
-                    className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none disabled:bg-gray-50 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500"
+                    className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none disabled:bg-gray-50 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500"
                   />
                 </div>
               </div>
@@ -193,7 +193,7 @@ export function TaskCreateAdvanced({
 
         {/* bottom actions */}
         <div className="flex justify-end gap-3 pb-2">
-          <button type="button" onClick={onCancel} className="rounded-xl border border-gray-200 dark:border-gray-700 px-6 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
+          <button type="button" onClick={onCancel} className="rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-6 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
             Cancelar
           </button>
           <button

@@ -48,7 +48,7 @@ export function MeetingListPage() {
             <StaggerItem key={m.id}>
               <Link to={`/meetings/${m.id}`} className="block rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 shadow-sm transition-all hover:shadow-md hover:border-purple-100 dark:hover:border-purple-900">
                 <div className="flex items-start gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-purple-50 to-indigo-50 dark:to-indigo-950">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-purple-50 dark:from-purple-950 to-indigo-50 dark:to-indigo-950">
                     <HiOutlineCalendar className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div className="flex-1">

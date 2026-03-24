@@ -249,7 +249,7 @@ export function TaskCreatePage() {
                       id="title"
                       {...register('title')}
                       placeholder="Ej: Enviar informe semanal"
-                      className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                      className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                     />
                     {errors.title && <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errors.title.message}</p>}
                   </div>
@@ -299,14 +299,14 @@ export function TaskCreatePage() {
                               type="email"
                               {...register('external_email')}
                               placeholder="correo@ejemplo.com"
-                              className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none"
+                              className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none"
                             />
                             {errors.external_email && <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errors.external_email.message}</p>}
                             <input
                               type="text"
                               {...register('external_name')}
                               placeholder="Nombre del destinatario"
-                              className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none"
+                              className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none"
                             />
                           </div>
                         )}
@@ -318,7 +318,7 @@ export function TaskCreatePage() {
                           id="assigned_to_user_id"
                           {...register('assigned_to_user_id', { setValueAs: (v: string) => v ? Number(v) : null })}
                           disabled={hasArea || hasExternalEmail}
-                          className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none disabled:bg-gray-50 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500"
+                          className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none disabled:bg-gray-50 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500"
                         >
                           <option value="">Seleccionar usuario</option>
                           {availableUsers.map((u) => (
@@ -331,7 +331,7 @@ export function TaskCreatePage() {
                     {/* due date */}
                     <div>
                       <label htmlFor="due_date" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha límite</label>
-                      <input id="due_date" type="date" {...register('due_date')} className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none" />
+                      <input id="due_date" type="date" {...register('due_date')} className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none" />
                     </div>
                   </div>
 
@@ -349,7 +349,7 @@ export function TaskCreatePage() {
                             onClick={() => setValue('priority', value as CreateTaskFormData['priority'])}
                             className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium ring-1 transition-all ${active ? `${s.bg} ${s.text} ${s.ring} shadow-sm` : 'bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 ring-gray-200 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
                           >
-                            <span className={`h-2 w-2 rounded-full ${active ? s.dot : 'bg-gray-300'}`} />
+                            <span className={`h-2 w-2 rounded-full ${active ? s.dot : 'bg-gray-300 dark:bg-gray-600'}`} />
                             {label}
                           </button>
                         );
@@ -360,7 +360,7 @@ export function TaskCreatePage() {
                 </div>
 
                 {/* toggle advanced */}
-                <div className="mt-5 border-t border-gray-100 dark:border-gray-800 pt-4">
+                <div className="mt-5 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-t border-gray-100 dark:border-gray-800 pt-4">
                   {!showAdvanced && (
                     <button
                       type="button"

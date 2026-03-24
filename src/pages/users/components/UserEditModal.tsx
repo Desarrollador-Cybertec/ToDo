@@ -76,7 +76,7 @@ export function UserEditModal({
                     type="text"
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
-                    className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                   />
                 </div>
                 <div>
@@ -85,7 +85,7 @@ export function UserEditModal({
                     type="email"
                     value={editEmail}
                     onChange={(e) => setEditEmail(e.target.value)}
-                    className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                   />
                 </div>
               </div>
@@ -96,7 +96,7 @@ export function UserEditModal({
                   <select
                     value={editRoleId}
                     onChange={(e) => setEditRoleId(Number(e.target.value))}
-                    className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                   >
                     <option value={2}>{ROLE_LABELS[Role.AREA_MANAGER]}</option>
                     <option value={3}>{ROLE_LABELS[Role.WORKER]}</option>
@@ -104,7 +104,7 @@ export function UserEditModal({
                 </div>
               )}
 
-              <div className="flex items-center justify-between rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3">
+              <div className="flex items-center justify-between rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 text-gray-700 dark:text-gray-300">
                 <div>
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Estado del usuario</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">{editActive ? 'El usuario puede iniciar sesión' : 'El usuario está bloqueado'}</p>
@@ -113,7 +113,7 @@ export function UserEditModal({
                   type="button"
                   onClick={() => setEditActive(!editActive)}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-                    editActive ? 'bg-green-500' : 'bg-gray-300'
+                    editActive ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'
                   }`}
                 >
                   <span
@@ -136,7 +136,7 @@ export function UserEditModal({
                     <select
                       value={editAreaId}
                       onChange={(e) => setEditAreaId(e.target.value)}
-                      className="w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                      className="w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-gray-900 dark:text-gray-100"
                     >
                       <option value="">— Sin área —</option>
                       {areas.filter((a) => a.active).map((a) => (
@@ -149,7 +149,7 @@ export function UserEditModal({
                 </div>
               )}
 
-              <div className="flex justify-end gap-3 border-t border-gray-100 dark:border-gray-800 pt-4">
+              <div className="flex justify-end gap-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-t border-gray-100 dark:border-gray-800 pt-4">
                 <button
                   type="button"
                   onClick={onCancel}

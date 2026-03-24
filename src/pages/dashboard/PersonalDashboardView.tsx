@@ -184,14 +184,14 @@ export function PersonalDashboardView() {
       <div className="grid gap-6 lg:grid-cols-5">
         {/* Lo importante hoy - 3 cols */}
         <FadeIn delay={0.05} className="lg:col-span-3 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
-          <div className="flex items-center gap-2 border-b border-gray-100 dark:border-gray-800 px-6 py-4">
+          <div className="flex items-center gap-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-800 px-6 py-4">
             <span className="text-xl">🔥</span>
             <div>
               <h3 className="font-semibold text-gray-900 dark:text-gray-100">Lo importante hoy</h3>
               <p className="text-xs text-gray-500 dark:text-gray-400">Empieza por estas tareas para evitar atrasos.</p>
             </div>
           </div>
-          <div className="divide-y divide-gray-50 px-6">
+          <div className="divide-y divide-gray-50 dark:divide-gray-800 px-6">
             {urgentTasks.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 text-center">
                 <HiOutlineCheckCircle className="mb-2 h-10 w-10 text-green-400" />
@@ -232,16 +232,16 @@ export function PersonalDashboardView() {
       <div className="grid gap-6 lg:grid-cols-5">
         {/* Mis tareas - 3 cols */}
         <FadeIn delay={0.15} className="lg:col-span-3 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
-          <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-6 py-4">
+          <div className="flex items-center justify-between bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-800 px-6 py-4">
             <div>
               <h3 className="font-semibold text-gray-900 dark:text-gray-100">Mis tareas activas</h3>
               <p className="text-xs text-gray-400 dark:text-gray-500">En progreso, en revisión, vencidas o rechazadas.</p>
             </div>
-            <Link to="/tasks" className="rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100">
+            <Link to="/tasks" className="rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100">
               Ver todas
             </Link>
           </div>
-          <div className="divide-y divide-gray-50">
+          <div className="divide-y divide-gray-50 dark:divide-gray-800">
             {myTasks.length === 0 ? (
               <div className="flex flex-col items-center justify-center px-6 py-10 text-center">
                 <HiOutlineCheckCircle className="mb-2 h-10 w-10 text-green-400" />
@@ -269,7 +269,7 @@ export function PersonalDashboardView() {
             ) : (
               <div className="space-y-2">
                 {pendingTasks.slice(0, 4).map((t) => (
-                  <Link key={t.id} to={`/tasks/${t.id}`} className="group flex items-center justify-between rounded-xl border border-gray-100 dark:border-gray-800 p-3 transition-all hover:border-indigo-100 dark:hover:border-indigo-900 hover:bg-indigo-50 dark:hover:bg-indigo-900/30">
+                  <Link key={t.id} to={`/tasks/${t.id}`} className="group flex items-center justify-between rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-100 dark:border-gray-800 p-3 transition-all hover:border-indigo-100 dark:hover:border-indigo-900 hover:bg-indigo-50 dark:hover:bg-indigo-900/30">
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-indigo-700 dark:group-hover:text-indigo-400">{t.title}</p>
                       <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
@@ -291,7 +291,7 @@ export function PersonalDashboardView() {
             </h3>
             <div className="space-y-2">
               {TIPS.slice(0, 3).map((tip, i) => (
-                <div key={i} className="flex items-start gap-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 px-3.5 py-2.5">
+                <div key={i} className="flex items-start gap-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 px-3.5 py-2.5 text-gray-700 dark:text-gray-300">
                   <span className="mt-0.5 text-sm shrink-0">{tip.icon}</span>
                   <p className="text-xs leading-relaxed text-gray-600 dark:text-gray-400">{tip.text}</p>
                 </div>
@@ -336,7 +336,7 @@ function UrgentTaskRow({ task }: { task: UpcomingTask }) {
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-2">
-        <Link to={`/tasks/${task.id}`} className="rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
+        <Link to={`/tasks/${task.id}`} className="rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
           <HiOutlineEye className="inline h-3.5 w-3.5" /> Ver
         </Link>
         <Link to={`/tasks/${task.id}`} className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-700">

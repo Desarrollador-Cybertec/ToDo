@@ -126,7 +126,7 @@ export function TemplatesTab({
               </div>
             </div>
             {isModified && (
-              <div className="mt-3 flex items-center justify-end gap-2 border-t border-gray-100 dark:border-gray-800 pt-3">
+              <div className="mt-3 flex items-center justify-end gap-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-t border-gray-100 dark:border-gray-800 pt-3">
                 {confirmingTemplateId === t.id ? (
                   <>
                     <span className="mr-auto text-xs text-amber-600 dark:text-amber-400">{'\u00bf'}Guardar cambios de esta plantilla?</span>

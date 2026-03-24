@@ -18,7 +18,7 @@ export function TaskUpdates({ updates }: { updates: Update[] }) {
       <StaggerList className="space-y-3">
         {updates.map((u) => (
           <StaggerItem key={u.id}>
-            <div className="rounded-xl bg-gray-50 dark:bg-gray-800 p-4 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700/80">
+            <div className="rounded-xl bg-gray-50 dark:bg-gray-800 p-4 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700/80 text-gray-700 dark:text-gray-300">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="flex h-7 w-7 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/40 text-xs font-medium text-green-600 dark:text-green-400">{u.user?.name?.charAt(0) ?? '?'}</span>

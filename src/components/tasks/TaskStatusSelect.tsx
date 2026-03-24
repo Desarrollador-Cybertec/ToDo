@@ -165,7 +165,7 @@ export function TaskStatusSelect({ task, userId, userRole, onUpdated }: TaskStat
             onChange={(e) => setRejectNote(e.target.value)}
             rows={2}
             placeholder="Escribe el motivo..."
-            className="w-full rounded-lg border border-red-200 dark:border-red-800 bg-white dark:bg-gray-900 px-3 py-1.5 text-sm placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-400/20 resize-none"
+            className="w-full rounded-lg border border-red-200 dark:border-red-800 bg-white dark:bg-gray-900 px-3 py-1.5 text-sm placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-400/20 resize-none text-gray-900 dark:text-gray-100"
           />
           <div className="flex gap-2">
             <button
@@ -179,7 +179,7 @@ export function TaskStatusSelect({ task, userId, userRole, onUpdated }: TaskStat
             <button
               type="button"
               onClick={() => { setPendingReject(false); setRejectNote(''); }}
-              className="rounded-lg border border-red-200 dark:border-red-800 px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 transition-colors hover:bg-red-100 dark:hover:bg-red-900/40"
+              className="rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-red-200 dark:border-red-800 px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 transition-colors hover:bg-red-100 dark:hover:bg-red-900/40"
             >
               Cancelar
             </button>

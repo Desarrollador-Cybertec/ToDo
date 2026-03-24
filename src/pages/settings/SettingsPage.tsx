@@ -310,7 +310,7 @@ export function SettingsPage() {
             {activeTab === tab.key && (
               <motion.div
                 layoutId="settings-tab"
-                className="absolute inset-0 rounded-lg bg-white dark:bg-gray-900 shadow-sm"
+                className="absolute inset-0 rounded-lg bg-white dark:bg-gray-900 shadow-sm text-gray-900 dark:text-gray-100"
                 transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
               />
             )}
@@ -378,7 +378,7 @@ export function SettingsPage() {
                       key={item.name}
                       type="button"
                       onClick={() => runAutomation(item.name, item.fn)}
-                      className="rounded-xl border border-gray-100 dark:border-gray-800 px-4 py-4 text-left text-sm transition-all hover:border-blue-100 dark:hover:border-blue-900 hover:bg-blue-50 dark:hover:bg-blue-900/30 active:scale-[0.98]"
+                      className="rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-100 dark:border-gray-800 px-4 py-4 text-left text-sm transition-all hover:border-blue-100 dark:hover:border-blue-900 hover:bg-blue-50 dark:hover:bg-blue-900/30 active:scale-[0.98]"
                     >
                       <p className="flex items-center gap-2 font-medium text-gray-900 dark:text-gray-100"><span>{item.icon}</span> {item.name}</p>
                       <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{item.desc}</p>

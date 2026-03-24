@@ -88,7 +88,7 @@ export function LoginPage() {
                   type="email"
                   autoComplete="email"
                   {...register('email')}
-                  className="w-full rounded-xl border border-gray-300 dark:border-gray-600 py-2.5 pl-10 pr-4 text-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 py-2.5 pl-10 pr-4 text-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                   placeholder="correo@ejemplo.com"
                 />
               </div>
@@ -108,7 +108,7 @@ export function LoginPage() {
                   type="password"
                   autoComplete="current-password"
                   {...register('password')}
-                  className="w-full rounded-xl border border-gray-300 dark:border-gray-600 py-2.5 pl-10 pr-4 text-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 py-2.5 pl-10 pr-4 text-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                   placeholder="••••••••"
                 />
               </div>

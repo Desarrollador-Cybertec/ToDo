@@ -156,14 +156,14 @@ export function TaskListPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar tarea..."
-              className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 py-2.5 pl-10 pr-4 text-sm transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 py-2.5 pl-10 pr-4 text-sm transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-gray-700 dark:text-gray-300"
             />
           </div>
           {/* Filters */}
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2.5 text-sm transition-colors focus:border-blue-500 focus:bg-white dark:focus:bg-gray-900 focus:outline-none"
+            className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2.5 text-sm transition-colors focus:border-blue-500 focus:bg-white dark:focus:bg-gray-900 focus:outline-none text-gray-700 dark:text-gray-300"
           >
             <option value="">Estado</option>
             {Object.entries(TASK_STATUS_LABELS).map(([value, label]) => (
@@ -173,7 +173,7 @@ export function TaskListPage() {
           <select
             value={filterPriority}
             onChange={(e) => setFilterPriority(e.target.value)}
-            className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2.5 text-sm transition-colors focus:border-blue-500 focus:bg-white dark:focus:bg-gray-900 focus:outline-none"
+            className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2.5 text-sm transition-colors focus:border-blue-500 focus:bg-white dark:focus:bg-gray-900 focus:outline-none text-gray-700 dark:text-gray-300"
           >
             <option value="">Prioridad</option>
             {Object.entries(TASK_PRIORITY_LABELS).map(([value, label]) => (
@@ -184,7 +184,7 @@ export function TaskListPage() {
             <select
               value={filterAreaId}
               onChange={(e) => { setFilterAreaId(e.target.value); if (e.target.value) setFilterType(''); }}
-              className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2.5 text-sm transition-colors focus:border-blue-500 focus:bg-white dark:focus:bg-gray-900 focus:outline-none"
+              className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2.5 text-sm transition-colors focus:border-blue-500 focus:bg-white dark:focus:bg-gray-900 focus:outline-none text-gray-700 dark:text-gray-300"
             >
               <option value="">Área</option>
               {areas.filter((a) => a.active).map((a) => (
@@ -196,7 +196,7 @@ export function TaskListPage() {
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
-              className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2.5 text-sm transition-colors focus:border-blue-500 focus:bg-white dark:focus:bg-gray-900 focus:outline-none"
+              className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2.5 text-sm transition-colors focus:border-blue-500 focus:bg-white dark:focus:bg-gray-900 focus:outline-none text-gray-700 dark:text-gray-300"
             >
               <option value="">Tipo</option>
               <option value="org">Organización</option>
@@ -206,7 +206,7 @@ export function TaskListPage() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2.5 text-sm transition-colors focus:border-blue-500 focus:bg-white dark:focus:bg-gray-900 focus:outline-none"
+            className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2.5 text-sm transition-colors focus:border-blue-500 focus:bg-white dark:focus:bg-gray-900 focus:outline-none text-gray-700 dark:text-gray-300"
           >
             <option value="">Más recientes</option>
             <option value="oldest">Más antiguas</option>
@@ -260,7 +260,7 @@ export function TaskListPage() {
                   <button
                     type="button"
                     onClick={clearFilters}
-                    className="mt-4 rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+                    className="mt-4 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                   >
                     Limpiar filtros
                   </button>
@@ -271,14 +271,14 @@ export function TaskListPage() {
         ) : (
           <FadeIn delay={0.1} className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
             {/* List header */}
-            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-6 py-3">
+            <div className="flex items-center justify-between bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-800 px-6 py-3">
               <p className="text-xs font-medium text-gray-400 dark:text-gray-500">
                 {filteredTasks.length} tarea{filteredTasks.length !== 1 ? 's' : ''}
                 {search && ` para "${search}"`}
               </p>
             </div>
             {/* Rows */}
-            <StaggerList className="divide-y divide-gray-50">
+            <StaggerList className="divide-y divide-gray-50 dark:divide-gray-800">
               {filteredTasks.map((task) => (
                 <StaggerItem key={task.id}>
                   <div className="group flex items-center gap-4 px-6 py-4 transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/30">
@@ -355,7 +355,7 @@ export function TaskListPage() {
                       />
                       <Link
                         to={`/tasks/${task.id}`}
-                        className="flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-all hover:border-blue-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700"
+                        className="flex items-center gap-1.5 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-all hover:border-blue-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700"
                       >
                         <HiOutlineEye className="h-3.5 w-3.5" />
                         Ver

@@ -106,7 +106,7 @@ export function AvailableWorkersSection({ areaId, refreshKey, onClaimed }: Avail
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar por nombre o correo..."
-          className="w-full rounded-xl border border-gray-300 dark:border-gray-600 py-2.5 pl-10 pr-4 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 py-2.5 pl-10 pr-4 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
         />
       </div>
 
@@ -141,7 +141,7 @@ export function AvailableWorkersSection({ areaId, refreshKey, onClaimed }: Avail
                   className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-blue-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {claimingId === worker.id ? (
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    <span className="h-4 w-4 animate-spin rounded-full bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-2 border-white border-t-transparent" />
                   ) : (
                     <HiOutlineUserAdd className="h-4 w-4" />
                   )}

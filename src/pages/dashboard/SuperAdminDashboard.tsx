@@ -88,7 +88,7 @@ export function SuperAdminDashboard() {
           </Link>
           <Link
             to="/consolidated"
-            className="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-700 px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+            className="inline-flex items-center gap-2 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
           >
             <HiOutlineTrendingUp className="h-4 w-4" />
             Consolidado
@@ -124,7 +124,7 @@ export function SuperAdminDashboard() {
 
           {/* extra metrics row */}
           <div className="mt-4 grid grid-cols-3 gap-3">
-            <div className="rounded-xl bg-gray-50 dark:bg-gray-800 px-3 py-2.5 text-center">
+            <div className="rounded-xl bg-gray-50 dark:bg-gray-800 px-3 py-2.5 text-center text-gray-700 dark:text-gray-300">
               <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{data.total_all}</p>
               <p className="text-xs text-gray-500 dark:text-gray-400">Total históricas</p>
             </div>
@@ -137,7 +137,7 @@ export function SuperAdminDashboard() {
               <p className="text-xs text-gray-500 dark:text-gray-400">Completadas (mes)</p>
             </div>
             {data.total_cancelled != null && (
-              <div className="rounded-xl bg-gray-50 dark:bg-gray-800 px-3 py-2.5 text-center">
+              <div className="rounded-xl bg-gray-50 dark:bg-gray-800 px-3 py-2.5 text-center text-gray-700 dark:text-gray-300">
                 <p className="text-lg font-bold text-gray-500 dark:text-gray-400">{data.total_cancelled}</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">Canceladas</p>
               </div>
@@ -147,11 +147,11 @@ export function SuperAdminDashboard() {
 
         {/* Tareas por estado - 2 cols */}
         <FadeIn delay={0.1} className="lg:col-span-2 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
-          <div className="border-b border-gray-100 dark:border-gray-800 px-6 py-4">
+          <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-800 px-6 py-4">
             <h3 className="font-semibold text-gray-900 dark:text-gray-100">Tareas por estado</h3>
             <p className="text-xs text-gray-400 dark:text-gray-500">Distribución actual de todas las tareas.</p>
           </div>
-          <div className="divide-y divide-gray-50 px-6">
+          <div className="divide-y divide-gray-50 dark:divide-gray-800 px-6">
             {(() => {
               const entries = Object.entries(data.tasks_by_status ?? {}).filter(([, c]) => c > 0);
               if (entries.length === 0) {
@@ -186,7 +186,7 @@ export function SuperAdminDashboard() {
       <div className="grid gap-6 lg:grid-cols-5">
         {/* Pendientes por usuario - 3 cols */}
         <FadeIn delay={0.15} className="lg:col-span-3 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
-          <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-6 py-4">
+          <div className="flex items-center justify-between bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-800 px-6 py-4">
             <div className="flex items-center gap-2">
               <HiOutlineUserGroup className="h-5 w-5 text-indigo-500 dark:text-indigo-400" />
               <div>
@@ -194,11 +194,11 @@ export function SuperAdminDashboard() {
                 <p className="text-xs text-gray-400 dark:text-gray-500">Usuarios con más tareas pendientes.</p>
               </div>
             </div>
-            <Link to="/users" className="rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100">
+            <Link to="/users" className="rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100">
               Ver usuarios
             </Link>
           </div>
-          <div className="divide-y divide-gray-50 px-6">
+          <div className="divide-y divide-gray-50 dark:divide-gray-800 px-6">
             {topOverloaded.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 text-center">
                 <HiOutlineCheckCircle className="mb-2 h-10 w-10 text-green-400" />
@@ -233,11 +233,11 @@ export function SuperAdminDashboard() {
         <div className="lg:col-span-2 space-y-6">
           {/* Tareas por área */}
           <FadeIn delay={0.2} className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
-            <div className="flex items-center gap-2 border-b border-gray-100 dark:border-gray-800 px-5 py-4">
+            <div className="flex items-center gap-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-800 px-5 py-4">
               <HiOutlineOfficeBuilding className="h-4.5 w-4.5 text-blue-500 dark:text-blue-400" />
               <h3 className="font-semibold text-gray-900 dark:text-gray-100">Por área</h3>
             </div>
-            <div className="divide-y divide-gray-50 px-5">
+            <div className="divide-y divide-gray-50 dark:divide-gray-800 px-5">
               {(data.tasks_by_area ?? []).length === 0 ? (
                 <p className="py-6 text-center text-xs text-gray-400 dark:text-gray-500">Sin áreas registradas</p>
               ) : (
@@ -258,16 +258,16 @@ export function SuperAdminDashboard() {
 
           {/* Mis tareas */}
           <FadeIn delay={0.25} className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
-            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-5 py-4">
+            <div className="flex items-center justify-between bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-800 px-5 py-4">
               <div className="flex items-center gap-2">
                 <HiOutlineClipboardList className="h-4.5 w-4.5 text-blue-500 dark:text-blue-400" />
                 <h3 className="font-semibold text-gray-900 dark:text-gray-100">Mis tareas</h3>
               </div>
-              <Link to="/tasks" className="rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100">
+              <Link to="/tasks" className="rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100">
                 Ver todas
               </Link>
             </div>
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-gray-50 dark:divide-gray-800">
               {!data.my_tasks || data.my_tasks.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <HiOutlineCheckCircle className="mb-2 h-8 w-8 text-green-400" />
@@ -289,7 +289,7 @@ export function SuperAdminDashboard() {
             </h3>
             <div className="space-y-2">
               {TIPS.slice(0, 3).map((tip, i) => (
-                <div key={i} className="flex items-start gap-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 px-3.5 py-2.5">
+                <div key={i} className="flex items-start gap-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 px-3.5 py-2.5 text-gray-700 dark:text-gray-300">
                   <span className="mt-0.5 shrink-0 text-sm">{tip.icon}</span>
                   <p className="text-xs leading-relaxed text-gray-600 dark:text-gray-400">{tip.text}</p>
                 </div>
@@ -333,7 +333,7 @@ function MyTaskRow({ task }: { task: MyTask }) {
         <Badge variant={PRIORITY_BADGE_VARIANT[task.priority] ?? 'gray'} size="sm">
           {TASK_PRIORITY_LABELS[task.priority as keyof typeof TASK_PRIORITY_LABELS] ?? task.priority}
         </Badge>
-        <Link to={`/tasks/${task.id}`} className="rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
+        <Link to={`/tasks/${task.id}`} className="rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
           Ver
         </Link>
       </div>

@@ -21,7 +21,7 @@ export function TaskComments({ comments }: { comments: Comment[] }) {
       <StaggerList className="space-y-3">
         {comments.map((c) => (
           <StaggerItem key={c.id}>
-            <div className="rounded-xl bg-gray-50 dark:bg-gray-800 p-4 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700/80">
+            <div className="rounded-xl bg-gray-50 dark:bg-gray-800 p-4 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700/80 text-gray-700 dark:text-gray-300">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/40 text-xs font-medium text-blue-600 dark:text-blue-400">{c.user?.name?.charAt(0) ?? '?'}</span>

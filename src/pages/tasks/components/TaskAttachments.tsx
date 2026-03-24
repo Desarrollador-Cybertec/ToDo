@@ -20,7 +20,7 @@ export function TaskAttachments({ attachments }: { attachments: Attachment[] }) 
       <StaggerList className="space-y-2">
         {attachments.map((a) => (
           <StaggerItem key={a.id}>
-            <div className="flex items-center justify-between rounded-xl bg-gray-50 dark:bg-gray-800 p-4 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700/80">
+            <div className="flex items-center justify-between rounded-xl bg-gray-50 dark:bg-gray-800 p-4 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700/80 text-gray-700 dark:text-gray-300">
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-900/30">
                   <HiOutlinePaperClip className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />

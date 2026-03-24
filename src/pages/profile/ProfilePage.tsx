@@ -101,12 +101,12 @@ export function ProfilePage() {
               </label>
               <input
                 {...register('name')}
-                className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               />
               {errors.name && <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errors.name.message}</p>}
             </div>
 
-            <div className="border-t border-gray-100 dark:border-gray-800 pt-4">
+            <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-t border-gray-100 dark:border-gray-800 pt-4">
               <p className="mb-3 text-xs text-gray-400 dark:text-gray-500">Deja en blanco si no quieres cambiar la contraseña.</p>
               <div className="space-y-3">
                 <div>
@@ -118,7 +118,7 @@ export function ProfilePage() {
                     type="password"
                     {...register('password')}
                     placeholder="••••••••"
-                    className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                   />
                   {errors.password && <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errors.password.message}</p>}
                 </div>
@@ -131,7 +131,7 @@ export function ProfilePage() {
                     type="password"
                     {...register('password_confirmation')}
                     placeholder="••••••••"
-                    className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                   />
                   {errors.password_confirmation && (
                     <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errors.password_confirmation.message}</p>

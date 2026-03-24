@@ -133,7 +133,7 @@ export function AppLayout() {
           sidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
         }`}
       >
-        <div className="flex h-16 items-center justify-between border-b border-gray-100 dark:border-gray-800 px-6">
+        <div className="flex h-16 items-center justify-between bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-800 px-6">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-blue-600 to-indigo-600 text-xs font-bold text-white shadow-sm">
               T
@@ -171,7 +171,7 @@ export function AppLayout() {
                     transition={{ type: 'spring', stiffness: 350, damping: 30 }}
                   />
                 )}
-                <span className={`transition-colors ${active ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-600'}`}>
+                <span className={`transition-colors ${active ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-400'}`}>
                   {item.icon}
                 </span>
                 {item.label}
@@ -180,7 +180,7 @@ export function AppLayout() {
           })}
         </nav>
 
-        <div className="border-t border-gray-100 dark:border-gray-800 p-4">
+        <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-t border-gray-100 dark:border-gray-800 p-4">
           <NavLink
             to="/profile"
             onClick={() => setSidebarOpen(false)}
