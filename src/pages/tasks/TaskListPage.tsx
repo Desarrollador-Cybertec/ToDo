@@ -260,7 +260,7 @@ export function TaskListPage() {
                   <button
                     type="button"
                     onClick={clearFilters}
-                    className="mt-4 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+                    className="mt-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                   >
                     Limpiar filtros
                   </button>
@@ -355,7 +355,7 @@ export function TaskListPage() {
                       />
                       <Link
                         to={`/tasks/${task.id}`}
-                        className="flex items-center gap-1.5 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-all hover:border-blue-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700"
+                        className="flex items-center gap-1.5 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-all hover:border-blue-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700"
                       >
                         <HiOutlineEye className="h-3.5 w-3.5" />
                         Ver

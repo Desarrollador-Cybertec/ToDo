@@ -323,7 +323,7 @@ export function MeetingTasksSection({ meetingId, areaId, onTasksCreated }: Props
               setForm(EMPTY_DRAFT);
               setShowForm(true);
             }}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-dashed border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 transition-all hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30/50 hover:text-blue-600 dark:hover:text-blue-400"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-white dark:bg-gray-900 border border-dashed border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 transition-all hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400"
           >
             <HiOutlinePlus className="h-4 w-4" /> Agregar compromiso
           </button>

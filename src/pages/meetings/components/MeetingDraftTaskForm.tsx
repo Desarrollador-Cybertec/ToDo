@@ -179,7 +179,7 @@ export function MeetingDraftTaskForm({
           <button
             type="button"
             onClick={onCancel}
-            className="inline-flex items-center gap-1 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-4 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+            className="inline-flex items-center gap-1 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 px-4 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
           >
             <HiOutlineX className="h-4 w-4" /> Cancelar
           </button>

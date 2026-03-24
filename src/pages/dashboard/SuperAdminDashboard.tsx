@@ -88,7 +88,7 @@ export function SuperAdminDashboard() {
           </Link>
           <Link
             to="/consolidated"
-            className="inline-flex items-center gap-2 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+            className="inline-flex items-center gap-2 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
           >
             <HiOutlineTrendingUp className="h-4 w-4" />
             Consolidado
@@ -194,7 +194,7 @@ export function SuperAdminDashboard() {
                 <p className="text-xs text-gray-400 dark:text-gray-500">Usuarios con más tareas pendientes.</p>
               </div>
             </div>
-            <Link to="/users" className="rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100">
+            <Link to="/users" className="rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100">
               Ver usuarios
             </Link>
           </div>
@@ -263,7 +263,7 @@ export function SuperAdminDashboard() {
                 <HiOutlineClipboardList className="h-4.5 w-4.5 text-blue-500 dark:text-blue-400" />
                 <h3 className="font-semibold text-gray-900 dark:text-gray-100">Mis tareas</h3>
               </div>
-              <Link to="/tasks" className="rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100">
+              <Link to="/tasks" className="rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100">
                 Ver todas
               </Link>
             </div>
@@ -333,7 +333,7 @@ function MyTaskRow({ task }: { task: MyTask }) {
         <Badge variant={PRIORITY_BADGE_VARIANT[task.priority] ?? 'gray'} size="sm">
           {TASK_PRIORITY_LABELS[task.priority as keyof typeof TASK_PRIORITY_LABELS] ?? task.priority}
         </Badge>
-        <Link to={`/tasks/${task.id}`} className="rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
+        <Link to={`/tasks/${task.id}`} className="rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
           Ver
         </Link>
       </div>

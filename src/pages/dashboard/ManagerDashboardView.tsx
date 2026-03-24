@@ -165,7 +165,7 @@ export function ManagerDashboardView() {
           </Link>
           <Link
             to="/claim-workers"
-            className="inline-flex items-center gap-2 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+            className="inline-flex items-center gap-2 rounded-xl bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
           >
             <HiOutlineUserGroup className="h-4 w-4" />
             Mi equipo
@@ -181,7 +181,7 @@ export function ManagerDashboardView() {
           {/* Section header */}
           <div className="flex items-center gap-2">
             <span className="text-base">🏢</span>
-            <h3 className="text-sm font-semibold text-gray-800">Panel del área</h3>
+            <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">Panel del área</h3>
             <div className="flex-1 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-t border-gray-200 dark:border-gray-700" />
           </div>
 
@@ -286,7 +286,7 @@ export function ManagerDashboardView() {
           {/* Section header */}
           <div className="flex items-center gap-2">
             <span className="text-base">👤</span>
-            <h3 className="text-sm font-semibold text-gray-800">Mi panel personal</h3>
+            <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">Mi panel personal</h3>
             <div className="flex-1 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-t border-gray-200 dark:border-gray-700" />
           </div>
 
@@ -317,7 +317,7 @@ export function ManagerDashboardView() {
           <FadeIn delay={0.15} className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
             <div className="flex items-center justify-between bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-800 px-5 py-4">
               <h3 className="font-semibold text-gray-900 dark:text-gray-100">Mis próximas tareas</h3>
-              <Link to="/tasks" className="rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
+              <Link to="/tasks" className="rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
                 Ver todas
               </Link>
             </div>

@@ -237,7 +237,7 @@ export function PersonalDashboardView() {
               <h3 className="font-semibold text-gray-900 dark:text-gray-100">Mis tareas activas</h3>
               <p className="text-xs text-gray-400 dark:text-gray-500">En progreso, en revisión, vencidas o rechazadas.</p>
             </div>
-            <Link to="/tasks" className="rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100">
+            <Link to="/tasks" className="rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100">
               Ver todas
             </Link>
           </div>
@@ -336,7 +336,7 @@ function UrgentTaskRow({ task }: { task: UpcomingTask }) {
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-2">
-        <Link to={`/tasks/${task.id}`} className="rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
+        <Link to={`/tasks/${task.id}`} className="rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
           <HiOutlineEye className="inline h-3.5 w-3.5" /> Ver
         </Link>
         <Link to={`/tasks/${task.id}`} className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-700">

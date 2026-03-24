@@ -147,7 +147,7 @@ export function MeetingCreatePage() {
           </FadeIn>
 
           <div className="flex justify-end gap-3">
-            <button type="button" onClick={() => setShowLeaveModal(true)} className="rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-6 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
+            <button type="button" onClick={() => setShowLeaveModal(true)} className="rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 px-6 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
             <button type="submit" disabled={isSubmitting} className="inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-purple-600 to-indigo-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98] disabled:opacity-50">
               {isSubmitting ? <><Spinner size="sm" /> Creando...</> : 'Crear reunión'}
             </button>

@@ -122,7 +122,7 @@ export function MeetingDetailPage() {
                 <textarea id="edit-notes" rows={4} value={editNotes} onChange={(e) => setEditNotes(e.target.value)} className="w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm focus:border-purple-500 focus:outline-none" />
               </div>
               <div className="flex justify-end gap-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-t border-gray-100 dark:border-gray-800 pt-4">
-                <button type="button" onClick={cancelEditing} className="inline-flex items-center gap-1.5 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
+                <button type="button" onClick={cancelEditing} className="inline-flex items-center gap-1.5 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
                   <HiOutlineX className="h-4 w-4" /> Cancelar
                 </button>
                 <button type="button" onClick={saveEdit} disabled={editSaving || !editTitle.trim()} className="inline-flex items-center gap-1.5 rounded-xl bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700 disabled:opacity-50">

@@ -52,7 +52,7 @@ export function UserCreateForm({ form, onSubmit, onCancel }: Props) {
             <button type="submit" disabled={isSubmitting} className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
               {isSubmitting ? <><Spinner size="sm" /> Creando...</> : 'Crear'}
             </button>
-            <button type="button" onClick={onCancel} className="rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
+            <button type="button" onClick={onCancel} className="rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
               Cancelar
             </button>
           </div>
