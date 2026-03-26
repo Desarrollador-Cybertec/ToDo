@@ -18,12 +18,15 @@ import { UserListPage } from './pages/users/UserListPage';
 import { ConsolidatedPage } from './pages/consolidated/ConsolidatedPage';
 import { SettingsPage } from './pages/settings/SettingsPage';
 import { ProfilePage } from './pages/profile/ProfilePage';
+import { NotificationsPage } from './pages/notifications/NotificationsPage';
 import { DarkModeToggle } from './components/ui/DarkModeToggle';
+import { SileoToaster } from './components/notifications/SileoToaster';
 
 function App() {
   return (
     <>
       <DarkModeToggle />
+      <SileoToaster />
       <Routes>
       {/* Guest routes */}
       <Route element={<GuestRoute />}>
@@ -39,6 +42,9 @@ function App() {
           <Route path="/tasks" element={<TaskListPage />} />
           <Route path="/tasks/create" element={<TaskCreatePage />} />
           <Route path="/tasks/:id" element={<TaskDetailPage />} />
+
+          {/* Notifications - all authenticated roles */}
+          <Route path="/notifications" element={<NotificationsPage />} />
 
           {/* Profile - all authenticated roles */}
           <Route path="/profile" element={<ProfilePage />} />

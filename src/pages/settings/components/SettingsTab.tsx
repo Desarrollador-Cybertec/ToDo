@@ -9,9 +9,10 @@ const SETTING_LABELS: Record<string, string> = {
   alert_days_before_due: 'Días de anticipación para alertas',
   daily_summary_enabled: 'Resumen diario activado',
   detect_overdue_enabled: 'Detección de vencidas activada',
-  emails_enabled: 'Envío de correos activado',
+  emails_enabled: 'Enviar notificaciones por correo',
   inactivity_alert_days: 'Días para alerta de inactividad',
   inactivity_alert_enabled: 'Alerta de inactividad activada',
+  copy_to_manager: 'Copiar alertas al encargado de área',
 };
 
 const GROUP_LABELS: Record<string, string> = {

@@ -180,32 +180,32 @@ export function AppLayout() {
           })}
         </nav>
 
-        <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-t border-gray-100 dark:border-gray-800 p-4">
-          <NavLink
-            to="/profile"
-            onClick={() => setSidebarOpen(false)}
-            className={({ isActive }) =>
-              `mb-3 flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors ${
-                isActive ? 'bg-blue-50 dark:bg-blue-900/30 ring-1 ring-blue-100' : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'
-              }`
-            }
-          >
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-indigo-500 text-sm font-medium text-white">
-              {user?.name?.charAt(0).toUpperCase()}
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">{user?.name}</p>
-              <p className="truncate text-xs text-gray-500 dark:text-gray-400">
-                {user?.role && ROLE_LABELS[user.role.slug]}
-              </p>
-              {areaName && (
-                <p className="mt-0.5 flex items-center gap-1 truncate text-xs font-medium text-blue-600 dark:text-blue-400">
-                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-400" />
-                  {areaName}
+        <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-t border-gray-100 dark:border-gray-800 p-4 space-y-3">
+            <NavLink
+              to="/profile"
+              onClick={() => setSidebarOpen(false)}
+              className={({ isActive }) =>
+                `flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors ${
+                  isActive ? 'bg-blue-50 dark:bg-blue-900/30 ring-1 ring-blue-100' : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`
+              }
+            >
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-indigo-500 text-sm font-medium text-white">
+                {user?.name?.charAt(0).toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">{user?.name}</p>
+                <p className="truncate text-xs text-gray-500 dark:text-gray-400">
+                  {user?.role && ROLE_LABELS[user.role.slug]}
                 </p>
-              )}
-            </div>
-          </NavLink>
+                {areaName && (
+                  <p className="mt-0.5 flex items-center gap-1 truncate text-xs font-medium text-blue-600 dark:text-blue-400">
+                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-400" />
+                    {areaName}
+                  </p>
+                )}
+              </div>
+            </NavLink>
           <button
             type="button"
             onClick={handleLogout}

@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { NotificationBell } from '../../components/notifications';
 import { dashboardApi } from '../../api/dashboard';
 import { areasApi } from '../../api/areas';
 import { tasksApi } from '../../api/tasks';
@@ -155,7 +156,7 @@ export function ManagerDashboardView() {
             )}.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-3">
           <Link
             to="/tasks/create"
             className="inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow-md shadow-blue-500/25 transition-all hover:shadow-lg hover:shadow-blue-500/30 active:scale-[0.98]"
@@ -170,6 +171,8 @@ export function ManagerDashboardView() {
             <HiOutlineUserGroup className="h-4 w-4" />
             Mi equipo
           </Link>
+          <div className="w-px h-8 bg-gray-200 dark:bg-gray-700" />
+          <NotificationBell />
         </div>
       </FadeIn>
 

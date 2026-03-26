@@ -17,6 +17,7 @@ import {
   HiOutlineClock,
 } from 'react-icons/hi';
 import { FadeIn, SkeletonDashboard, Badge, STATUS_BADGE_VARIANT, PRIORITY_BADGE_VARIANT } from '../../components/ui';
+import { NotificationBell } from '../../components/notifications';
 
 function formatRelativeDate(dateStr: string | null): string {
   if (!dateStr) return '';
@@ -78,7 +79,7 @@ export function SuperAdminDashboard() {
             )}.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-3">
           <Link
             to="/tasks/create"
             className="inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow-md shadow-blue-500/25 transition-all hover:shadow-lg hover:shadow-blue-500/30 active:scale-[0.98]"
@@ -93,6 +94,8 @@ export function SuperAdminDashboard() {
             <HiOutlineTrendingUp className="h-4 w-4" />
             Consolidado
           </Link>
+          <div className="w-px h-8 bg-gray-200 dark:bg-gray-700" />
+          <NotificationBell />
         </div>
       </FadeIn>
 
