@@ -168,7 +168,7 @@ function validateFile(file: File): string | null {
 }
 
 export function UploadFormPanel({
-  file, setFile, attachmentType, setAttachmentType, onUpload, onClose,
+  file, setFile, attachmentType, setAttachmentType, onUpload, onClose, isUploading,
 }: {
   file: File | null;
   setFile: (f: File | null) => void;
@@ -176,6 +176,7 @@ export function UploadFormPanel({
   setAttachmentType: (v: string) => void;
   onUpload: () => void;
   onClose: () => void;
+  isUploading?: boolean;
 }) {
   const [fileError, setFileError] = useState<string | null>(null);
 
@@ -203,7 +204,7 @@ export function UploadFormPanel({
           {fileError && <p className="text-sm text-red-500 dark:text-red-400">{fileError}</p>}
           <p className="text-xs text-gray-400 dark:text-gray-500">Máx. 10 MB. Tipos: {ALLOWED_EXTENSIONS.join(', ')}</p>
           <div className="flex gap-2">
-            <button type="button" onClick={onUpload} disabled={!file} className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">Subir</button>
+            <button type="button" onClick={onUpload} disabled={!file || isUploading} className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">{isUploading ? 'Subiendo...' : 'Subir'}</button>
             <button type="button" onClick={onClose} className="rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
           </div>
         </div>

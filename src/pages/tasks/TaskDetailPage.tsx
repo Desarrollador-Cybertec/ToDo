@@ -278,12 +278,15 @@ export function TaskDetailPage() {
 
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [attachmentType, setAttachmentType] = useState('evidence');
+  const [isUploading, setIsUploading] = useState(false);
   const onUpload = async () => {
-    if (!uploadFile) return;
+    if (!uploadFile || isUploading) return;
+    setIsUploading(true);
     const formData = new FormData();
     formData.append('file', uploadFile);
     formData.append('attachment_type', attachmentType);
     await handleAction(() => tasksApi.uploadAttachment(taskId, formData), 'Archivo subido');
+    setIsUploading(false);
     setUploadFile(null);
     setShowUploadForm(false);
   };
@@ -564,7 +567,7 @@ export function TaskDetailPage() {
             <DelegateFormPanel form={delegateForm} onSubmit={onDelegate} onClose={() => setShowDelegateForm(false)} members={areaMembers} loading={membersLoading} />
           )}
           {showUploadForm && (
-            <UploadFormPanel file={uploadFile} setFile={setUploadFile} attachmentType={attachmentType} setAttachmentType={setAttachmentType} onUpload={onUpload} onClose={() => setShowUploadForm(false)} />
+            <UploadFormPanel file={uploadFile} setFile={setUploadFile} attachmentType={attachmentType} setAttachmentType={setAttachmentType} onUpload={onUpload} onClose={() => setShowUploadForm(false)} isUploading={isUploading} />
           )}
         </AnimatePresence>
 

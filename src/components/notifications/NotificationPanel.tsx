@@ -72,7 +72,7 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
     };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col overflow-hidden" style={{ height: '100%', maxHeight: 'inherit' }}>
       {/* Encabezado */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
@@ -130,7 +130,7 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
                   className={`p-4 cursor-pointer transition-colors ${
                     isUnread
                       ? iconConfig.bgColor
-                      : 'bg-gray-50 dark:bg-gray-800/50 opacity-70 hover:opacity-100'
+                      : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750'
                   }`}
                 >
                   <div className="flex gap-3">
@@ -141,7 +141,7 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
                       <div className="flex items-start justify-between gap-2">
                         <h4
                           className={`text-sm text-gray-900 dark:text-gray-100 ${
-                            isUnread ? 'font-bold' : 'font-semibold'
+                            isUnread ? 'font-bold' : 'font-medium text-gray-500 dark:text-gray-400'
                           }`}
                         >
                           {iconConfig.label}
@@ -150,7 +150,7 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
                           <div className="shrink-0 w-2 h-2 bg-blue-500 rounded-full mt-1" />
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
+                      <p className={`text-sm mt-1 line-clamp-2 ${isUnread ? 'text-gray-600 dark:text-gray-400' : 'text-gray-400 dark:text-gray-500'}`}>
                         {notification.data.message}
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">

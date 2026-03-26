@@ -17,30 +17,45 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const prevUnreadCountRef = useRef<number | null>(null);
   const knownIdsRef = useRef<Set<string>>(new Set());
+  const initializedRef = useRef(false);
 
+  /**
+   * Solo carga y muestra notificaciones — NO dispara toasts ni toca knownIdsRef.
+   * Usar para: abrir el panel, cargar la página de notificaciones.
+   */
   const fetchNotifications = useCallback(async (page = 1) => {
     if (!getToken()) return;
     try {
       setIsLoading(true);
       const response = await notificationsApi.list(page);
-      const incoming = response.data;
-
-      // Detectar notificaciones nuevas para toasts
-      if (knownIdsRef.current.size > 0) {
-        for (const notif of incoming) {
-          if (!knownIdsRef.current.has(notif.id) && !notif.read_at) {
-            showNotificationToast(notif);
-          }
-        }
-      }
-
-      // Actualizar el set de IDs conocidos
-      knownIdsRef.current = new Set(incoming.map((n) => n.id));
-      setNotifications(incoming);
+      setNotifications(response.data);
     } catch (error) {
       console.error('Error fetching notifications:', error);
     } finally {
       setIsLoading(false);
+    }
+  }, []);
+
+  /**
+   * Detecta notificaciones nuevas respecto a knownIdsRef, dispara toasts
+   * y actualiza el estado. Llamar solo desde el polling.
+   */
+  const checkAndToastNew = useCallback(async () => {
+    if (!getToken()) return;
+    try {
+      const response = await notificationsApi.list();
+      const incoming = response.data;
+
+      for (const notif of incoming) {
+        if (!knownIdsRef.current.has(notif.id) && !notif.read_at) {
+          showNotificationToast(notif);
+        }
+      }
+
+      knownIdsRef.current = new Set(incoming.map((n) => n.id));
+      setNotifications(incoming);
+    } catch (error) {
+      console.error('Error checking new notifications:', error);
     }
   }, []);
 
@@ -50,9 +65,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       const response = await notificationsApi.getUnreadCount();
       const newCount = response.unread_count;
 
-      // Si el conteo de no leídas subió, refrescar la lista para detectar las nuevas
       if (prevUnreadCountRef.current !== null && newCount > prevUnreadCountRef.current) {
-        fetchNotifications();
+        // Hay notificaciones nuevas: comparar IDs y disparar toasts
+        checkAndToastNew();
       }
 
       prevUnreadCountRef.current = newCount;
@@ -60,7 +75,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error fetching unread count:', error);
     }
-  }, [fetchNotifications]);
+  }, [checkAndToastNew]);
 
   const markAsRead = useCallback(async (id: string) => {
     try {
@@ -71,6 +86,8 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         )
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
+      // Mantener knownIdsRef actualizado
+      knownIdsRef.current.add(id);
     } catch (error) {
       console.error('Error marking notification as read:', error);
       throw error;
@@ -97,21 +114,31 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     setNotifications((prev) => prev.filter((notif) => notif.id !== id));
   }, []);
 
-  // Polling cada 30 segundos para obtener el contador
+  // Inicialización: sembrar knownIdsRef con las notificaciones actuales (sin toasts)
   useEffect(() => {
-    fetchUnreadCount();
+    if (initializedRef.current || !getToken()) return;
+    initializedRef.current = true;
 
-    const interval = setInterval(() => {
+    notificationsApi.list().then((response) => {
+      knownIdsRef.current = new Set(response.data.map((n) => n.id));
+      setNotifications(response.data);
+    }).catch(() => {});
+  }, []);
+
+  // Polling cada 15 segundos para el contador de no leídas.
+  // El primer tick lo saltamos si la inicialización ya terminó (evita doble llamada en mount).
+  useEffect(() => {
+    if (!getToken()) return;
+    // Pequeño delay para que la inicialización termine primero
+    const initialTimeout = setTimeout(() => {
       fetchUnreadCount();
-    }, 15000); // 15 segundos
-
-    return () => clearInterval(interval);
+    }, 1000);
+    const interval = setInterval(fetchUnreadCount, 15000);
+    return () => {
+      clearTimeout(initialTimeout);
+      clearInterval(interval);
+    };
   }, [fetchUnreadCount]);
-
-  // Cargar notificaciones al montar
-  useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
 
   return (
     <NotificationContext.Provider
