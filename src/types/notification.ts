@@ -47,7 +47,7 @@ export interface NotificationPaginatedResponse {
 }
 
 export interface NotificationUnreadCountResponse {
-  count: number;
+  unread_count: number;
 }
 
 export interface NotificationIcon {

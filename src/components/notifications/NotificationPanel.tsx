@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../../context/useNotifications';
 import type { Notification, NotificationType } from '../../types/notification';
@@ -34,7 +34,13 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
     isLoading,
     markAsRead,
     markAllAsRead,
+    fetchNotifications,
   } = useNotifications();
+
+  // Cargar notificaciones frescas cada vez que el panel se abre
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
 
   const filtered = filterByTab(notifications, activeTab);
 

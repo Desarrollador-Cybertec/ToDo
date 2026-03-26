@@ -48,7 +48,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     if (!getToken()) return;
     try {
       const response = await notificationsApi.getUnreadCount();
-      const newCount = response.count;
+      const newCount = response.unread_count;
 
       // Si el conteo de no leídas subió, refrescar la lista para detectar las nuevas
       if (prevUnreadCountRef.current !== null && newCount > prevUnreadCountRef.current) {
