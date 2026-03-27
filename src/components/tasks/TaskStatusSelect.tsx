@@ -30,6 +30,8 @@ function getAvailableActions(
     Number(task.creator?.id) === uid;
   const isSuperAdmin = userRole === Role.SUPERADMIN;
   const isManager = userRole === Role.AREA_MANAGER;
+  const isExternalTask = !!task.external_email;
+  const canActAsResponsible = isResponsible || (isExternalTask && (isSuperAdmin || isManager));
   const terminal: string[] = [TaskStatus.COMPLETED, TaskStatus.CANCELLED];
 
   const actions: Action[] = [];
@@ -43,13 +45,13 @@ function getAvailableActions(
   }
 
   if (
-    isResponsible &&
+    canActAsResponsible &&
     ([TaskStatus.PENDING, TaskStatus.OVERDUE, TaskStatus.REJECTED] as string[]).includes(task.status)
   ) {
     actions.push({ key: 'start', label: 'Iniciar tarea' });
   }
 
-  if (isResponsible && task.status === TaskStatus.IN_PROGRESS) {
+  if (canActAsResponsible && task.status === TaskStatus.IN_PROGRESS) {
     actions.push({ key: 'submit_review', label: 'Enviar a revisión' });
   }
 

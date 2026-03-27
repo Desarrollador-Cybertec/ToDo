@@ -2,6 +2,14 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Sileo toast text colors */
+.sileo-text-light {
+  color: #ffffff !important;
+}
+.sileo-text-dark {
+  color: #111111 !important;
+}
+
 #root {
   min-height: 100svh;
 }

@@ -16,6 +16,10 @@ export function SileoToaster() {
         duration: 5000,
         fill: dark ? DARK_FILL : LIGHT_FILL,
         roundness: 14,
+        styles: {
+          title: dark ? 'sileo-text-dark' : 'sileo-text-light',
+          description: dark ? 'sileo-text-dark' : 'sileo-text-light',
+        },
       }}
     />
   );
