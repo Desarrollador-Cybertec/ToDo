@@ -340,6 +340,9 @@ export function TaskAttachmentsV2({
 
   const hasAttachments = attachments.length > 0;
 
+  // Don't render anything until we know there are attachments to show
+  if (!loading && !hasAttachments) return null;
+
   return (
     <>
       <FadeIn delay={0.15} className="mt-6 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
@@ -361,13 +364,6 @@ export function TaskAttachmentsV2({
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="h-48 animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />
             ))}
-          </div>
-        ) : !hasAttachments ? (
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <HiOutlinePaperClip className="mb-2 h-10 w-10 text-gray-300 dark:text-gray-600" />
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {requiresAttachment ? 'Esta tarea requiere adjuntos. Sube un archivo.' : 'No hay adjuntos en esta tarea.'}
-            </p>
           </div>
         ) : (
           <StaggerList className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
