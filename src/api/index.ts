@@ -7,3 +7,4 @@ export { meetingsApi } from './meetings';
 export { dashboardApi } from './dashboard';
 export { settingsApi, automationApi, importApi } from './settings';
 export { notificationsApi } from './notifications';
+export { attachmentsApi } from './attachments';

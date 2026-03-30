@@ -7,6 +7,7 @@ export * from './meeting';
 export * from './dashboard';
 export * from './settings';
 export * from './notification';
+export * from './attachment';
 
 export interface ApiResponse<T> {
   data: T;

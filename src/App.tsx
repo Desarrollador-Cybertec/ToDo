@@ -19,6 +19,7 @@ import { ConsolidatedPage } from './pages/consolidated/ConsolidatedPage';
 import { SettingsPage } from './pages/settings/SettingsPage';
 import { ProfilePage } from './pages/profile/ProfilePage';
 import { NotificationsPage } from './pages/notifications/NotificationsPage';
+import { AttachmentsPage } from './pages/attachments/AttachmentsPage';
 import { DarkModeToggle } from './components/ui/DarkModeToggle';
 import { SileoToaster } from './components/notifications/SileoToaster';
 
@@ -81,6 +82,7 @@ function App() {
         <Route element={<AppLayout />}>
           <Route path="/users" element={<UserListPage />} />
           <Route path="/consolidated" element={<ConsolidatedPage />} />
+          <Route path="/attachments" element={<AttachmentsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
       </Route>

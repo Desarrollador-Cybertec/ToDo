@@ -49,10 +49,9 @@ import {
   ApproveFormPanel,
   RejectFormPanel,
   DelegateFormPanel,
-  UploadFormPanel,
 } from './components/TaskActionForms';
 import { TaskComments } from './components/TaskComments';
-import { TaskAttachments } from './components/TaskAttachments';
+import { TaskAttachmentsV2, UploadFormPanelV2 } from './components/TaskAttachmentsV2';
 import { TaskStatusHistory } from './components/TaskStatusHistory';
 import { TaskUpdates } from './components/TaskUpdates';
 
@@ -276,20 +275,7 @@ export function TaskDetailPage() {
     setShowDelegateForm(false);
   };
 
-  const [uploadFile, setUploadFile] = useState<File | null>(null);
-  const [attachmentType, setAttachmentType] = useState('evidence');
-  const [isUploading, setIsUploading] = useState(false);
-  const onUpload = async () => {
-    if (!uploadFile || isUploading) return;
-    setIsUploading(true);
-    const formData = new FormData();
-    formData.append('file', uploadFile);
-    formData.append('attachment_type', attachmentType);
-    await handleAction(() => tasksApi.uploadAttachment(taskId, formData), 'Archivo subido');
-    setIsUploading(false);
-    setUploadFile(null);
-    setShowUploadForm(false);
-  };
+  const [attachmentsKey, setAttachmentsKey] = useState(0);
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -567,12 +553,27 @@ export function TaskDetailPage() {
             <DelegateFormPanel form={delegateForm} onSubmit={onDelegate} onClose={() => setShowDelegateForm(false)} members={areaMembers} loading={membersLoading} />
           )}
           {showUploadForm && (
-            <UploadFormPanel file={uploadFile} setFile={setUploadFile} attachmentType={attachmentType} setAttachmentType={setAttachmentType} onUpload={onUpload} onClose={() => setShowUploadForm(false)} isUploading={isUploading} />
+            <UploadFormPanelV2
+              taskId={taskId}
+              areaId={task?.area_id ?? undefined}
+              onUploaded={() => {
+                showMessage('Archivo subido');
+                setShowUploadForm(false);
+                setAttachmentsKey((k) => k + 1);
+              }}
+              onClose={() => setShowUploadForm(false)}
+            />
           )}
         </AnimatePresence>
 
       <TaskComments comments={task.comments ?? []} />
-      <TaskAttachments attachments={task.attachments ?? []} />
+      {task.requires_attachment && (
+        <TaskAttachmentsV2
+          key={attachmentsKey}
+          taskId={taskId}
+          requiresAttachment={task.requires_attachment}
+        />
+      )}
       <TaskStatusHistory history={task.status_history ?? []} isSuperAdmin={isSuperAdmin} isManager={isManager} userId={user?.id} />
       <TaskUpdates updates={task.updates ?? []} />
       </div>
